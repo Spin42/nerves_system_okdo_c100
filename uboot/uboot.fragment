@@ -1,0 +1,22 @@
+# Applied on top of p3450-0000_defconfig
+
+# The C100 module has no SPI flash. The environment holds the Nerves A/B state
+# and lives on the eMMC at the offset and size used in fwup_include.
+# CONFIG_ENV_IS_IN_SPI_FLASH is not set
+CONFIG_ENV_IS_IN_MMC=y
+CONFIG_ENV_MMC_DEVICE_INDEX=0
+CONFIG_ENV_MMC_EMMC_HW_PARTITION=0
+CONFIG_ENV_OFFSET=0x200000
+CONFIG_ENV_SIZE=0x20000
+
+# Boot extlinux-{a,b}.conf straight from the squashfs root filesystems
+CONFIG_CMD_SYSBOOT=y
+CONFIG_CMD_FS_GENERIC=y
+CONFIG_CMD_SQUASHFS=y
+CONFIG_CMD_PART=y
+
+# U-Boot lives in the 64 MiB LNX eMMC partition, not in the 768 KiB SPI
+# flash region that this limit protects on the developer kit.
+# CONFIG_HAS_BOARD_SIZE_LIMIT is not set
+
+CONFIG_BOOTDELAY=1

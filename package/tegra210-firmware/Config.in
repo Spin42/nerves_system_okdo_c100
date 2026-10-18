@@ -1,0 +1,8 @@
+config BR2_PACKAGE_TEGRA210_FIRMWARE
+	bool "tegra210-firmware"
+	select BR2_PACKAGE_LINUX_FIRMWARE
+	help
+	  NVIDIA Tegra210 firmware from linux-firmware: the GM20B GPU
+	  (nouveau), the XUSB controller and the VIC video engine.
+
+	  https://gitlab.com/kernel-firmware/linux-firmware

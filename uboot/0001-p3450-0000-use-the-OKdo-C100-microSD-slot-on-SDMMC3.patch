@@ -1,0 +1,51 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Subject: [PATCH] p3450-0000: use the OKdo C100 microSD slot on SDMMC3
+
+The OKdo Nano C100 carrier wires its microSD slot to SDMMC3 instead of
+SDMMC1 and powers its I/O from PMIC LDO6. Point mmc1 at SDMMC3 and turn
+LDO6 on at 3.3V.
+
+Based on the c100-bootupd change for NVIDIA's U-Boot fork by
+ZHANG Yuntian <yt@radxa.com>.
+---
+diff -ru a/arch/arm/dts/tegra210-p3450-0000.dts b/arch/arm/dts/tegra210-p3450-0000.dts
+--- a/arch/arm/dts/tegra210-p3450-0000.dts
++++ b/arch/arm/dts/tegra210-p3450-0000.dts
+@@ -21,7 +21,7 @@
+ 		i2c3 = "/i2c@7000c500";
+ 		i2c4 = "/i2c@7000c700";
+ 		mmc0 = "/mmc@700b0600";
+-		mmc1 = "/mmc@700b0000";
++		mmc1 = "/mmc@700b0400";
+ 		spi0 = "/spi@70410000";
+ 		usb0 = "/usb@7d000000";
+ 	};
+@@ -89,10 +89,9 @@
+ 		};
+ 	};
+ 
+-	mmc@700b0000 {
++	/* OKdo C100: carrier microSD slot on SDMMC3, no card-detect line */
++	mmc@700b0400 {
+ 		status = "okay";
+-		cd-gpios = <&gpio TEGRA_GPIO(Z, 1) GPIO_ACTIVE_LOW>;
+-		power-gpios = <&gpio TEGRA_GPIO(Z, 3) GPIO_ACTIVE_HIGH>;
+ 		bus-width = <4>;
+ 	};
+ 
+diff -ru a/board/nvidia/p3450-0000/p3450-0000.c b/board/nvidia/p3450-0000/p3450-0000.c
+--- a/board/nvidia/p3450-0000/p3450-0000.c
++++ b/board/nvidia/p3450-0000/p3450-0000.c
+@@ -34,6 +34,12 @@
+ 	if (ret)
+ 		printf("i2c_write 0 0x3c 0x27 failed: %d\n", ret);
+ 
++	/* OKdo C100: LDO6 to 3.3V for the carrier microSD I/O rail (SDMMC3) */
++	val = 0xF2;
++	ret = dm_i2c_write(dev, MAX77620_CNFG1_L6_REG, &val, 1);
++	if (ret)
++		printf("i2c_write 0 0x3c 0x2f failed: %d\n", ret);
++
+ 	/* Disable LDO4 discharge */
+ 	ret = dm_i2c_read(dev, MAX77620_CNFG2_L4_REG, &val, 1);
+ 	if (ret) {

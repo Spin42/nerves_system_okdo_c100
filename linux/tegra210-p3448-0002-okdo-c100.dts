@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * OKdo Nano C100: Jetson Nano production module (P3448-0002, 16 GB eMMC) on
+ * a carrier derived from the P3449 B01 developer kit carrier.
+ *
+ * Differences from the developer kit (tegra210-p3450-0000.dts):
+ * - the module has eMMC on SDMMC4 and nothing on SDMMC1;
+ * - the carrier's microSD slot is wired to SDMMC3 (the developer kit uses
+ *   SDMMC3 for SDIO on the M.2 key E slot). The slot has no card-detect line
+ *   and runs at 3.3 V signalling only, with its I/O rail on PMIC LDO6.
+ */
+
+/dts-v1/;
+
+#include "nvidia/tegra210-p3450-0000.dts"
+
+/ {
+	model = "OKdo Nano C100";
+	compatible = "okdo,c100", "nvidia,p3449-0000-b00+p3448-0002-b00",
+		     "nvidia,p3450-0000", "nvidia,tegra210";
+
+	/* eMMC first so that the Nerves root device is always mmcblk0 */
+	aliases {
+		mmc0 = "/mmc@700b0600";
+		mmc1 = "/mmc@700b0400";
+	};
+
+	i2c@7000d000 {
+		pmic@3c {
+			regulators {
+				vddio_sdmmc3: ldo6 {
+					regulator-name = "VDDIO_SDMMC3";
+					regulator-min-microvolt = <3300000>;
+					regulator-max-microvolt = <3300000>;
+					regulator-enable-ramp-delay = <24>;
+					regulator-ramp-delay = <100000>;
+					regulator-always-on;
+					regulator-boot-on;
+					status = "okay";
+				};
+			};
+		};
+	};
+
+	mmc@700b0000 {
+		status = "disabled";
+	};
+
+	/* microSD */
+	mmc@700b0400 {
+		/delete-property/ non-removable;
+		/delete-property/ cap-sdio-irq;
+		/delete-property/ keep-power-in-suspend;
+		/delete-property/ wakeup-source;
+
+		status = "okay";
+		bus-width = <4>;
+		broken-cd;
+		disable-wp;
+		/*
+		 * UHS needs a 1.8 V switch that the boot ROM and U-Boot cannot
+		 * undo after a warm reset, which leaves the card unreadable.
+		 */
+		no-1-8-v;
+
+		vqmmc-supply = <&vddio_sdmmc3>;
+		vmmc-supply = <&vdd_3v3_sd>;
+	};
+
+	/* eMMC */
+	mmc@700b0600 {
+		status = "okay";
+		bus-width = <8>;
+		non-removable;
+		vqmmc-supply = <&vdd_1v8>;
+		vmmc-supply = <&vdd_3v3_sys>;
+	};
+};
