@@ -1,0 +1,58 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Subject: [PATCH] p3450-0000: take the Ethernet MAC address from the module EEPROM
+
+U-Boot does not get the MAC address from cboot when it is loaded by another
+U-Boot, so Linux falls back to a random one. Read it from the module
+EEPROM, where L4T keeps it.
+---
+diff -ru a/board/nvidia/p3450-0000/p3450-0000.c b/board/nvidia/p3450-0000/p3450-0000.c
+--- a/board/nvidia/p3450-0000/p3450-0000.c
++++ b/board/nvidia/p3450-0000/p3450-0000.c
+@@ -6,6 +6,7 @@
+  */
+ 
+ #include <blk.h>
++#include <env.h>
+ #include <fdtdec.h>
+ #include <i2c.h>
+ #include <linux/bitops.h>
+@@ -13,6 +14,7 @@
+ #include <malloc.h>
+ #include <memalign.h>
+ #include <mmc.h>
++#include <net.h>
+ #include <pca953x.h>
+ #include <asm/arch/gpio.h>
+ #include <asm/arch/pinmux.h>
+@@ -106,6 +108,31 @@
+ 	return 0;
+ }
+ 
++/*
++ * The Jetson module EEPROM (I2C3, address 0x50) holds the Ethernet MAC
++ * address at offset 0x44, least significant byte first.
++ */
++#define MODULE_EEPROM_BUS	3
++#define MODULE_EEPROM_ADDR	0x50
++#define MODULE_EEPROM_MAC	0x44
++
++void nvidia_board_late_init(void)
++{
++	struct udevice *dev;
++	u8 raw[ARP_HLEN], mac[ARP_HLEN];
++	int i;
++
++	if (i2c_get_chip_for_busnum(MODULE_EEPROM_BUS, MODULE_EEPROM_ADDR, 1, &dev) ||
++	    dm_i2c_read(dev, MODULE_EEPROM_MAC, raw, sizeof(raw)))
++		return;
++
++	for (i = 0; i < ARP_HLEN; i++)
++		mac[i] = raw[ARP_HLEN - 1 - i];
++
++	if (is_valid_ethaddr(mac))
++		eth_env_set_enetaddr("ethaddr", mac);
++}
++
+ #ifdef CONFIG_ENV_IS_IN_MMC
+ /*
+  * OKdo C100: use the environment on the microSD card (mmc1) when the card
