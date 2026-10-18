@@ -63,28 +63,33 @@ Realistic performance ceiling (on paper):
 
 ## 2. Boot chain and storage layout
 
-The early boot chain (BCT incl. PCN211181 DRAM config, nvtboot, TOS, …) stays
-NVIDIA's. It is flashed **once** over USB recovery with `c100-bootupd`
-(`make flash`). The kernel never sees DRAM training; DRAM changes only affect
-the BCT plus the EMC DVFS tables.
+The early boot chain (BCT incl. PCN211181 DRAM config, nvtboot, TOS, cboot)
+stays NVIDIA's and is never rewritten. It is already on every C100 (factory
+image or `c100-bootupd`). The kernel never sees DRAM training; DRAM changes
+only affect the BCT plus the EMC DVFS tables.
 
-Nerves owns:
-- **U-Boot** (mainline `p3450-0000_defconfig` + C100 patch), written into
-  the eMMC `LNX` partition, the slot NVIDIA's nvtboot chain-loads.
-- Everything on the **microSD** (SDMMC3): MBR, boot partitions A/B (Image +
-  dtb), rootfs A/B (squashfs), `/data` (f2fs/ext4). Standard Nerves
-  `fwup.conf`, uboot-env for A/B + `nerves_fw_validated`.
+No NVIDIA tools are used to install Nerves:
+- cboot loads U-Boot from the eMMC `LNX` partition as an **unsigned** Android
+  v0 boot image (verified: `scripts/mkbootimg-lnx.py` reproduces the image
+  L4T's flasher wrote, byte for byte).
+- fwup's `complete` task writes a GPT, the U-Boot environment, rootfs A and
+  **mainline U-Boot** (into `LNX` and `LNX-1`).
+- First install: stop the board's existing U-Boot, `ums 0 mmc 0`, then
+  `mix burn` from the host. Our U-Boot keeps `ums` for reinstalls.
 
-The eMMC user area is **not touched** in phase 1: p3448-0002 keeps NVIDIA
-partitions in its GPT. Moving Nerves onto eMMC (append partitions after the
-NVIDIA ones, fwup with GPT awareness) is phase 5.
+Nerves owns NVIDIA's old `APP` region of the **eMMC** (2 MiB .. 2 MiB+14 GiB):
+U-Boot env, rootfs A/B (squashfs, 1 GiB each), application data (f2fs). The
+GPT reproduces NVIDIA's partitions after it with their L4T names and offsets
+(except L4T's recovery entries, to stay within fwup's 16-entry GPT limit);
+`scripts/check-emmc-layout.sh` refuses boards with a different layout. The
+microSD card is a plain data device (`/dev/mmcblk1`).
 
 C100 deltas to port (from `~/Projects/c100-bootupd`):
 
 | c100-bootupd | Nerves/mainline equivalent |
 |---|---|
 | `0001-Enable-sdmmc3.patch` (U-Boot dts + pinmux) | Rebase onto mainline U-Boot `tegra210-p3450-0000.dts` / `board/nvidia/p3450-0000` |
-| `0002` preboot script from both mmc | Drop. Nerves uses its own `boot.scr` |
+| `0002` preboot script from both mmc | Drop. Nerves U-Boot env runs `sysboot` on extlinux-a/b.conf inside the squashfs |
 | `0003`–`0005` pxe_utils overlay hacks | Drop. Use a real board DTS instead of overlays |
 | `tegra210-p3448-common-sdmmc3.dts` overlay | New kernel DTS `tegra210-p3448-0002-okdo-c100.dts` (includes p3450 dtsi): enable `mmc@700b0400` (SD, 3.3V-only/high-speed to avoid UHS warm-reset), enable `mmc@700b0600` (eMMC, 8-bit), disable `mmc@700b0000` |
 | `tegra210-porg-p3448-emc-a00.dts` (EMC tables) | Mainline Tegra210 EMC driver takes tables from bootloader reserved-memory (2025 work by A. Kling / T. Reding). **Risk item**: verify; without them EMC stays at boot clock |
@@ -102,7 +107,8 @@ C100 deltas to port (from `~/Projects/c100-bootupd`):
   (`sgdisk -p`), which partition nvtboot loads U-Boot from.
 
 ### Phase 1 — minimal Nerves system, mainline (1–2 weeks)
-Repo layout modeled on `nerves_system_fp3`:
+Repo layout modeled on the official `nerves_system_rpi4`/`rpi5` (conventions)
+and `nerves_system_mangopi_mq_pro` (U-Boot A/B pattern):
 `mix.exs`, `nerves_defconfig`, `linux-6.18.defconfig` (or 7.x),
 `uboot/` (defconfig fragment + patches), `fwup.conf`, `fwup-ops.conf`,
 `fwup_include/`, `post-build.sh`, `post-createfs.sh`, `rootfs_overlay/`,
@@ -110,13 +116,14 @@ Repo layout modeled on `nerves_system_fp3`:
 patches), `README.md`, `CHANGELOG.md`, `VERSION`.
 
 - `nerves_system_br` latest (1.35.x), `nerves_toolchain_aarch64_nerves_linux_gnu` 15.x.
-- Kernel: start from the 6.18 LTS tag (has gm20b devfreq). Enable
+- Kernel: 6.18 LTS plus the two 6.19 commits that add Tegra GPU devfreq
+  (gp10b reclocking, then devfreq). Enable
   `ARCH_TEGRA_210_SOC`, `TEGRA_EMC`, `DRM_TEGRA`, `DRM_NOUVEAU`,
   `NOUVEAU_PLATFORM_DRIVER`, PCIe + `R8169`, XUSB + firmware, `TEGRA_SOCTHERM`,
   `PWM_FAN`, cpufreq. Firmware: `nvidia/tegra210/xusb.bin`, `nvidia/gm20b/*`.
 - Board DTS `tegra210-p3448-0002-okdo-c100.dts`, carried as a patch in
   `linux/` (upstream later).
-- U-Boot: mainline + SDMMC3 patch, `boot.scr` with Nerves A/B logic.
+- U-Boot: mainline 2026.07 + SDMMC3 patch, env on eMMC with Nerves A/B logic.
 - Done when: IEx over UART + ethernet, `nerves_firmware_ssh`/`mix upload` OTA,
   A/B revert works, `cat /sys/class/devfreq/*/cur_freq` shows EMC/GPU.
 
@@ -153,7 +160,7 @@ patches), `README.md`, `CHANGELOG.md`, `VERSION`.
 
 ### Phase 4 — productisation
 - Camera: CSI via mainline VI (`tegra-video`), test IMX219.
-- eMMC install path (phase 5), NervesHub, `nerves_system_okdo_c100` on Hex.
+- NervesHub, `nerves_system_okdo_c100` on Hex.
 - Upstream the board DTS (linux-tegra) and the U-Boot SDMMC3 patch.
 
 ---
@@ -189,7 +196,7 @@ If the L4T variant (section 6) is ever built, skip Docker and do this instead:
 | rusticl on nouveau untested on GM20B | zink-on-NVK path; nx_vulkan via clspv |
 | Building Mesa (Rust + LLVM + libclc) in Buildroot | Prebuild Mesa as a Nerves artifact package; host LLVM shared with toolchain |
 | Thermal throttling under sustained GPU load | Fan control via `pwm-fan`, soctherm trip points in DTS |
-| eMMC GPT shared with NVIDIA partitions | Stay on SD until phase 5 |
+| eMMC GPT shared with NVIDIA partitions | GPT reproduces NVIDIA entries at L4T offsets; `check-emmc-layout.sh` before first install |
 
 ---
 
