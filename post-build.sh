@@ -2,7 +2,7 @@
 
 set -e
 
-# Create the fwup ops script to handling eMMC operations at runtime
+# Create the fwup ops script to handling microSD/eMMC operations at runtime
 # NOTE: revert.fw is the previous, more limited version of this. ops.fw is
 #       backwards compatible.
 mkdir -p $TARGET_DIR/usr/share/fwup

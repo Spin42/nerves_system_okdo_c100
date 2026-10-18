@@ -35,7 +35,7 @@ recovery-dtb 29785216 1024 optional
 kernel-bootctrl 29786240 512
 kernel-bootctrl_b 29786752 512
 RECROOTFS 29787264 614400 optional
-UDA 30401664 -"
+UDA 30401664 - optional"
 
 actual=$(sfdisk --json "$dev" | python3 -I -c '
 import json, sys

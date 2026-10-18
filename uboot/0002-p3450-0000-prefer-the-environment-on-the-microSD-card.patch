@@ -1,0 +1,69 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Subject: [PATCH] p3450-0000: prefer the environment on the OKdo C100 microSD card
+
+Nerves can be installed on the microSD card or on the eMMC. Use the
+environment from the card when it holds a valid one, so that the same
+U-Boot boots either installation.
+---
+diff -ru a/board/nvidia/p3450-0000/p3450-0000.c b/board/nvidia/p3450-0000/p3450-0000.c
+--- a/board/nvidia/p3450-0000/p3450-0000.c
++++ b/board/nvidia/p3450-0000/p3450-0000.c
+@@ -5,14 +5,19 @@
+  *
+  */
+ 
++#include <blk.h>
+ #include <fdtdec.h>
+ #include <i2c.h>
+ #include <linux/bitops.h>
+ #include <linux/libfdt.h>
++#include <malloc.h>
++#include <memalign.h>
++#include <mmc.h>
+ #include <pca953x.h>
+ #include <asm/arch/gpio.h>
+ #include <asm/arch/pinmux.h>
+ #include <asm/arch-tegra/board.h>
++#include <u-boot/crc.h>
+ #include "../p2571/max77620_init.h"
+ 
+ void pin_mux_mmc(void)
+@@ -100,3 +105,38 @@
+ 
+ 	return 0;
+ }
++
++#ifdef CONFIG_ENV_IS_IN_MMC
++/*
++ * OKdo C100: use the environment on the microSD card (mmc1) when the card
++ * holds a valid one, and the eMMC (mmc0) otherwise. This lets the same
++ * U-Boot run a system installed on either device.
++ */
++int mmc_get_env_dev(void)
++{
++	struct blk_desc *desc;
++	struct mmc *mmc;
++	lbaint_t start, count;
++	u32 *buf;
++	int dev = 0;
++
++	mmc = find_mmc_device(1);
++	if (!mmc || mmc_init(mmc))
++		return dev;
++
++	desc = mmc_get_blk_desc(mmc);
++	start = CONFIG_ENV_OFFSET / desc->blksz;
++	count = CONFIG_ENV_SIZE / desc->blksz;
++
++	buf = malloc_cache_aligned(CONFIG_ENV_SIZE);
++	if (!buf)
++		return dev;
++
++	if (blk_dread(desc, start, count, buf) == count &&
++	    crc32(0, (u8 *)&buf[1], CONFIG_ENV_SIZE - sizeof(u32)) == le32_to_cpu(buf[0]))
++		dev = 1;
++
++	free(buf);
++	return dev;
++}
++#endif

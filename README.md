@@ -9,9 +9,9 @@ production module (P3448-0002, 16 GB eMMC).
 | CPU                  | 1.43 GHz quad-core Cortex-A57 (Tegra X1 / T210)    |
 | GPU                  | 128-core Maxwell (GM20B), OpenGL ES via Mesa       |
 | Memory               | 4 GB LPDDR4                                        |
-| Storage              | 16 GB eMMC (Nerves), microSD as `/dev/mmcblk1`     |
+| Storage              | microSD (default) or 16 GB eMMC                    |
 | Linux kernel         | 6.18 (mainline)                                    |
-| Bootloader           | U-Boot 2026.07 (mainline), chain-loaded by cboot   |
+| Bootloader           | U-Boot 2026.07 (mainline)                          |
 | IEx terminal         | UART `ttyS0` (115200 8N1)                          |
 | GPIO, I2C, SPI       | Yes - [Elixir Circuits](https://github.com/elixir-circuits) |
 | Ethernet             | Yes - Realtek RTL8111 over PCIe                    |
@@ -29,36 +29,61 @@ If you need custom modifications to this system for your device, clone this
 repository and update as described in [Making custom
 systems](https://hexdocs.pm/nerves/customizing-systems.html).
 
+## Installing on a microSD card
+
+```sh
+mix firmware
+mix burn
+```
+
+Put the card in the C100 and power it on. Nothing on the eMMC is modified.
+
 ## How it boots
 
 NVIDIA's boot firmware (BCT, nvtboot, TOS, cboot) stays on the module and is
-never modified. It lives in the eMMC boot partitions and in a few partitions at
-the end of the eMMC user area. cboot loads U-Boot from the `LNX` partition.
-This system replaces that U-Boot with mainline U-Boot, which then runs the
-Nerves A/B logic and boots Linux from the active root filesystem.
+never modified. cboot always loads a U-Boot from the eMMC `LNX` partition.
+Nerves runs with this system's mainline U-Boot, which handles the Nerves A/B
+logic and boots Linux from the active root filesystem:
+
+* **microSD card**: the U-Boot in `LNX` is whatever the board shipped with
+  (for example OKdo's). Its distro boot finds `boot.scr` in the card's boot
+  partition, which starts this system's U-Boot from the same partition.
+* **eMMC**: the eMMC install puts this system's U-Boot into `LNX`, so cboot
+  starts it directly.
+
+This system's U-Boot keeps its environment on the microSD card when the card
+holds a Nerves installation, and on the eMMC otherwise. A Nerves microSD card
+therefore takes precedence over a Nerves eMMC installation.
+
+The microSD card and the eMMC use the same Nerves partitions, so firmware
+updates work the same on both:
 
 ```text
-eMMC user area
 +------------------------------------+ 0
 | Protective MBR + GPT               |
 +------------------------------------+ 2 MiB
 | U-Boot environment (Nerves A/B)    |
+| p1: boot (FAT)                     |  boot.scr, u-boot.bin
 +------------------------------------+ 4 MiB
-| p1: rootfs A (squashfs, 1 GiB)     |  /boot holds Image, dtb, extlinux
-| p2: rootfs B (squashfs, 1 GiB)     |
-| p3: application data (f2fs, 12 GiB)|
-+------------------------------------+ 2 MiB + 14 GiB
-| p4..p16: NVIDIA partitions         |  LNX and LNX-1 hold U-Boot
+| p2: rootfs A (squashfs, 1 GiB)     |  /boot holds Image and the dtb
+| p3: rootfs B (squashfs, 1 GiB)     |
+| p4: application data (f2fs)        |  fills the card; 12 GiB on the eMMC
++------------------------------------+
+| eMMC only: p5..p16 NVIDIA          |  LNX and LNX-1 hold U-Boot
 +------------------------------------+
 ```
 
-The NVIDIA partitions keep the names, offsets and sizes from L4T R32.7's
-layout for this module, so cboot finds `LNX` as before.
+On the eMMC, Nerves takes the region that NVIDIA's layout uses for the L4T root
+filesystem (`APP`). The NVIDIA partitions keep the names, offsets and sizes
+from L4T R32.7's layout for this module, so cboot finds `LNX` as before.
 
-## Installing Nerves on the eMMC
+In Linux, `/dev/mmcblk0` is the eMMC and `/dev/mmcblk1` the microSD card.
+`/dev/rootdisk0` refers to whichever one Nerves booted from.
 
-No NVIDIA tools are needed. The board's existing U-Boot exposes the eMMC to
-your computer over USB, and `fwup` writes Nerves, including the new U-Boot.
+## Installing on the eMMC
+
+No NVIDIA tools are needed. U-Boot exposes the eMMC to your computer over USB,
+and `fwup` writes Nerves, including this system's U-Boot.
 
 You need:
 
@@ -71,7 +96,8 @@ You need:
 Then:
 
 1. Build your firmware with `mix firmware`.
-2. Power on the C100 and press a key on the serial console to stop U-Boot.
+2. Remove any microSD card, power on the C100 and press a key on the serial
+   console to stop U-Boot.
 3. Expose the eMMC over USB:
 
    ```text
@@ -88,44 +114,23 @@ Then:
    Stop here if it reports a mismatch: that board was flashed with a
    different layout and installing would overwrite other data.
 
-5. Write the firmware:
+5. Write the firmware with the `emmc` task:
 
    ```sh
-   mix burn -d /dev/sdX
+   mix burn -d /dev/sdX --task emmc
    ```
 
 6. Press Ctrl+C on the serial console to leave `ums`, then type `reset`.
 
-The same steps reinstall a board that already runs Nerves, since this
-system's U-Boot also has `ums`. A full install erases the application data
-partition.
-
-## Testing from a microSD card
-
-A microSD card can run the same firmware without modifying the eMMC. It boots
-with the U-Boot already on the board (for example OKdo's), which runs
-`boot.scr` from the card. There is a single root filesystem and no A/B
-updates, so this is meant for trying out a build, not for deployment.
-
-Do not `mix burn` a regular `.fw` to a card: its install task targets the
-eMMC layout. Convert it first:
-
-```sh
-deps/nerves_system_okdo_c100/scripts/make-sd-test-fw.sh \
-  _build/okdo_c100_dev/nerves/images/my_app.fw my_app-sd-test.fw \
-  $NERVES_SYSTEM
-sudo fwup my_app-sd-test.fw
-```
-
-`$NERVES_SYSTEM` is the built system directory (the one containing
-`images/`). On the board, the microSD card is `/dev/mmcblk0` and the eMMC is
-`/dev/mmcblk1`.
+The same steps reinstall a board that already runs Nerves from the eMMC. An
+install erases the application data partition.
 
 ## Firmware updates
 
-`mix upload` and NervesHub update the inactive root filesystem and switch to it
-on the next boot, with automatic rollback if the new firmware is not
-validated. Updates do not rewrite U-Boot; a full install does.
+`mix upload` and NervesHub update the inactive root filesystem on the device
+Nerves booted from and switch to it on the next boot, with automatic rollback
+if the new firmware is not validated. Updates do not rewrite U-Boot; an install
+does.
 
 ## GPU
 
@@ -145,7 +150,5 @@ GPU clock scaling is handled by devfreq; see
 
 * The kernel has no memory controller (EMC) frequency tables, so the DRAM runs
   at the frequency set by NVIDIA's boot firmware.
-* Nerves boots from the eMMC only. The microSD card is available to
-  applications as `/dev/mmcblk1`.
 * If NVIDIA's boot firmware itself is damaged, the board has to be recovered
   over USB recovery mode (RCM), which this system does not provide tools for.

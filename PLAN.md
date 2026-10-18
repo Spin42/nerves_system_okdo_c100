@@ -68,21 +68,30 @@ stays NVIDIA's and is never rewritten. It is already on every C100 (factory
 image or `c100-bootupd`). The kernel never sees DRAM training; DRAM changes
 only affect the BCT plus the EMC DVFS tables.
 
-No NVIDIA tools are used to install Nerves:
+Nerves installs on the **microSD card by default** (`mix burn`) and on the
+**eMMC as an explicit task** (`mix burn --task emmc`). No NVIDIA tools are
+used for either:
 - cboot loads U-Boot from the eMMC `LNX` partition as an **unsigned** Android
   v0 boot image (verified: `scripts/mkbootimg-lnx.py` reproduces the image
   L4T's flasher wrote, byte for byte).
-- fwup's `complete` task writes a GPT, the U-Boot environment, rootfs A and
-  **mainline U-Boot** (into `LNX` and `LNX-1`).
-- First install: stop the board's existing U-Boot, `ums 0 mmc 0`, then
-  `mix burn` from the host. Our U-Boot keeps `ums` for reinstalls.
+- microSD: the board's existing U-Boot (OKdo's) runs `boot.scr` from the
+  card's FAT boot partition, which chain-loads this system's mainline U-Boot
+  with `booti` (Tegra arm64 U-Boot has a Linux image header and is PIE).
+- eMMC: stop U-Boot, `ums 0 mmc 0`, `check-emmc-layout.sh`, then
+  `mix burn --task emmc`, which also writes mainline U-Boot into `LNX` and
+  `LNX-1`.
+- Mainline U-Boot picks its environment from the microSD card if the card
+  holds a valid Nerves environment, else from the eMMC (board patch
+  overriding `mmc_get_env_dev()`). fwup sets `devnum` per medium and the
+  kernel gets `root=/dev/mmcblk${devnum}p${part}`.
 
-Nerves owns NVIDIA's old `APP` region of the **eMMC** (2 MiB .. 2 MiB+14 GiB):
-U-Boot env, rootfs A/B (squashfs, 1 GiB each), application data (f2fs). The
-GPT reproduces NVIDIA's partitions after it with their L4T names and offsets
-(except L4T's recovery entries, to stay within fwup's 16-entry GPT limit);
-`scripts/check-emmc-layout.sh` refuses boards with a different layout. The
-microSD card is a plain data device (`/dev/mmcblk1`).
+Both media share one layout: env at 2 MiB, p1 boot FAT, p2/p3 rootfs A/B
+(squashfs, 1 GiB each), p4 app (f2fs). Userspace uses `/dev/rootdisk0`, so
+the same rootfs works from either. On the eMMC Nerves owns NVIDIA's old `APP`
+region and the GPT reproduces NVIDIA's partitions after it at their L4T
+offsets (without L4T's recovery entries and UDA, to stay within fwup's
+16-entry GPT limit); `scripts/check-emmc-layout.sh` refuses boards with a
+different layout.
 
 C100 deltas to port (from `~/Projects/c100-bootupd`):
 
