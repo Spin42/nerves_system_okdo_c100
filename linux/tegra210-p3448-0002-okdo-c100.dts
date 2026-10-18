@@ -67,6 +67,11 @@
 		vmmc-supply = <&vdd_3v3_sd>;
 	};
 
+	/* The P3448-0002 module has no QSPI flash */
+	spi@70410000 {
+		status = "disabled";
+	};
+
 	/* eMMC */
 	mmc@700b0600 {
 		status = "okay";
