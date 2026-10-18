@@ -15,6 +15,39 @@ Constraints:
 
 ---
 
+## 0. Bring-up status (2026-10-18, on hardware)
+
+Working on the C100 from a microSD card (`mix burn`), booted by OKdo's
+L4T U-Boot chain-loading our mainline U-Boot (`boot.scr`):
+
+- Linux 6.18.57, IEx on UART `ttyS0`, Nerves A/B: first `mix upload`
+  switched to slot B and validated.
+- eth0 (RTL8111F) with the module's MAC from the EEPROM (U-Boot patch
+  0003), usb0 gadget Ethernet, USB 3 host, PMIC watchdog for nerves_heart.
+- Hostname `nerves-<last 4 of module serial>` from the module EEPROM.
+- HDMI: console framebuffer, hotplug and EDID. Needed the GPIOs L4T drives
+  high (PMIC GPIO1 open-drain high, SoC X3 and CC7) in the board DTS.
+- GPU: nouveau binds GM20B; EGL/GLES 3.2 (Mesa 26.1.8, renderer `tegra`).
+
+Open:
+
+- kmscube segfaults on the first glClear in Mesa nouveau
+  `nvc0_validate_fb` (nvc0_state_validate.c:156/177, via st_Clear ->
+  nvc0_clear), before anything is drawn; no kernel faults. Suspect the
+  `tegra` gallium wrapper handing nouveau a framebuffer surface it cannot
+  use. Reproduce: `kmscube -D /dev/dri/card1 -c 1`. Analyse cores with
+  `scripts/dev/corepc.py` + addr2line on staging libgallium (the
+  toolchain gdb crashes on the core).
+- DisplayPort untested (does the C100 have a DP connector?).
+- EMC DVFS tables do not reach Linux: `boot.scr` passes OKdo U-Boot's
+  control DT to our U-Boot instead of cboot's, so our U-Boot cannot copy
+  carveouts ("failed to get carveout ... -9").
+- U-Boot changes only ship with a fresh install (decided); the test card
+  got the MAC-patched u-boot.bin by hand.
+- An unverified write of U-Boot into LNX under LineageOS's cboot
+  soft-bricked the board (Android cboot rejects the image and fails over
+  to an incomplete BFS1). Recovered with RCM + c100-bootupd `make flash`.
+
 ## 1. Key decision: mainline kernel + Mesa, not L4T + CUDA
 
 | | Mainline 6.18+/7.x + nouveau + Mesa | L4T R32.7.6 (4.9) + nvgpu + CUDA 10.2 |
