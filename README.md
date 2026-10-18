@@ -100,6 +100,27 @@ The same steps reinstall a board that already runs Nerves, since this
 system's U-Boot also has `ums`. A full install erases the application data
 partition.
 
+## Testing from a microSD card
+
+A microSD card can run the same firmware without modifying the eMMC. It boots
+with the U-Boot already on the board (for example OKdo's), which runs
+`boot.scr` from the card. There is a single root filesystem and no A/B
+updates, so this is meant for trying out a build, not for deployment.
+
+Do not `mix burn` a regular `.fw` to a card: its install task targets the
+eMMC layout. Convert it first:
+
+```sh
+deps/nerves_system_okdo_c100/scripts/make-sd-test-fw.sh \
+  _build/okdo_c100_dev/nerves/images/my_app.fw my_app-sd-test.fw \
+  $NERVES_SYSTEM
+sudo fwup my_app-sd-test.fw
+```
+
+`$NERVES_SYSTEM` is the built system directory (the one containing
+`images/`). On the board, the microSD card is `/dev/mmcblk0` and the eMMC is
+`/dev/mmcblk1`.
+
 ## Firmware updates
 
 `mix upload` and NervesHub update the inactive root filesystem and switch to it
