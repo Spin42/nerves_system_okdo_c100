@@ -25,8 +25,44 @@
 		mmc1 = "/mmc@700b0400";
 	};
 
+	/* L4T drives these high on this board; mainline does not use them */
+	gpio@6000d000 {
+		l4t-default-high-px3-hog {
+			gpio-hog;
+			gpios = <TEGRA_GPIO(X, 3) GPIO_ACTIVE_HIGH>;
+			output-high;
+			line-name = "l4t-default-high";
+		};
+
+		l4t-default-high-pcc7-hog {
+			gpio-hog;
+			gpios = <TEGRA_GPIO(CC, 7) GPIO_ACTIVE_HIGH>;
+			output-high;
+			line-name = "l4t-default-high";
+		};
+	};
+
 	i2c@7000d000 {
 		pmic@3c {
+			/*
+			 * L4T configures PMIC GPIO1 as an open-drain output and
+			 * keeps it high instead of using it as an FPS output.
+			 */
+			pinmux {
+				gpio1 {
+					function = "gpio";
+					/delete-property/ drive-push-pull;
+					drive-open-drain = <1>;
+				};
+			};
+
+			l4t-default-high-gpio1-hog {
+				gpio-hog;
+				gpios = <1 GPIO_ACTIVE_HIGH>;
+				output-high;
+				line-name = "l4t-default-high";
+			};
+
 			regulators {
 				vddio_sdmmc3: ldo6 {
 					regulator-name = "VDDIO_SDMMC3";
@@ -65,6 +101,12 @@
 
 		vqmmc-supply = <&vddio_sdmmc3>;
 		vmmc-supply = <&vdd_3v3_sd>;
+	};
+
+	/* L4T keeps the USB hub powered */
+	regulator-vdd-hub-3v3 {
+		regulator-always-on;
+		regulator-boot-on;
 	};
 
 	/* The P3448-0002 module has no QSPI flash */
