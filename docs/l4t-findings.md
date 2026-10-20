@@ -108,11 +108,11 @@ on 2026-10-20. Raw data is in `docs/l4t-reference/` (collected with
 
 | | Measured | Theoretical |
 |---|---|---|
-| fp32 | 227 GFLOPS | 236 |
-| fp16 scalar | 428 GFLOPS | 472 |
-| fp16 vec4 | 329 GFLOPS | |
+| fp32 | 226 GFLOPS | 236 |
+| fp16 scalar | 417 GFLOPS | 472 |
+| fp16 vec4 | 322 GFLOPS | |
 | int32, int16 | 77 GIOPS | |
-| fp64 | 7.3 GFLOPS | |
+| fp64 | 7.2 GFLOPS | |
 | int8 dot product, matrix ops | 0 | no hardware |
 
 Board power under this load: about 7.0 W at the 5 V input, 4.7 W on the
