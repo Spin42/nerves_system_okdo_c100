@@ -1,0 +1,178 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Date: Tue, 20 Oct 2026 19:40:00 +0200
+Subject: [PATCH] package/mesa3d: add the nouveau Vulkan driver (NVK)
+
+NVK needs Rust, bindgen and the host mesa_clc, but no LLVM on the
+target. The Rust crates that meson would download as wraps are fetched
+as extra downloads and placed in subprojects/packagecache.
+
+host-mesa3d now passes cpp_rtti to match host-llvm, which meson
+otherwise rejects when LLVM is built without RTTI.
+
+Add host-cbindgen, which NVK uses to generate C headers from Rust.
+---
+diff --git a/package/cbindgen/cbindgen.hash b/package/cbindgen/cbindgen.hash
+--- a/package/cbindgen/cbindgen.hash
++++ b/package/cbindgen/cbindgen.hash
+@@ -0,0 +1,3 @@
++# Locally calculated
++sha256  e0f829a0e0a3231052cfc1b1921fff1e9ec90b7d0cdefde7330277b4d7b1696f  cbindgen-0.29.4-cargo6.tar.gz
++sha256  1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5  LICENSE
+diff --git a/package/cbindgen/cbindgen.mk b/package/cbindgen/cbindgen.mk
+--- a/package/cbindgen/cbindgen.mk
++++ b/package/cbindgen/cbindgen.mk
+@@ -0,0 +1,12 @@
++################################################################################
++#
++# cbindgen
++#
++################################################################################
++
++CBINDGEN_VERSION = 0.29.4
++CBINDGEN_SITE = $(call github,mozilla,cbindgen,refs/tags/$(CBINDGEN_VERSION))
++CBINDGEN_LICENSE = MPL-2.0
++CBINDGEN_LICENSE_FILES = LICENSE
++
++$(eval $(host-cargo-package))
+diff --git a/package/mesa3d/Config.in b/package/mesa3d/Config.in
+--- a/package/mesa3d/Config.in
++++ b/package/mesa3d/Config.in
+@@ -406,6 +406,25 @@
+ 	depends on !BR2_TOOLCHAIN_HEADERS_AT_LEAST_3_17 || \
+ 		!BR2_TOOLCHAIN_USES_GLIBC
+ 
++config BR2_PACKAGE_MESA3D_VULKAN_DRIVER_NOUVEAU
++	bool "Vulkan nouveau driver (NVK)"
++	depends on BR2_TOOLCHAIN_HAS_SYNC_4 || !BR2_PACKAGE_XORG7 # libxshmfence
++	depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
++	select BR2_PACKAGE_HOST_RUSTC
++	select BR2_PACKAGE_LIBDRM_NOUVEAU
++	select BR2_PACKAGE_MESA3D_VULKAN_DRIVER
++	help
++	  Vulkan driver for NVIDIA GPUs from Kepler onward (NVK).
++
++	  NVK only exposes GPUs it is not conformant on, such as
++	  Maxwell and the Tegra integrated GPUs, when the environment
++	  variable NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1 is set.
++
++	  https://docs.mesa3d.org/drivers/nvk.html
++
++comment "nouveau vulkan needs a rust compiler"
++	depends on !BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
++
+ config BR2_PACKAGE_MESA3D_VULKAN_DRIVER_PANFROST
+ 	bool "Vulkan panfrost driver"
+ 	depends on BR2_TOOLCHAIN_HAS_SYNC_4 || !BR2_PACKAGE_XORG7 # libxshmfence
+diff --git a/package/mesa3d/mesa3d.hash b/package/mesa3d/mesa3d.hash
+--- a/package/mesa3d/mesa3d.hash
++++ b/package/mesa3d/mesa3d.hash
+@@ -1,6 +1,13 @@
+ # From https://lists.freedesktop.org/archives/mesa-announce/2026-August/000865.html
+ sha256  b320f65874fd9653ac6c0bd1616605387344e1247411a50c797b5f3fb9dc0b55  mesa-26.1.8.tar.xz
+ sha512  eb3d46ae9aaba70fdd908486cef24041fec9264ddf586eaebbba65ce55e716d306ef9e91be83e742dfaec4dfc94105a5cd3a36b29bf56614febcbcf6c1f8b516  mesa-26.1.8.tar.xz
++# Rust crates, hashes from the meson wraps in subprojects/
++sha256  de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c  paste-1.0.14.crate
++sha256  5e719e8df665df0d1c8fbfd238015744736151d4445ec0836b8e628aae103b77  proc-macro2-1.0.86.crate
++sha256  291ec9ab5efd934aaf503a6466c5d5251535d108ee747472c3977cc5acc868ef  quote-1.0.35.crate
++sha256  357703d41365b4b27c590e3ed91eabb1b663f07c4c084095e60cbed4362dff0d  rustc-hash-2.1.1.crate
++sha256  25aa4ce346d03a6dcd68dd8b4010bcb74e54e62c90c573f394c46eae99aba32d  syn-2.0.87.crate
++sha256  3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b  unicode-ident-1.0.12.crate
+ # License
+ sha256  0d1a0472ecc81830e75c20d59b0ea02841e3db21255e0ebad97ab682c54d6615  docs/license.rst
+ sha256  323c587d0ccf10e376f8bf9a7f31fb4ca6078105194b42e0b1e0ee2bc9bde71f  licenses/MIT
+diff --git a/package/mesa3d/mesa3d.mk b/package/mesa3d/mesa3d.mk
+--- a/package/mesa3d/mesa3d.mk
++++ b/package/mesa3d/mesa3d.mk
+@@ -57,19 +57,26 @@
+ 
+ ifeq ($(BR2_PACKAGE_MESA3D_RUSTICL),y)
+ MESA3D_DEPENDENCIES += \
+-	host-rustc \
+-	host-rust-bindgen \
+ 	spirv-tools \
+ 	spirv-llvm-translator \
+ 	opencl-icd-loader
+ 
+-# rust_std is defined here to workaround a known meson bug. See:
+-# https://docs.mesa3d.org/rusticl.html#known-issues
+-# https://github.com/mesonbuild/meson/issues/10664
+ MESA3D_CONF_OPTS += \
+ 	-Dgallium-rusticl=true \
+-	-Drust_std=2021 \
+ 	-Dmesa-clc-bundle-headers=enabled
++else
++MESA3D_CONF_OPTS += -Dgallium-rusticl=false
++endif
++
++ifneq ($(BR2_PACKAGE_MESA3D_RUSTICL)$(BR2_PACKAGE_MESA3D_VULKAN_DRIVER_NOUVEAU),)
++MESA3D_DEPENDENCIES += \
++	host-rustc \
++	host-rust-bindgen
++
++# rust_std is defined here to workaround a known meson bug. See:
++# https://docs.mesa3d.org/rusticl.html#known-issues
++# https://github.com/mesonbuild/meson/issues/10664
++MESA3D_CONF_OPTS += -Drust_std=2021
+ 
+ # meson does not allow ccache
+ # https://github.com/mesonbuild/meson/commit/aac5f78580a3ea1cf0cae487cb46cab68a048660
+@@ -81,8 +88,26 @@
+ 	rust=['$(HOST_DIR)/bin/rustc','--target=$(RUSTC_TARGET_NAME)'] \
+ 	rust_ld='$(TARGET_CROSS)gcc'
+ 
+-else
+-MESA3D_CONF_OPTS += -Dgallium-rusticl=false
++# Rust crates that the meson wraps in subprojects/ would download. meson
++# takes them from subprojects/packagecache instead, even with
++# --wrap-mode=nodownload.
++MESA3D_CRATES = \
++	paste/paste-1.0.14 \
++	proc-macro2/proc-macro2-1.0.86 \
++	quote/quote-1.0.35 \
++	rustc-hash/rustc-hash-2.1.1 \
++	syn/syn-2.0.87 \
++	unicode-ident/unicode-ident-1.0.12
++MESA3D_EXTRA_DOWNLOADS += \
++	$(patsubst %,https://static.crates.io/crates/%.crate,$(MESA3D_CRATES))
++
++define MESA3D_COPY_CRATES
++	mkdir -p $(@D)/subprojects/packagecache
++	$(foreach c,$(notdir $(MESA3D_CRATES)),\
++		cp $(MESA3D_DL_DIR)/$(c).crate \
++			$(@D)/subprojects/packagecache/$(c).tar.gz$(sep))
++endef
++MESA3D_POST_EXTRACT_HOOKS += MESA3D_COPY_CRATES
+ endif
+ 
+ ifeq ($(BR2_PACKAGE_MESA3D_NEEDS_ELFUTILS),y)
+@@ -139,6 +164,7 @@
+ MESA3D_VULKAN_DRIVERS-$(BR2_PACKAGE_MESA3D_VULKAN_DRIVER_FREEDRENO) += freedreno
+ MESA3D_VULKAN_DRIVERS-$(BR2_PACKAGE_MESA3D_VULKAN_DRIVER_IMAGINATION) += imagination
+ MESA3D_VULKAN_DRIVERS-$(BR2_PACKAGE_MESA3D_VULKAN_DRIVER_INTEL)   += intel
++MESA3D_VULKAN_DRIVERS-$(BR2_PACKAGE_MESA3D_VULKAN_DRIVER_NOUVEAU) += nouveau
+ MESA3D_VULKAN_DRIVERS-$(BR2_PACKAGE_MESA3D_VULKAN_DRIVER_PANFROST) += panfrost
+ HOST_MESA3D_VULKAN_DRIVERS-$(BR2_PACKAGE_MESA3D_VULKAN_DRIVER_PANFROST) += panfrost
+ MESA3D_VULKAN_DRIVERS-$(BR2_PACKAGE_MESA3D_VULKAN_DRIVER_SWRAST) += swrast
+@@ -181,6 +207,14 @@
+ ifeq ($(BR2_PACKAGE_MESA3D_NEEDS_PRECOMP_COMPILER),y)
+ MESA3D_CONF_OPTS += -Dmesa-clc=system -Dprecomp-compiler=system
+ MESA3D_DEPENDENCIES += host-mesa3d spirv-llvm-translator spirv-tools
++else ifeq ($(BR2_PACKAGE_MESA3D_VULKAN_DRIVER_NOUVEAU),y)
++# NVK only needs mesa_clc on the build host, not LLVM on the target
++MESA3D_CONF_OPTS += -Dmesa-clc=system
++MESA3D_DEPENDENCIES += host-mesa3d
++endif
++
++ifeq ($(BR2_PACKAGE_MESA3D_VULKAN_DRIVER_NOUVEAU),y)
++MESA3D_DEPENDENCIES += host-cbindgen
+ endif
+ 
+ ifeq ($(BR2_PACKAGE_MESA3D_VULKAN_DRIVER),)
+@@ -343,6 +377,7 @@
+ 	LLVM_CONFIG="$(HOST_DIR)/bin/llvm-config"
+ 
+ HOST_MESA3D_CONF_OPTS = \
++	-Dcpp_rtti=$(if $(BR2_PACKAGE_LLVM_RTTI),true,false) \
+ 	-Dglvnd=disabled \
+ 	-Dgallium-drivers=$(subst $(space),$(comma),$(HOST_MESA3D_GALLIUM_DRIVERS-y)) \
+ 	-Dtools=$(subst $(space),$(comma),$(HOST_MESA3D_TOOLS)) \

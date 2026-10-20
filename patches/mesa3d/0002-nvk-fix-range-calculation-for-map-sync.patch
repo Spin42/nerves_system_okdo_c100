@@ -1,0 +1,49 @@
+From 99386fb8afcc48a8e34dff0e2b280ade81912d92 Mon Sep 17 00:00:00 2001
+From: "Thomas H.P. Andersen" <phomes@gmail.com>
+Date: Mon, 19 Oct 2026 23:56:18 +0200
+Subject: [PATCH] nvk: fix range calculation for map sync
+
+nvkmd_mem_sync_map_to_gpu takes: mem, offset, and range
+
+the range calculation did not consider the min_idx, so this
+was only working with a min_idx of 0
+
+nvkmd_mem_sync_map_to_gpu calls nvkmd_mem_sync_to_gpu which
+exits early with:
+
+   if (mem->flags & NVKMD_MEM_COHERENT)
+      return;
+
+so this is was only an issue on tegra
+
+Assisted-by: LLM
+Reviewed-by: Faith Ekstrand <faith.ekstrand@collabora.com>
+Reviewed-by: Mary Guillemard <mary@mary.zone>
+Upstream: https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/45402
+---
+ src/nouveau/vulkan/nvk_indirect_execution_set.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/nouveau/vulkan/nvk_indirect_execution_set.c b/src/nouveau/vulkan/nvk_indirect_execution_set.c
+index 155ed8a98f7f..d130f8cf0f52 100644
+--- a/src/nouveau/vulkan/nvk_indirect_execution_set.c
++++ b/src/nouveau/vulkan/nvk_indirect_execution_set.c
+@@ -387,7 +387,7 @@ nvk_UpdateIndirectExecutionSetPipelineEXT(
+    }
+ 
+    nvkmd_mem_sync_map_to_gpu(ies->mem, min_idx * (uint64_t)ies->stride_B,
+-                             (max_idx + 1) * (uint64_t)ies->stride_B);
++                             (max_idx - min_idx + 1) * (uint64_t)ies->stride_B);
+ }
+ 
+ VKAPI_ATTR void VKAPI_CALL
+@@ -414,5 +414,5 @@ nvk_UpdateIndirectExecutionSetShaderEXT(
+    }
+ 
+    nvkmd_mem_sync_map_to_gpu(ies->mem, min_idx * (uint64_t)ies->stride_B,
+-                             (max_idx + 1) * (uint64_t)ies->stride_B);
++                             (max_idx - min_idx + 1) * (uint64_t)ies->stride_B);
+ }
+-- 
+GitLab
+
