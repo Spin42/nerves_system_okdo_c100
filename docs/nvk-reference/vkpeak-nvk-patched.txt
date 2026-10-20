@@ -1,0 +1,30 @@
+device       = NVK GM20B
+driver       = NVK / Mesa 26.1.8
+
+fp32-scalar  = 222.67 GFLOPS
+fp32-vec4    = 221.02 GFLOPS
+fp16-scalar  = 415.74 GFLOPS
+fp16-vec4    = 439.08 GFLOPS
+fp16-matrix  = 0.00 GFLOPS
+fp64-scalar  = 7.26 GFLOPS
+fp64-vec4    = 7.23 GFLOPS
+int32-scalar = 76.11 GIOPS
+int32-vec4   = 76.27 GIOPS
+int16-scalar = 223.38 GIOPS
+int16-vec4   = 227.29 GIOPS
+int64-scalar = 17.24 GIOPS
+int64-vec4   = 14.47 GIOPS
+int8-dotprod = 72.24 GIOPS
+int8-matrix  = 0.00 GIOPS
+bf16-dotprod = 0.00 GFLOPS
+bf16-matrix  = 0.00 GFLOPS
+fp8-matrix   = 0.00 GFLOPS
+bf8-matrix   = 0.00 GFLOPS
+fp6-matrix   = 0.00 GFLOPS
+bf6-matrix   = 0.00 GFLOPS
+fp4-matrix   = 0.00 GFLOPS
+copy-h2h     = 3.59 GBPS
+copy-h2d     = 3.70 GBPS
+copy-d2h     = 0.77 GBPS
+copy-d2d     = 10.25 GBPS
+
