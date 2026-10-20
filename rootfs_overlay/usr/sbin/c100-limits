@@ -4,11 +4,13 @@
 # Jetson Nano module. Mainline offers one step more on each (1555.5 MHz CPU,
 # 998.4 MHz GPU); the GPU step needs about 1100 mV, above the 1068 mV
 # nominal maximum. Run by erlinit before Erlang starts.
-
 #
 # The DRAM runs at the 1600 MHz rate cboot trains at every boot. Nothing
 # scales the EMC clock on demand, and 204 MHz cuts memory bandwidth by
-# about 4x for roughly 0.7 W less at idle.
+# about 4x for roughly 0.7 W less at idle. nouveau builds the GPU's golden
+# context on the first graphics channel, and that times out in FECS while
+# the EMC runs at 1600 MHz, so the EMC stays at 204 MHz until a first
+# channel has been created.
 
 CPU_MAX_KHZ=1479000
 GPU_MAX_HZ=921600000
@@ -21,8 +23,6 @@ for policy in /sys/devices/system/cpu/cpufreq/policy*; do
 done
 
 [ -d $EMC_DEBUGFS ] || mount -t debugfs debugfs /sys/kernel/debug
-grep -qw $EMC_HZ $EMC_DEBUGFS/available_rates 2>/dev/null &&
-	echo $EMC_HZ > $EMC_DEBUGFS/min_rate
 
 # nouveau is a module and loads after Erlang starts
 (
@@ -32,6 +32,12 @@ grep -qw $EMC_HZ $EMC_DEBUGFS/available_rates 2>/dev/null &&
 		i=$((i + 1))
 	done
 	[ -w $GPU_DEVFREQ/max_freq ] && echo $GPU_MAX_HZ > $GPU_DEVFREQ/max_freq
+
+	# Creating a Vulkan device opens the first graphics channel
+	NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1 vulkaninfo --summary > /dev/null 2>&1
+
+	grep -qw $EMC_HZ $EMC_DEBUGFS/available_rates 2>/dev/null &&
+		echo $EMC_HZ > $EMC_DEBUGFS/min_rate
 ) &
 
 exit 0
