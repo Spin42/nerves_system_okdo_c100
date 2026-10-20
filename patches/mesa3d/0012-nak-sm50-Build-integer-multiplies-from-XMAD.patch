@@ -1,0 +1,498 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Date: Tue, 20 Oct 2026 22:30:00 +0200
+Subject: [PATCH] nak/sm50: Build integer multiplies from XMAD
+
+IMUL and IMAD are slow variable-latency ops on Maxwell and Pascal.
+Like the blob, build a 32-bit multiply-add from three full-rate 16x16
+XMADs, a 16-bit one from a single XMAD, and the 32x32->64 product from
+four XMADs and two PRMTs.  imad is formed for 32-bit values, and a 16-bit
+iadd of an imul is folded into an imad.  XMADs take part in operand reuse
+and bank-aware register allocation.
+
+vkpeak on GM20B, in GIOPS: int32 1.8 -> 76, int16 1.8 -> 223,
+int64 0.6 -> 17.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+diff --git a/src/nouveau/compiler/nak/api.rs b/src/nouveau/compiler/nak/api.rs
+--- a/src/nouveau/compiler/nak/api.rs
++++ b/src/nouveau/compiler/nak/api.rs
+@@ -169,7 +169,8 @@
+         lower_usub_borrow: true,
+         has_rotate32: dev.sm >= 32,
+         has_iadd3: dev.sm >= 70,
+-        has_imad32: dev.sm >= 70,
++        // SM50-SM62 build imad from three XMADs
++        has_imad32: dev.sm >= 50,
+         has_sdot_4x8: dev.sm >= 70,
+         has_udot_4x8: dev.sm >= 70,
+         has_sudot_4x8: dev.sm >= 70,
+diff --git a/src/nouveau/compiler/nak/assign_regs.rs b/src/nouveau/compiler/nak/assign_regs.rs
+--- a/src/nouveau/compiler/nak/assign_regs.rs
++++ b/src/nouveau/compiler/nak/assign_regs.rs
+@@ -165,7 +165,7 @@
+ ///     Taiwan, 2011, pp. 45-54, doi: 10.1145/2038698.2038708.
+ ///
+ /// With `bank_aware`, it also records which GPR values are read by the same
+-/// FP32 ALU instruction, so that allocation can put them in different
++/// FP32 ALU or XMAD instruction, so that allocation can put them in different
+ /// register banks (SM50-SM62 have 4 banks, reg % 4, and same-bank operands of
+ /// one instruction cost extra issue cycles).
+ struct PhiWebs {
+@@ -220,6 +220,7 @@
+                         Op::FFma(op) => &op.srcs,
+                         Op::FAdd(op) => &op.srcs,
+                         Op::FMul(op) => &op.srcs,
++                        Op::Xmad(op) => &op.srcs,
+                         _ => continue,
+                     };
+                     let vals: Vec<SSAValue> = srcs
+diff --git a/src/nouveau/compiler/nak/builder.rs b/src/nouveau/compiler/nak/builder.rs
+--- a/src/nouveau/compiler/nak/builder.rs
++++ b/src/nouveau/compiler/nak/builder.rs
+@@ -462,7 +462,65 @@
+         dst
+     }
+ 
++    /// Low 32 bits of x * y + z from three full-rate XMADs, for SM50-SM62
++    /// where IMUL and IMAD are slow variable-latency ops
++    fn imad_xmad(&mut self, x: Src, y: Src, z: Src) -> SSAValue {
++        // x.lo * y.lo + z
++        let lo = self.alloc_ssa(RegFile::GPR);
++        self.push_op(OpXmad {
++            dst: lo.into(),
++            srcs: [x.clone(), y.clone(), z],
++            a_hi: false,
++            b_hi: false,
++            psl: false,
++            mrg: false,
++            c_mode: XmadCMode::C,
++        });
++        // (x.lo * y.hi) & 0xffff | y.lo << 16
++        let mid = self.alloc_ssa(RegFile::GPR);
++        self.push_op(OpXmad {
++            dst: mid.into(),
++            srcs: [x.clone(), y, 0.into()],
++            a_hi: false,
++            b_hi: true,
++            psl: false,
++            mrg: true,
++            c_mode: XmadCMode::C,
++        });
++        // (x.hi * y.lo) << 16 + lo + ((x.lo * y.hi) << 16)
++        let dst = self.alloc_ssa(RegFile::GPR);
++        self.push_op(OpXmad {
++            dst: dst.into(),
++            srcs: [x, mid.into(), lo.into()],
++            a_hi: true,
++            b_hi: true,
++            psl: true,
++            mrg: false,
++            c_mode: XmadCMode::Cbcc,
++        });
++        dst
++    }
++
++    /// x * y + z on 16-bit values, which only need the low halves
++    fn xmad16(&mut self, x: Src, y: Src, z: Src) -> SSAValue {
++        let dst = self.alloc_ssa(RegFile::GPR);
++        self.push_op(OpXmad {
++            dst: dst.into(),
++            srcs: [x, y, z],
++            a_hi: false,
++            b_hi: false,
++            psl: false,
++            mrg: false,
++            c_mode: XmadCMode::C,
++        });
++        dst
++    }
++
+     fn imul(&mut self, x: Src, y: Src) -> SSAValue {
++        if self.sm() >= 50 && self.sm() < 70 {
++            return self.imad_xmad(x, y, 0.into());
++        }
++
+         let dst = self.alloc_ssa(RegFile::GPR);
+         if self.sm() >= 70 {
+             self.push_op(OpIMad {
+@@ -481,7 +539,57 @@
+         dst
+     }
+ 
++    /// Full 64-bit product of two 32-bit values from four XMADs on SM50-SM62.
++    ///
++    /// With x = xh * 2^16 + xl and y = yh * 2^16 + yl:
++    ///
++    ///    t0 = xl * yl
++    ///    t2 = xh * yl + (t0 >> 16)
++    ///    t1 = xl * yh + (t2 & 0xffff)
++    ///    x * y = t0.lo + 2^16 * t1.lo + 2^32 * (xh * yh + t2.hi + t1.hi)
++    ///
++    /// None of the partial sums overflow 32 bits.
++    fn umul_2x32_64_xmad(&mut self, x: Src, y: Src) -> [SSAValue; 2] {
++        let xmad = |b: &mut Self, srcs: [Src; 3], a_hi, b_hi, c_mode| {
++            let dst = b.alloc_ssa(RegFile::GPR);
++            b.push_op(OpXmad {
++                dst: dst.into(),
++                srcs,
++                a_hi,
++                b_hi,
++                psl: false,
++                mrg: false,
++                c_mode,
++            });
++            dst
++        };
++        let t0 = xmad(self, [x.clone(), y.clone(), 0.into()], false, false, XmadCMode::C);
++        let t2 = xmad(self, [x.clone(), y.clone(), t0.into()], true, false, XmadCMode::Chi);
++        let t1 = xmad(self, [x.clone(), y.clone(), t2.into()], false, true, XmadCMode::Clo);
++        let h0 = xmad(self, [x, y, t2.into()], true, true, XmadCMode::Chi);
++        let lo = self.prmt(t0.into(), t1.into(), [0, 1, 4, 5]);
++        let t1_hi = self.prmt(t1.into(), 0.into(), [2, 3, 4, 4]);
++        let hi = self.iadd(h0.into(), t1_hi.into(), 0.into());
++        [lo, hi]
++    }
++
+     fn imul_2x32_64(&mut self, x: Src, y: Src, signed: bool) -> SSARef {
++        if self.sm() >= 50 && self.sm() < 70 {
++            let [lo, hi] = self.umul_2x32_64_xmad(x.clone(), y.clone());
++            if !signed {
++                return [lo, hi].into();
++            }
++            // As signed values, x * y = unsigned x * y - 2^32 * ((x < 0 ? y
++            // : 0) + (y < 0 ? x : 0)) modulo 2^64.
++            let x_neg = self.isetp(IntCmpType::I32, IntCmpOp::Lt, x.clone(), 0.into());
++            let y_neg = self.isetp(IntCmpType::I32, IntCmpOp::Lt, y.clone(), 0.into());
++            let fx = self.sel(x_neg.into(), y.clone(), 0.into());
++            let fy = self.sel(y_neg.into(), x, 0.into());
++            let hi = self.iadd(hi.into(), Src::from(fx).ineg(), 0.into());
++            let hi = self.iadd(hi.into(), Src::from(fy).ineg(), 0.into());
++            return [lo, hi].into();
++        }
++
+         let dst = self.alloc_ssa_vec(RegFile::GPR, 2);
+         if self.sm() >= 70 {
+             self.push_op(OpIMad64 {
+diff --git a/src/nouveau/compiler/nak/from_nir.rs b/src/nouveau/compiler/nak/from_nir.rs
+--- a/src/nouveau/compiler/nak/from_nir.rs
++++ b/src/nouveau/compiler/nak/from_nir.rs
+@@ -627,12 +627,28 @@
+             let comps = alu.src_components(i.try_into().unwrap());
+             let ssa = self.get_ssa(alu_src.src.as_def());
+ 
++            // The low 16 bits of IADD and XMAD results only depend on the low
++            // 16 bits of their sources, so a 16-bit value in the low half of
++            // its dword is used as it is on SM50-SM62.
++            let low_half_ok = matches!(
++                alu.op,
++                nir_op_iadd | nir_op_imul | nir_op_imad
++            ) && b.sm() >= 50
++                && b.sm() < 70
++                && bit_size == 16
++                && comps == 1
++                && alu_src.swizzle[0] % 2 == 0;
++
+             match bit_size {
+                 1 => {
+                     assert!(comps == 1);
+                     let s = usize::from(alu_src.swizzle[0]);
+                     srcs_vec.push(Some(ssa[s].into()));
+                 }
++                16 if low_half_ok => {
++                    let dw = usize::from(alu_src.swizzle[0] / 2);
++                    srcs_vec.push(Some(ssa[dw].into()));
++                }
+                 8 | 16 => {
+                     let num_bytes = usize::from(comps * (bit_size / 8));
+                     assert!(num_bytes <= 4);
+@@ -1423,6 +1439,10 @@
+             }
+             nir_op_iabs => b.iabs(srcs(0)).into(),
+             nir_op_iadd => match alu.def.bit_size {
++                // Only the low 16 bits of a 16-bit value are meaningful
++                16 if b.sm() >= 50 && b.sm() < 70 => {
++                    b.iadd(srcs(0), srcs(1), 0.into()).into()
++                }
+                 32 => b.iadd(srcs(0), srcs(1), 0.into()).into(),
+                 64 => b.iadd64(srcs(0), srcs(1), 0.into()),
+                 x => panic!("unsupported bit size for nir_op_iadd: {x}"),
+@@ -1480,6 +1500,18 @@
+                     b.isetp(cmp_type, cmp_op, x.into(), y.into()).into()
+                 }
+             }
++            nir_op_imad if b.sm() >= 50 && b.sm() < 70 => {
++                if alu.def.bit_size() == 16 {
++                    b.xmad16(srcs(0), srcs(1), srcs(2)).into()
++                } else {
++                    assert!(alu.def.bit_size() == 32);
++                    b.imad_xmad(srcs(0), srcs(1), srcs(2)).into()
++                }
++            }
++            nir_op_imul if alu.def.bit_size() == 16 => {
++                assert!(b.sm() >= 50 && b.sm() < 70);
++                b.xmad16(srcs(0), srcs(1), 0.into()).into()
++            }
+             nir_op_imad => {
+                 assert!(alu.def.bit_size() == 32);
+                 let dst = b.alloc_ssa(RegFile::GPR);
+diff --git a/src/nouveau/compiler/nak/ir.rs b/src/nouveau/compiler/nak/ir.rs
+--- a/src/nouveau/compiler/nak/ir.rs
++++ b/src/nouveau/compiler/nak/ir.rs
+@@ -4063,6 +4063,67 @@
+     }
+ }
+ 
++#[derive(Clone, Copy, Eq, PartialEq)]
++pub enum XmadCMode {
++    /// c
++    C,
++    /// c & 0xffff
++    Clo,
++    /// c >> 16
++    Chi,
++    /// c + (b << 16), with b the full 32-bit source b
++    Cbcc,
++}
++
++/// 16x16-bit integer multiply-add, only used on SM50-SM62
++///
++/// dst = a.lo|hi * b.lo|hi (shifted left by 16 with psl) + c, with mrg
++/// replacing the high 16 bits of the result by the low 16 bits of b.
++#[repr(C)]
++#[derive(SrcsAsSlice, DstsAsSlice)]
++pub struct OpXmad {
++    #[dst_type(GPR)]
++    pub dst: Dst,
++
++    #[src_type(ALU)]
++    pub srcs: [Src; 3],
++
++    pub a_hi: bool,
++    pub b_hi: bool,
++    pub psl: bool,
++    pub mrg: bool,
++    pub c_mode: XmadCMode,
++}
++
++impl DisplayOp for OpXmad {
++    fn fmt_op(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
++        write!(f, "xmad")?;
++        if self.psl {
++            write!(f, ".psl")?;
++        }
++        if self.mrg {
++            write!(f, ".mrg")?;
++        }
++        match self.c_mode {
++            XmadCMode::C => (),
++            XmadCMode::Clo => write!(f, ".clo")?,
++            XmadCMode::Chi => write!(f, ".chi")?,
++            XmadCMode::Cbcc => write!(f, ".cbcc")?,
++        }
++        let hi = |h| if h { ".h1" } else { "" };
++        write!(
++            f,
++            " {}{} {}{} {}",
++            self.srcs[0],
++            hi(self.a_hi),
++            self.srcs[1],
++            hi(self.b_hi),
++            self.srcs[2]
++        )
++    }
++}
++impl_display_for_op!(OpXmad);
++
+ #[repr(C)]
+ #[derive(SrcsAsSlice, DstsAsSlice)]
+ pub struct OpIMad64 {
+@@ -8154,6 +8215,7 @@
+     IMad(Box<OpIMad>),
+     IMad64(Box<OpIMad64>),
+     IMul(Box<OpIMul>),
++    Xmad(Box<OpXmad>),
+     IMnMx(Box<OpIMnMx>),
+     ISetP(Box<OpISetP>),
+     Lea(Box<OpLea>),
+@@ -8325,6 +8387,7 @@
+             | Op::IDp4(_)
+             | Op::IMad64(_)
+             | Op::IMnMx(_)
++            | Op::Xmad(_)
+             | Op::ISetP(_)
+             | Op::Lea(_)
+             | Op::LeaX(_)
+@@ -8504,6 +8567,7 @@
+             | Op::IDp4(_)
+             | Op::IMad64(_)
+             | Op::IMnMx(_)
++            | Op::Xmad(_)
+             | Op::ISetP(_)
+             | Op::Lea(_)
+             | Op::LeaX(_)
+@@ -9062,6 +9126,7 @@
+             | Op::IMad64(_)
+             | Op::IMul(_)
+             | Op::IMnMx(_)
++            | Op::Xmad(_)
+             | Op::ISetP(_)
+             | Op::Lea(_)
+             | Op::LeaX(_)
+diff --git a/src/nouveau/compiler/nak/opt_instr_sched_common.rs b/src/nouveau/compiler/nak/opt_instr_sched_common.rs
+--- a/src/nouveau/compiler/nak/opt_instr_sched_common.rs
++++ b/src/nouveau/compiler/nak/opt_instr_sched_common.rs
+@@ -125,6 +125,7 @@
+         | Op::IDp4(_)
+         | Op::IMad64(_)
+         | Op::IMnMx(_)
++        | Op::Xmad(_)
+         | Op::ISetP(_)
+         | Op::Lea(_)
+         | Op::LeaX(_)
+diff --git a/src/nouveau/compiler/nak/sm50.rs b/src/nouveau/compiler/nak/sm50.rs
+--- a/src/nouveau/compiler/nak/sm50.rs
++++ b/src/nouveau/compiler/nak/sm50.rs
+@@ -1637,6 +1637,44 @@
+     }
+ }
+ 
++impl SM50Op for OpXmad {
++    fn legalize(&mut self, b: &mut LegalizeBuilder) {
++        use RegFile::GPR;
++        let [src0, src1, src2] = &mut self.srcs;
++        b.copy_alu_src_if_not_reg(src0, GPR, SrcType::ALU);
++        b.copy_alu_src_if_not_reg(src1, GPR, SrcType::ALU);
++        b.copy_alu_src_if_not_reg(src2, GPR, SrcType::ALU);
++    }
++
++    fn encode(&self, e: &mut SM50Encoder<'_>) {
++        assert!(self.srcs.iter().all(|s| s.is_unmodified()));
++
++        e.set_opcode(0x5b00);
++        e.set_dst(&self.dst);
++        e.set_reg_src(8..16, &self.srcs[0]);
++        e.set_reg_src(20..28, &self.srcs[1]);
++        e.set_reg_src(39..47, &self.srcs[2]);
++
++        e.set_bit(35, self.b_hi);
++        e.set_bit(36, self.psl);
++        e.set_bit(37, self.mrg);
++        e.set_bit(38, false); // .X
++        e.set_bit(47, false); // .CC
++        e.set_bit(48, false); // a signed
++        e.set_bit(49, false); // b signed
++        e.set_field(
++            50..53,
++            match self.c_mode {
++                XmadCMode::C => 0_u8,
++                XmadCMode::Clo => 1_u8,
++                XmadCMode::Chi => 2_u8,
++                XmadCMode::Cbcc => 4_u8,
++            },
++        );
++        e.set_bit(53, self.a_hi);
++    }
++}
++
+ impl SM50Op for OpIMnMx {
+     fn legalize(&mut self, b: &mut LegalizeBuilder) {
+         use RegFile::GPR;
+@@ -3519,6 +3557,7 @@
+             Op::I2I($x) => $y,
+             Op::IMad($x) => $y,
+             Op::IMul($x) => $y,
++            Op::Xmad($x) => $y,
+             Op::IMnMx($x) => $y,
+             Op::ISetP($x) => $y,
+             Op::Tex($x) => $y,
+@@ -3568,7 +3607,7 @@
+ 
+ /// The GPRs an instruction reads through the operand slots that have a
+ /// reuse cache (Ra at bits 8..16, Rb at 20..28, Rc at 39..47), for the FP32
+-/// ALU ops where the slot assignment is known.
++/// ALU and XMAD ops where the slot assignment is known.
+ fn reuse_slots(instr: &Instr) -> Option<[Option<RegRef>; 3]> {
+     if !instr.pred.is_true() {
+         return None;
+@@ -3592,6 +3631,9 @@
+         }
+         Op::FAdd(op) => Some([gpr(&op.srcs[0]), gpr(&op.srcs[1]), None]),
+         Op::FMul(op) => Some([gpr(&op.srcs[0]), gpr(&op.srcs[1]), None]),
++        Op::Xmad(op) => {
++            Some([gpr(&op.srcs[0]), gpr(&op.srcs[1]), gpr(&op.srcs[2])])
++        }
+         _ => None,
+     }
+ }
+diff --git a/src/nouveau/compiler/nak_nir.c b/src/nouveau/compiler/nak_nir.c
+--- a/src/nouveau/compiler/nak_nir.c
++++ b/src/nouveau/compiler/nak_nir.c
+@@ -300,6 +300,16 @@
+             return 0;
+          break;
+ 
++      case nir_op_iadd:
++      case nir_op_imul:
++      case nir_op_imad:
++         /* SM50-SM62 do a 16-bit multiply-add with one XMAD.  The low 16
++          * bits of 32-bit IADD and XMAD results are the 16-bit results.
++          */
++         if (bit_size == 16 && nak->sm >= 50 && nak->sm < 70)
++            return 0;
++         break;
++
+       default:
+          break;
+       }
+@@ -1176,6 +1186,38 @@
+    }
+ }
+ 
++/* Fold a 16-bit iadd of a single-use 16-bit imul into an imad, which is one
++ * XMAD on SM50-SM62.  NIR only forms imad for 32-bit values.
++ */
++static bool
++fuse_imad16(nir_builder *b, nir_alu_instr *alu, void *data)
++{
++   if (alu->op != nir_op_iadd || alu->def.bit_size != 16 ||
++       alu->def.num_components != 1)
++      return false;
++
++   for (unsigned s = 0; s < 2; s++) {
++      nir_instr *parent = nir_def_instr(alu->src[s].src.ssa);
++      if (parent->type != nir_instr_type_alu)
++         continue;
++
++      nir_alu_instr *mul = nir_instr_as_alu(parent);
++      if (mul->op != nir_op_imul || mul->def.num_components != 1 ||
++          !list_is_singular(&mul->def.uses))
++         continue;
++
++      b->cursor = nir_before_instr(&alu->instr);
++      nir_def *r = nir_imad(b, nir_ssa_for_alu_src(b, mul, 0),
++                            nir_ssa_for_alu_src(b, mul, 1),
++                            nir_ssa_for_alu_src(b, alu, 1 - s));
++      nir_def_replace(&alu->def, r);
++      nir_instr_remove(&mul->instr);
++      return true;
++   }
++
++   return false;
++}
++
+ /* Each iteration of a loop costs an iadd, an isetp, a branch and a NOP on
+  * pre-Volta GPUs, which is a quarter of the issue slots of a 16-instruction
+  * body.  Unroll single-block loops with a constant trip count by a factor
+@@ -1654,6 +1696,11 @@
+    OPT(nir, nir_lower_bit_size, lower_bit_size_cb, (void *)nak);
+ 
+    if (nak->sm >= 50 && nak->sm < 70) {
++      OPT(nir, nir_shader_alu_pass, fuse_imad16, nir_metadata_control_flow,
++          NULL);
++   }
++
++   if (nak->sm >= 50 && nak->sm < 70) {
+       if (OPT(nir, nak_nir_unroll_loops_by_factor)) {
+          OPT(nir, nir_opt_copy_prop);
+          OPT(nir, nir_opt_dce);

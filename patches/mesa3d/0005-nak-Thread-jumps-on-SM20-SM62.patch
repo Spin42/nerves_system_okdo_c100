@@ -1,0 +1,90 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Date: Tue, 20 Oct 2026 22:30:00 +0200
+Subject: [PATCH] nak: Thread jumps on SM20-SM62
+
+Run opt_jump_thread after opt_crs on pre-Volta GPUs.  Blocks that are
+SSY, PBK or PCNT targets are kept, and the CFG rebuild knows the SYNC,
+BRK and CONT edges.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+diff --git a/src/nouveau/compiler/nak/api.rs b/src/nouveau/compiler/nak/api.rs
+--- a/src/nouveau/compiler/nak/api.rs
++++ b/src/nouveau/compiler/nak/api.rs
+@@ -467,11 +467,10 @@
+     pass!(s, assign_regs);
+     pass!(s, lower_par_copies);
+     pass!(s, lower_copy_swap);
+-    if nak.sm >= 70 {
+-        pass!(s, opt_jump_thread);
+-    } else {
++    if nak.sm < 70 {
+         pass!(s, opt_crs);
+     }
++    pass!(s, opt_jump_thread);
+ 
+     s.remove_annotations();
+ 
+diff --git a/src/nouveau/compiler/nak/opt_jump_thread.rs b/src/nouveau/compiler/nak/opt_jump_thread.rs
+--- a/src/nouveau/compiler/nak/opt_jump_thread.rs
++++ b/src/nouveau/compiler/nak/opt_jump_thread.rs
+@@ -4,7 +4,7 @@
+ use crate::ir::*;
+ 
+ use compiler::cfg::CFGBuilder;
+-use rustc_hash::{FxBuildHasher, FxHashMap};
++use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
+ 
+ fn clone_branch(op: &Op) -> Op {
+     match op {
+@@ -34,6 +34,22 @@
+     // enable a later optimization that converts branches to fallthrough.
+     let mut progress = false;
+ 
++    // SSY, PBK and PCNT name the block where threads reconverge.  Those
++    // blocks have to stay, so they are never threaded through.
++    let mut crs_targets: FxHashSet<Label> = Default::default();
++    for b in func.blocks.iter() {
++        for instr in &b.instrs {
++            match &instr.op {
++                Op::SSy(OpSSy { target })
++                | Op::PBk(OpPBk { target })
++                | Op::PCnt(OpPCnt { target }) => {
++                    crs_targets.insert(*target);
++                }
++                _ => (),
++            }
++        }
++    }
++
+     // A branch to label can be replaced with Op
+     let mut replacements: FxHashMap<Label, Op> = Default::default();
+ 
+@@ -71,9 +87,14 @@
+ 
+         // Is this block trivial?
+         let block_label = func.blocks[i].label;
++        if crs_targets.contains(&block_label) {
++            continue;
++        }
+         match &func.blocks[i].instrs[..] {
+             [instr] => {
+-                if instr.is_branch_always_taken() {
++                if instr.is_branch_always_taken()
++                    && matches!(instr.op, Op::Bra(_) | Op::Exit(_))
++                {
+                     // Upholds invariant 2 because we updated the branch above
+                     replacements.insert(block_label, clone_branch(&instr.op));
+                 }
+@@ -126,6 +147,11 @@
+                 Op::Bra(bra) => {
+                     builder.add_edge(block.label, bra.target);
+                 }
++                Op::Sync(OpSync { target })
++                | Op::Brk(OpBrk { target })
++                | Op::Cont(OpCont { target }) => {
++                    builder.add_edge(block.label, *target);
++                }
+                 Op::Exit(_) => (),
+                 _ => unreachable!(),
+             };

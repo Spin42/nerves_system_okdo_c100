@@ -1,0 +1,134 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Date: Tue, 20 Oct 2026 22:30:00 +0200
+Subject: [PATCH] nak/sm50: Set operand reuse flags
+
+Flag an Ra/Rb/Rc slot when the next instruction reads the same GPR through
+the same slot, for FFMA, FADD and FMUL.  This saves register file reads
+on long FFMA chains, the way the blob does.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+diff --git a/src/nouveau/compiler/nak/sm50.rs b/src/nouveau/compiler/nak/sm50.rs
+--- a/src/nouveau/compiler/nak/sm50.rs
++++ b/src/nouveau/compiler/nak/sm50.rs
+@@ -3374,9 +3374,70 @@
+     }
+ }
+ 
++/// The GPRs an instruction reads through the operand slots that have a
++/// reuse cache (Ra at bits 8..16, Rb at 20..28, Rc at 39..47), for the FP32
++/// ALU ops where the slot assignment is known.
++fn reuse_slots(instr: &Instr) -> Option<[Option<RegRef>; 3]> {
++    if !instr.pred.is_true() {
++        return None;
++    }
++
++    let gpr = |src: &Src| match src.src_ref {
++        SrcRef::Reg(reg) if reg.file() == RegFile::GPR && reg.comps() == 1 => {
++            Some(reg)
++        }
++        _ => None,
++    };
++
++    match &instr.op {
++        Op::FFma(op) => {
++            if matches!(op.srcs[2].src_ref, SrcRef::CBuf(_)) {
++                // src1 moves to the Rc slot when src2 is a cbuf
++                Some([gpr(&op.srcs[0]), None, gpr(&op.srcs[1])])
++            } else {
++                Some([gpr(&op.srcs[0]), gpr(&op.srcs[1]), gpr(&op.srcs[2])])
++            }
++        }
++        Op::FAdd(op) => Some([gpr(&op.srcs[0]), gpr(&op.srcs[1]), None]),
++        Op::FMul(op) => Some([gpr(&op.srcs[0]), gpr(&op.srcs[1]), None]),
++        _ => None,
++    }
++}
++
++/// Computes the operand reuse flags of each instruction in a block.  A slot
++/// is flagged when the next instruction reads the same GPR through the same
++/// slot and the instruction itself does not write that GPR.
++fn block_reuse_masks(instrs: &[Instr]) -> Vec<u8> {
++    let slots: Vec<_> = instrs.iter().map(reuse_slots).collect();
++    let mut masks = vec![0_u8; instrs.len()];
++    for ip in 1..instrs.len() {
++        let (Some(prev), Some(next)) = (&slots[ip - 1], &slots[ip]) else {
++            continue;
++        };
++        let writes = |reg: RegRef| {
++            instrs[ip - 1].dsts().iter().any(|dst| match dst {
++                Dst::Reg(d) => {
++                    d.file() == reg.file()
++                        && d.idx_range().contains(&reg.base_idx())
++                }
++                _ => false,
++            })
++        };
++        for s in 0..3 {
++            if let (Some(a), Some(b)) = (prev[s], next[s]) {
++                if a == b && !writes(a) {
++                    masks[ip - 1] |= 1 << s;
++                }
++            }
++        }
++    }
++    masks
++}
++
+ fn encode_instr(
+     instr_index: usize,
+     instr: Option<&Instr>,
++    reuse_mask: u8,
+     sm: &ShaderModel50,
+     labels: &FxHashMap<Label, usize>,
+     ip: &mut usize,
+@@ -3394,6 +3455,10 @@
+         instr.op.encode(&mut e);
+         e.set_pred(&instr.pred);
+         e.set_instr_deps(&instr.deps);
++        BitMutView::new(&mut e.sched).set_field(
++            17..21,
++            instr.deps.reuse_mask | reuse_mask,
++        );
+     } else {
+         let nop = OpNop { label: None };
+         nop.encode(&mut e);
+@@ -3433,7 +3498,14 @@
+         // A block is composed of groups of 3 instructions.
+         let block_num_instrs = b.instrs.len().next_multiple_of(3);
+ 
++        let reuse_masks = block_reuse_masks(&b.instrs);
+         let mut instrs_iter = b.instrs.iter();
++        let mut next_ip = 0_usize;
++        let mut next_reuse = || {
++            let mask = reuse_masks.get(next_ip).copied().unwrap_or(0);
++            next_ip += 1;
++            mask
++        };
+ 
+         for _ in 0..(block_num_instrs / 3) {
+             let mut ip = ((encoded.len() / 2) + 1) * 8;
+@@ -3443,6 +3515,7 @@
+             let instr0 = encode_instr(
+                 0,
+                 instrs_iter.next(),
++                next_reuse(),
+                 sm,
+                 &labels,
+                 &mut ip,
+@@ -3451,6 +3524,7 @@
+             let instr1 = encode_instr(
+                 1,
+                 instrs_iter.next(),
++                next_reuse(),
+                 sm,
+                 &labels,
+                 &mut ip,
+@@ -3459,6 +3533,7 @@
+             let instr2 = encode_instr(
+                 2,
+                 instrs_iter.next(),
++                next_reuse(),
+                 sm,
+                 &labels,
+                 &mut ip,

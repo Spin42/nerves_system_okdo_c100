@@ -1,0 +1,19 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Date: Tue, 20 Oct 2026 22:30:00 +0200
+Subject: [PATCH] nvk: Advertise shaderFloat16 on SM53, SM60 and SM62
+
+Assisted-by: Claude:claude-opus-5-5
+---
+diff --git a/src/nouveau/vulkan/nvk_physical_device.c b/src/nouveau/vulkan/nvk_physical_device.c
+--- a/src/nouveau/vulkan/nvk_physical_device.c
++++ b/src/nouveau/vulkan/nvk_physical_device.c
+@@ -399,7 +399,8 @@
+       .storagePushConstant8 = true,
+       .shaderBufferInt64Atomics = info->cls_eng3d >= KEPLER_B,
+       .shaderSharedInt64Atomics = info->cls_eng3d >= KEPLER_B,
+-      .shaderFloat16 = info->sm >= 70,
++      .shaderFloat16 = info->sm >= 70 || info->sm == 53 ||
++                       info->sm == 60 || info->sm == 62,
+       .shaderInt8 = true,
+       .descriptorIndexing = true,
+       .shaderInputAttachmentArrayDynamicIndexing = true,

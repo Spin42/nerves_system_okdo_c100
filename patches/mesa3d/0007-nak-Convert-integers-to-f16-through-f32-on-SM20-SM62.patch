@@ -1,0 +1,104 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Date: Tue, 20 Oct 2026 22:30:00 +0200
+Subject: [PATCH] nak: Convert integers to f16 through f32 on SM20-SM62
+
+GM20B raises ILLEGAL_INSTR_ENCODING on I2F with an F16 destination.
+Convert to f32 first; integers in f16 range are exact in f32, so only
+the F2F rounds.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+diff --git a/src/nouveau/compiler/nak/from_nir.rs b/src/nouveau/compiler/nak/from_nir.rs
+--- a/src/nouveau/compiler/nak/from_nir.rs
++++ b/src/nouveau/compiler/nak/from_nir.rs
+@@ -1368,17 +1368,8 @@
+                 .into(),
+             nir_op_i2f16 | nir_op_i2f32 | nir_op_i2f64 => {
+                 let src_bits = alu.get_src(0).src.bit_size();
+-                let dst_bits = alu.def.bit_size();
+-                let dst_type = FloatType::from_bits(dst_bits.into());
+-                let dst = b.alloc_ssa_vec(RegFile::GPR, dst_bits.div_ceil(32));
+-                b.push_op(OpI2F {
+-                    dst: dst.clone().into(),
+-                    src: srcs(0),
+-                    dst_type: dst_type,
+-                    src_type: IntType::from_bits(src_bits.into(), true),
+-                    rnd_mode: self.float_ctl[dst_type].rnd_mode,
+-                });
+-                dst
++                let src_type = IntType::from_bits(src_bits.into(), true);
++                self.emit_i2f(b, srcs(0), src_type, alu.def.bit_size())
+             }
+             nir_op_i2i8 | nir_op_i2i16 | nir_op_i2i32 | nir_op_i2i64
+             | nir_op_u2u8 | nir_op_u2u16 | nir_op_u2u32 | nir_op_u2u64 => {
+@@ -1688,17 +1679,8 @@
+             }
+             nir_op_u2f16 | nir_op_u2f32 | nir_op_u2f64 => {
+                 let src_bits = alu.get_src(0).src.bit_size();
+-                let dst_bits = alu.def.bit_size();
+-                let dst_type = FloatType::from_bits(dst_bits.into());
+-                let dst = b.alloc_ssa_vec(RegFile::GPR, dst_bits.div_ceil(32));
+-                b.push_op(OpI2F {
+-                    dst: dst.clone().into(),
+-                    src: srcs(0),
+-                    dst_type: dst_type,
+-                    src_type: IntType::from_bits(src_bits.into(), false),
+-                    rnd_mode: self.float_ctl[dst_type].rnd_mode,
+-                });
+-                dst
++                let src_type = IntType::from_bits(src_bits.into(), false);
++                self.emit_i2f(b, srcs(0), src_type, alu.def.bit_size())
+             }
+             nir_op_uadd_sat => {
+                 let x = srcs(0).to_ssa();
+@@ -4080,6 +4062,50 @@
+         self.set_ssa(&undef.def, dst);
+     }
+ 
++    fn emit_i2f(
++        &self,
++        b: &mut impl SSABuilder,
++        src: Src,
++        src_type: IntType,
++        dst_bits: u8,
++    ) -> SSARef {
++        let dst_type = FloatType::from_bits(dst_bits.into());
++        let rnd_mode = self.float_ctl[dst_type].rnd_mode;
++        if dst_bits == 16 && self.sm.sm() < 70 {
++            // Pre-Volta I2F has no F16 destination.  Integers that fit in
++            // f16 are exact in f32, so only the F2F rounds.
++            let tmp = b.alloc_ssa(RegFile::GPR);
++            b.push_op(OpI2F {
++                dst: tmp.into(),
++                src,
++                dst_type: FloatType::F32,
++                src_type,
++                rnd_mode,
++            });
++            let dst = b.alloc_ssa(RegFile::GPR);
++            b.push_op(OpF2F {
++                dst: dst.into(),
++                src: tmp.into(),
++                src_type: FloatType::F32,
++                dst_type,
++                rnd_mode,
++                ftz: false,
++                integer_rnd: false,
++            });
++            return dst.into();
++        }
++
++        let dst = b.alloc_ssa_vec(RegFile::GPR, dst_bits.div_ceil(32));
++        b.push_op(OpI2F {
++            dst: dst.clone().into(),
++            src,
++            dst_type,
++            src_type,
++            rnd_mode,
++        });
++        dst
++    }
++
+     fn emit_jump(
+         &mut self,
+         b: &mut impl SSABuilder,

@@ -1,0 +1,248 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Date: Tue, 20 Oct 2026 22:30:00 +0200
+Subject: [PATCH] nak: Unroll constant trip count loops on SM50-SM62
+
+Unroll single-block loops whose trip count is a known multiple of 2, 4 or
+8 by that factor, keeping one exit test per group of iterations.  The
+iadd, isetp, branch and NOP of each iteration cost a quarter of the issue
+slots of a 16-instruction body.  On GM20B, vkpeak fp32-scalar goes from
+191 to 223 GFLOPS and fp16-scalar from 302 to 415 GFLOPS.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+diff --git a/src/nouveau/compiler/nak_nir.c b/src/nouveau/compiler/nak_nir.c
+--- a/src/nouveau/compiler/nak_nir.c
++++ b/src/nouveau/compiler/nak_nir.c
+@@ -1176,6 +1176,218 @@
+    }
+ }
+ 
++/* Each iteration of a loop costs an iadd, an isetp, a branch and a NOP on
++ * pre-Volta GPUs, which is a quarter of the issue slots of a 16-instruction
++ * body.  Unroll single-block loops with a constant trip count by a factor
++ * that divides it, keeping one exit test per F iterations.
++ *
++ * Only the do-while shape is handled:
++ *
++ *    loop {
++ *       i = phi(c0, i');  ...body...;  i' = iadd i, s;  c = ige/uge i', n
++ *       if (c) { break }
++ *    }
++ *
++ * with constants c0, s > 0 and n.  The body runs max(1, ceil((n - c0) / s))
++ * times.
++ */
++static bool
++loop_trip_count(nir_block *body, nir_if *nif, uint64_t *trip_count)
++{
++   nir_scalar cond = nir_get_scalar(nif->condition.ssa, 0);
++   if (!nir_scalar_is_alu(cond))
++      return false;
++
++   nir_op cmp = nir_scalar_alu_op(cond);
++   if (cmp != nir_op_ige && cmp != nir_op_uge)
++      return false;
++
++   nir_scalar iv_next = nir_scalar_chase_alu_src(cond, 0);
++   nir_scalar limit = nir_scalar_chase_alu_src(cond, 1);
++   if (!nir_scalar_is_const(limit) || !nir_scalar_is_alu(iv_next) ||
++       nir_scalar_alu_op(iv_next) != nir_op_iadd ||
++       iv_next.def->bit_size != 32 ||
++       nir_def_instr(iv_next.def)->block != body)
++      return false;
++
++   nir_scalar iv = nir_scalar_chase_alu_src(iv_next, 0);
++   nir_scalar step = nir_scalar_chase_alu_src(iv_next, 1);
++   if (nir_scalar_is_const(iv)) {
++      nir_scalar tmp = iv;
++      iv = step;
++      step = tmp;
++   }
++   if (!nir_scalar_is_const(step) ||
++       nir_def_instr(iv.def)->type != nir_instr_type_phi ||
++       nir_def_instr(iv.def)->block != body)
++      return false;
++
++   nir_phi_instr *phi = nir_instr_as_phi(nir_def_instr(iv.def));
++   nir_scalar init = { NULL, 0 };
++   nir_foreach_phi_src(src, phi) {
++      nir_scalar s = nir_scalar_chase_movs(nir_get_scalar(src->src.ssa, 0));
++      if (src->pred->index < body->index)
++         init = s;
++      else if (s.def != iv_next.def || s.comp != iv_next.comp)
++         return false;
++   }
++   if (init.def == NULL || !nir_scalar_is_const(init))
++      return false;
++
++   const bool sgn = cmp == nir_op_ige;
++   const int64_t c0 = sgn ? nir_scalar_as_int(init) : nir_scalar_as_uint(init);
++   const int64_t s = sgn ? nir_scalar_as_int(step) : nir_scalar_as_uint(step);
++   const int64_t n = sgn ? nir_scalar_as_int(limit) : nir_scalar_as_uint(limit);
++
++   /* Stay clear of 32-bit wrap-around in the unrolled increments */
++   const int64_t max = sgn ? INT32_MAX : UINT32_MAX;
++   if (s <= 0 || s > 0x10000 || n > max - 16 * s || c0 > n)
++      return false;
++
++   *trip_count = MAX2(1, (n - c0 + s - 1) / s);
++   return true;
++}
++
++static bool
++unroll_loop_by_factor(nir_shader *nir, nir_loop *loop)
++{
++   if (loop->control == nir_loop_control_dont_unroll ||
++       nir_loop_has_continue_construct(loop))
++      return false;
++
++   nir_cf_node *first = &nir_loop_first_block(loop)->cf_node;
++   nir_cf_node *ifn = nir_cf_node_next(first);
++   if (first->type != nir_cf_node_block || ifn == NULL ||
++       ifn->type != nir_cf_node_if)
++      return false;
++
++   nir_cf_node *tail = nir_cf_node_next(ifn);
++   if (tail == NULL || nir_cf_node_next(tail) != NULL ||
++       !exec_list_is_empty(&nir_cf_node_as_block(tail)->instr_list))
++      return false;
++
++   nir_block *body = nir_cf_node_as_block(first);
++   nir_if *nif = nir_cf_node_as_if(ifn);
++   nir_block *then_blk = nir_if_first_then_block(nif);
++   nir_block *else_blk = nir_if_first_else_block(nif);
++   if (then_blk != nir_if_last_then_block(nif) ||
++       else_blk != nir_if_last_else_block(nif) ||
++       !nir_block_ends_in_break(then_blk) ||
++       exec_list_length(&then_blk->instr_list) != 1 ||
++       !exec_list_is_empty(&else_blk->instr_list))
++      return false;
++
++   uint64_t trip_count;
++   if (!loop_trip_count(body, nif, &trip_count))
++      return false;
++
++   unsigned num_instrs = 0;
++   nir_foreach_instr(instr, body) {
++      if (instr->type != nir_instr_type_phi)
++         num_instrs++;
++   }
++
++   unsigned factor = 0;
++   for (unsigned f = 8; f >= 2; f /= 2) {
++      if (trip_count % f == 0 && trip_count > f && num_instrs * f <= 512) {
++         factor = f;
++         break;
++      }
++   }
++   if (factor == 0)
++      return false;
++
++   nir_instr *last_orig = nir_block_last_instr(body);
++   struct hash_table *remap = NULL;
++
++   for (unsigned k = 1; k < factor; k++) {
++      struct hash_table *next = _mesa_pointer_hash_table_create(NULL);
++
++      /* The phis of copy k are the back-edge values of copy k - 1 */
++      nir_foreach_phi(phi, body) {
++         nir_foreach_phi_src(src, phi) {
++            if (src->pred->index < body->index)
++               continue;
++            nir_def *v = src->src.ssa;
++            if (remap) {
++               struct hash_entry *e = _mesa_hash_table_search(remap, v);
++               if (e)
++                  v = e->data;
++            }
++            _mesa_hash_table_insert(next, &phi->def, v);
++         }
++      }
++
++      nir_foreach_instr(instr, body) {
++         if (instr->type == nir_instr_type_phi)
++            continue;
++         nir_instr *clone = nir_instr_clone_deep(nir, instr, next);
++         nir_instr_insert(nir_after_block(body), clone);
++         if (instr == last_orig)
++            break;
++      }
++
++      if (remap)
++         _mesa_hash_table_destroy(remap, NULL);
++      remap = next;
++   }
++
++   /* The loop now continues with, and exits after, the last copy */
++   nir_foreach_phi(phi, body) {
++      nir_foreach_phi_src(src, phi) {
++         if (src->pred->index < body->index)
++            continue;
++         struct hash_entry *e = _mesa_hash_table_search(remap, src->src.ssa);
++         if (e)
++            nir_src_rewrite(&src->src, e->data);
++      }
++   }
++
++   hash_table_foreach(remap, entry) {
++      nir_def *orig = (nir_def *)entry->key;
++      nir_def *last = entry->data;
++      nir_foreach_use_including_if_safe(src, orig) {
++         if (nir_src_is_if(src)) {
++            if (nir_src_parent_if(src) == nif)
++               nir_src_rewrite(src, last);
++            continue;
++         }
++         nir_instr *use = nir_src_parent_instr(src);
++         if (use->block != body && use->block != then_blk &&
++             use->block != else_blk)
++            nir_src_rewrite(src, last);
++      }
++   }
++
++   _mesa_hash_table_destroy(remap, NULL);
++   return true;
++}
++
++static bool
++nak_nir_unroll_loops_by_factor(nir_shader *nir)
++{
++   bool progress = false;
++
++   nir_foreach_function_impl(impl, nir) {
++      bool impl_progress = false;
++      nir_metadata_require(impl, nir_metadata_block_index);
++
++      /* Only innermost loops: their body is a single block */
++      nir_foreach_block(block, impl) {
++         nir_cf_node *parent = block->cf_node.parent;
++         if (parent->type == nir_cf_node_loop &&
++             block == nir_loop_first_block(nir_cf_node_as_loop(parent)))
++            impl_progress |=
++               unroll_loop_by_factor(nir, nir_cf_node_as_loop(parent));
++      }
++
++      progress |= nir_progress(impl_progress, impl,
++                               nir_metadata_control_flow);
++   }
++
++   return progress;
++}
++
+ /* Packed f16 ALU runs two lanes for the price of one.  Pair independent
+  * scalar 16-bit fadd/fmul/ffma of a block into one 2-wide op, then turn
+  * loop-header phis carried in the two lanes of one result into a vec2 phi
+@@ -1441,6 +1653,13 @@
+    OPT(nir, nir_lower_mem_access_bit_sizes, &mem_bit_size_options);
+    OPT(nir, nir_lower_bit_size, lower_bit_size_cb, (void *)nak);
+ 
++   if (nak->sm >= 50 && nak->sm < 70) {
++      if (OPT(nir, nak_nir_unroll_loops_by_factor)) {
++         OPT(nir, nir_opt_copy_prop);
++         OPT(nir, nir_opt_dce);
++      }
++   }
++
+    if (nak->sm < 70 && nak_has_f16v2_alu(nak)) {
+       if (OPT(nir, nak_nir_pair_f16_alu)) {
+          OPT(nir, nir_opt_copy_prop);

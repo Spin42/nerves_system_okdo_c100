@@ -1,0 +1,276 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Date: Tue, 20 Oct 2026 22:30:00 +0200
+Subject: [PATCH] nak/sm50: Implement packed f16 ALU on SM53, SM60 and SM62
+
+Encode the register forms of HADD2, HMUL2, HFMA2, HSET2 and HSETP2 and
+keep 16-bit fadd, fmul, ffma, compares, fsat and fsign native on the GPUs
+that run them at twice the f32 rate.  On GM20B they share the 6-cycle
+f32 pipeline.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+diff --git a/src/nouveau/compiler/nak/sm50.rs b/src/nouveau/compiler/nak/sm50.rs
+--- a/src/nouveau/compiler/nak/sm50.rs
++++ b/src/nouveau/compiler/nak/sm50.rs
+@@ -10,7 +10,7 @@
+ use rustc_hash::FxHashMap;
+ use std::ops::Range;
+ 
+-pub fn instr_latency(_sm: u8, op: &Op, dst_idx: usize) -> u32 {
++pub fn instr_latency(sm: u8, op: &Op, dst_idx: usize) -> u32 {
+     let file = match &op.dsts_as_slice()[dst_idx] {
+         Dst::None => return 0,
+         Dst::SSA(vec) => vec.file(),
+@@ -18,6 +18,14 @@
+     };
+ 
+     let (gpr_latency, pred_latency) = match op {
++            // GM20B runs packed f16 in the same pipeline as f32
++            Op::HAdd2(_)
++            | Op::HFma2(_)
++            | Op::HMul2(_)
++            | Op::HSet2(_)
++            | Op::HSetP2(_) if sm == 53 => {
++                (6, 13)
++            }
+             // Double-precision float ALU
+             Op::DAdd(_)
+             | Op::DFma(_)
+@@ -902,6 +910,185 @@
+     }
+ }
+ 
++impl SM50Encoder<'_> {
++    /// Sets the H1_H0/H0_H0/H1_H1 selection of a packed f16 operand
++    fn set_f16v2_swizzle(&mut self, range: Range<usize>, swizzle: SrcSwizzle) {
++        assert!(range.len() == 2);
++        self.set_field(
++            range,
++            match swizzle {
++                SrcSwizzle::None => 0_u8,
++                SrcSwizzle::Xx => 2_u8,
++                SrcSwizzle::Yy => 3_u8,
++            },
++        );
++    }
++
++    /// Sets Ra and Rb of the register form of the SM53+ HADD2, HMUL2,
++    /// HSET2 and HSETP2 along with their swizzles
++    fn set_f16v2_reg_srcs_ab(&mut self, srcs: &[Src; 2]) {
++        self.set_reg_src_ref(8..16, &srcs[0].src_ref);
++        self.set_f16v2_swizzle(47..49, srcs[0].src_swizzle);
++        self.set_reg_src_ref(20..28, &srcs[1].src_ref);
++        self.set_f16v2_swizzle(28..30, srcs[1].src_swizzle);
++    }
++
++    /// Sets the ftz/fmz field of HMUL2 and HFMA2
++    fn set_f16v2_fmz(&mut self, range: Range<usize>, ftz: bool, dnz: bool) {
++        self.set_field(
++            range,
++            if dnz {
++                2_u8
++            } else if ftz {
++                1_u8
++            } else {
++                0_u8
++            },
++        );
++    }
++}
++
++impl SM50Op for OpHAdd2 {
++    fn legalize(&mut self, b: &mut LegalizeBuilder) {
++        use RegFile::GPR;
++        let [src0, src1] = &mut self.srcs;
++        b.copy_alu_src_if_not_reg(src0, GPR, SrcType::F16v2);
++        b.copy_alu_src_if_not_reg(src1, GPR, SrcType::F16v2);
++    }
++
++    fn encode(&self, e: &mut SM50Encoder<'_>) {
++        assert!(e.sm.sm >= 53);
++        assert!(!self.f32);
++        e.set_opcode(0x5d10);
++        e.set_dst(&self.dst);
++        e.set_f16v2_reg_srcs_ab(&self.srcs);
++        e.set_bit(43, self.srcs[0].src_mod.has_fneg());
++        e.set_bit(44, self.srcs[0].src_mod.has_fabs());
++        e.set_bit(31, self.srcs[1].src_mod.has_fneg());
++        e.set_bit(30, self.srcs[1].src_mod.has_fabs());
++        e.set_bit(32, self.saturate);
++        e.set_bit(39, self.ftz);
++        e.set_field(49..51, 0_u8); // OFMT = F16_V2
++    }
++}
++
++impl SM50Op for OpHMul2 {
++    fn legalize(&mut self, b: &mut LegalizeBuilder) {
++        use RegFile::GPR;
++        let [src0, src1] = &mut self.srcs;
++        b.copy_alu_src_if_not_reg(src0, GPR, SrcType::F16v2);
++        b.copy_alu_src_if_not_reg(src1, GPR, SrcType::F16v2);
++    }
++
++    fn encode(&self, e: &mut SM50Encoder<'_>) {
++        assert!(e.sm.sm >= 53);
++        // There is one fneg bit for the product
++        let fneg =
++            self.srcs[0].src_mod.has_fneg() ^ self.srcs[1].src_mod.has_fneg();
++
++        e.set_opcode(0x5d08);
++        e.set_dst(&self.dst);
++        e.set_f16v2_reg_srcs_ab(&self.srcs);
++        e.set_bit(44, self.srcs[0].src_mod.has_fabs());
++        e.set_bit(30, self.srcs[1].src_mod.has_fabs());
++        e.set_bit(31, fneg);
++        e.set_bit(32, self.saturate);
++        e.set_f16v2_fmz(39..41, self.ftz, self.dnz);
++        e.set_field(49..51, 0_u8); // OFMT = F16_V2
++    }
++}
++
++impl SM50Op for OpHFma2 {
++    fn legalize(&mut self, b: &mut LegalizeBuilder) {
++        use RegFile::GPR;
++        let [src0, src1, src2] = &mut self.srcs;
++        b.copy_alu_src_if_fabs(src0, GPR, SrcType::F16v2);
++        b.copy_alu_src_if_fabs(src1, GPR, SrcType::F16v2);
++        b.copy_alu_src_if_fabs(src2, GPR, SrcType::F16v2);
++        b.copy_alu_src_if_not_reg(src0, GPR, SrcType::F16v2);
++        b.copy_alu_src_if_not_reg(src1, GPR, SrcType::F16v2);
++        b.copy_alu_src_if_not_reg(src2, GPR, SrcType::F16v2);
++    }
++
++    fn encode(&self, e: &mut SM50Encoder<'_>) {
++        assert!(e.sm.sm >= 53);
++        assert!(!self.f32);
++        // hfma2 doesn't have any abs flags
++        assert!(!self.srcs[0].src_mod.has_fabs());
++        assert!(!self.srcs[1].src_mod.has_fabs());
++        assert!(!self.srcs[2].src_mod.has_fabs());
++
++        // There is one fneg bit for the product
++        let fneg_fmul =
++            self.srcs[0].src_mod.has_fneg() ^ self.srcs[1].src_mod.has_fneg();
++
++        e.set_opcode(0x5d00);
++        e.set_dst(&self.dst);
++        e.set_reg_src_ref(8..16, &self.srcs[0].src_ref);
++        e.set_f16v2_swizzle(47..49, self.srcs[0].src_swizzle);
++        e.set_reg_src_ref(20..28, &self.srcs[1].src_ref);
++        e.set_f16v2_swizzle(28..30, self.srcs[1].src_swizzle);
++        e.set_reg_src_ref(39..47, &self.srcs[2].src_ref);
++        e.set_f16v2_swizzle(35..37, self.srcs[2].src_swizzle);
++        e.set_bit(31, fneg_fmul);
++        e.set_bit(30, self.srcs[2].src_mod.has_fneg());
++        e.set_bit(32, self.saturate);
++        e.set_f16v2_fmz(37..39, self.ftz, self.dnz);
++        e.set_field(49..51, 0_u8); // OFMT = F16_V2
++    }
++}
++
++impl SM50Op for OpHSet2 {
++    fn legalize(&mut self, b: &mut LegalizeBuilder) {
++        use RegFile::GPR;
++        let [src0, src1] = &mut self.srcs;
++        b.copy_alu_src_if_not_reg(src0, GPR, SrcType::F16v2);
++        b.copy_alu_src_if_not_reg(src1, GPR, SrcType::F16v2);
++    }
++
++    fn encode(&self, e: &mut SM50Encoder<'_>) {
++        assert!(e.sm.sm >= 53);
++        e.set_opcode(0x5d18);
++        e.set_dst(&self.dst);
++        e.set_f16v2_reg_srcs_ab(&self.srcs);
++        e.set_bit(43, self.srcs[0].src_mod.has_fneg());
++        e.set_bit(44, self.srcs[0].src_mod.has_fabs());
++        e.set_bit(31, self.srcs[1].src_mod.has_fneg());
++        e.set_bit(30, self.srcs[1].src_mod.has_fabs());
++        e.set_float_cmp_op(35..39, self.cmp_op);
++        e.set_pred_src(39..42, 42, &self.accum);
++        e.set_pred_set_op(45..47, self.set_op);
++        e.set_bit(49, true); // .BF: 1.0 instead of all ones
++        e.set_bit(50, self.ftz);
++    }
++}
++
++impl SM50Op for OpHSetP2 {
++    fn legalize(&mut self, b: &mut LegalizeBuilder) {
++        use RegFile::GPR;
++        let [src0, src1] = &mut self.srcs;
++        b.copy_alu_src_if_not_reg(src0, GPR, SrcType::F16v2);
++        b.copy_alu_src_if_not_reg(src1, GPR, SrcType::F16v2);
++    }
++
++    fn encode(&self, e: &mut SM50Encoder<'_>) {
++        assert!(e.sm.sm >= 53);
++        e.set_opcode(0x5d20);
++        e.set_pred_dst(3..6, &self.dsts[0]);
++        e.set_pred_dst(0..3, &self.dsts[1]);
++        e.set_f16v2_reg_srcs_ab(&self.srcs);
++        e.set_bit(43, self.srcs[0].src_mod.has_fneg());
++        e.set_bit(44, self.srcs[0].src_mod.has_fabs());
++        e.set_bit(31, self.srcs[1].src_mod.has_fneg());
++        e.set_bit(30, self.srcs[1].src_mod.has_fabs());
++        e.set_bit(6, self.ftz);
++        e.set_float_cmp_op(35..39, self.cmp_op);
++        e.set_pred_src(39..42, 42, &self.accum);
++        e.set_pred_set_op(45..47, self.set_op);
++        e.set_bit(49, self.horizontal); // .H_AND
++    }
++}
++
+ impl SM50Op for OpFSwzAdd {
+     fn legalize(&mut self, b: &mut LegalizeBuilder) {
+         use RegFile::GPR;
+@@ -3295,6 +3482,11 @@
+             Op::FSet($x) => $y,
+             Op::FSetP($x) => $y,
+             Op::FSwzAdd($x) => $y,
++            Op::HAdd2($x) => $y,
++            Op::HFma2($x) => $y,
++            Op::HMul2($x) => $y,
++            Op::HSet2($x) => $y,
++            Op::HSetP2($x) => $y,
+             Op::Rro($x) => $y,
+             Op::MuFu($x) => $y,
+             Op::Flo($x) => $y,
+diff --git a/src/nouveau/compiler/nak_nir.c b/src/nouveau/compiler/nak_nir.c
+--- a/src/nouveau/compiler/nak_nir.c
++++ b/src/nouveau/compiler/nak_nir.c
+@@ -264,11 +264,15 @@
+       case nir_op_flt:
+       case nir_op_fneu:
+       case nir_op_fmul:
+-      case nir_op_fmul_rtz:
+       case nir_op_ffma:
+-      case nir_op_ffmaz:
+       case nir_op_fsign:
+       case nir_op_fsat:
++         if (bit_size == 16 && nak_has_f16v2_alu(nak))
++            return 0;
++         break;
++
++      case nir_op_fmul_rtz:
++      case nir_op_ffmaz:
+       case nir_op_fceil:
+       case nir_op_ffloor:
+       case nir_op_fround_even:
+diff --git a/src/nouveau/compiler/nak_private.h b/src/nouveau/compiler/nak_private.h
+--- a/src/nouveau/compiler/nak_private.h
++++ b/src/nouveau/compiler/nak_private.h
+@@ -24,6 +24,15 @@
+    struct nir_shader_compiler_options nir_options;
+ };
+ 
++/* Packed f16 add, multiply, fma and compare.  SM53 (GM20B), SM60 (GP100)
++ * and SM62 (GP10B) run them at twice the f32 rate, SM61 at 1/64th.
++ */
++static inline bool
++nak_has_f16v2_alu(const struct nak_compiler *nak)
++{
++   return nak->sm >= 70 || nak->sm == 53 || nak->sm == 60 || nak->sm == 62;
++}
++
+ enum ENUM_PACKED nak_attr {
+    /* System values A */
+    NAK_ATTR_TESS_LOD_LEFT     = 0x000,

@@ -1,0 +1,79 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Date: Tue, 20 Oct 2026 22:30:00 +0200
+Subject: [PATCH] nak: Skip CRS ops for uniform control flow on SM20-SM62
+
+SSY/SYNC and PBK/PCNT/BRK/CONT are only needed where threads can diverge.
+Uniform ifs and loops without divergent breaks or continues now use plain
+branches.  On GM20B this takes a 16-FFMA loop from 31 to 21 issue slots
+per iteration.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+diff --git a/src/nouveau/compiler/nak/from_nir.rs b/src/nouveau/compiler/nak/from_nir.rs
+--- a/src/nouveau/compiler/nak/from_nir.rs
++++ b/src/nouveau/compiler/nak/from_nir.rs
+@@ -315,6 +315,19 @@
+     Cont,
+ }
+ 
++/// Whether an if needs SSY/SYNC on SM20-SM62.  When every active thread
++/// takes the same side, nothing needs to reconverge.
++fn if_needs_crs(ni: &nir_if) -> bool {
++    ni.condition.as_def().divergent
++}
++
++/// Whether a loop needs PBK/PCNT on SM20-SM62.  Without divergent breaks or
++/// continues, the active threads leave and repeat the loop together and plain
++/// branches are enough.
++fn loop_needs_crs(nl: &nir_loop) -> bool {
++    nl.divergent_break || nl.divergent_continue
++}
++
+ struct ShaderFromNir<'a> {
+     nir: &'a nir_shader,
+     sm: &'a ShaderModelInfo,
+@@ -4213,7 +4226,7 @@
+ 
+         if self.sm.sm() < 70
+             && nb.cf_node.prev().is_none()
+-            && nb.parent().as_loop().is_some()
++            && nb.parent().as_loop().is_some_and(loop_needs_crs)
+         {
+             b.push_op(OpPCnt {
+                 target: self.get_block_label(nb),
+@@ -4272,13 +4285,15 @@
+         }
+ 
+         if self.sm.sm() < 70 {
+-            if let Some(ni) = nb.following_if() {
++            if let Some(ni) = nb.following_if().filter(|ni| if_needs_crs(ni)) {
+                 let fb = ni.following_block();
+                 b.push_op(OpSSy {
+                     target: self.get_block_label(fb),
+                 });
+                 self.push_crs(fb, SyncType::Sync);
+-            } else if let Some(nl) = nb.following_loop() {
++            } else if let Some(nl) =
++                nb.following_loop().filter(|nl| loop_needs_crs(nl))
++            {
+                 let fb = nl.following_block();
+                 b.push_op(OpPBk {
+                     target: self.get_block_label(fb),
+@@ -4403,7 +4418,7 @@
+         self.parse_cf_list(ssa_alloc, phi_map, ni.iter_then_list());
+         self.parse_cf_list(ssa_alloc, phi_map, ni.iter_else_list());
+ 
+-        if self.sm.sm() < 70 {
++        if self.sm.sm() < 70 && if_needs_crs(ni) {
+             let next_block = ni.cf_node.next().unwrap().as_block().unwrap();
+             self.pop_crs(next_block, SyncType::Sync);
+         }
+@@ -4417,7 +4432,7 @@
+     ) {
+         self.parse_cf_list(ssa_alloc, phi_map, nl.iter_body());
+ 
+-        if self.sm.sm() < 70 {
++        if self.sm.sm() < 70 && loop_needs_crs(nl) {
+             let header = nl.iter_body().next().unwrap().as_block().unwrap();
+             self.pop_crs(header, SyncType::Cont);
+             let next_block = nl.cf_node.next().unwrap().as_block().unwrap();

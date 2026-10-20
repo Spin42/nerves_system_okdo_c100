@@ -1,0 +1,126 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Date: Tue, 20 Oct 2026 22:30:00 +0200
+Subject: [PATCH] nak: Spread FP32 ALU operands over GPR banks on SM50-SM62
+
+Maxwell and Pascal have four GPR banks and stall when one instruction
+reads two operands from the same bank.  When RA falls back to the lowest
+free register, prefer a bank not used by the values read together with
+the new one.  vkpeak fp32-vec4 on GM20B goes from 144 to 216 GFLOPS.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+diff --git a/src/nouveau/compiler/nak/assign_regs.rs b/src/nouveau/compiler/nak/assign_regs.rs
+--- a/src/nouveau/compiler/nak/assign_regs.rs
++++ b/src/nouveau/compiler/nak/assign_regs.rs
+@@ -163,13 +163,19 @@
+ ///     Proceedings of the 14th International Conference on Compilers,
+ ///     Architectures and Synthesis for Embedded Systems (CASES), Taipei,
+ ///     Taiwan, 2011, pp. 45-54, doi: 10.1145/2038698.2038708.
++///
++/// With `bank_aware`, it also records which GPR values are read by the same
++/// FP32 ALU instruction, so that allocation can put them in different
++/// register banks (SM50-SM62 have 4 banks, reg % 4, and same-bank operands of
++/// one instruction cost extra issue cycles).
+ struct PhiWebs {
+     uf: UnionFind<SSAValue, FxBuildHasher>,
+     assignments: FxHashMap<SSAValue, u32>,
++    co_reads: FxHashMap<SSAValue, Vec<SSAValue>>,
+ }
+ 
+ impl PhiWebs {
+-    pub fn new(f: &Function) -> Self {
++    pub fn new(f: &Function, bank_aware: bool) -> Self {
+         let mut uf = UnionFind::new();
+ 
+         // Populate uf with phi equivalence classes
+@@ -205,10 +211,57 @@
+             }
+         }
+ 
++        let mut co_reads: FxHashMap<SSAValue, Vec<SSAValue>> =
++            Default::default();
++        if bank_aware {
++            for b in f.blocks.iter() {
++                for instr in &b.instrs {
++                    let srcs: &[Src] = match &instr.op {
++                        Op::FFma(op) => &op.srcs,
++                        Op::FAdd(op) => &op.srcs,
++                        Op::FMul(op) => &op.srcs,
++                        _ => continue,
++                    };
++                    let vals: Vec<SSAValue> = srcs
++                        .iter()
++                        .filter_map(src_ssa_ref)
++                        .filter(|ssa| ssa.len() == 1)
++                        .map(|ssa| ssa[0])
++                        .filter(|ssa| ssa.file() == RegFile::GPR)
++                        .collect();
++                    for (i, a) in vals.iter().enumerate() {
++                        for (j, b) in vals.iter().enumerate() {
++                            if i != j && a != b {
++                                co_reads.entry(uf.find(*a)).or_default().push(*b);
++                            }
++                        }
++                    }
++                }
++            }
++        }
++
+         PhiWebs {
+             uf,
+             assignments: Default::default(),
++            co_reads,
++        }
++    }
++
++    /// Mask of the GPR banks already used by values read together with
++    /// `ssa`, as far as they have registers.
++    pub fn co_read_banks(&mut self, ssa: SSAValue, ra: &RegAllocator) -> u8 {
++        let web = self.uf.find(ssa);
++        let Some(partners) = self.co_reads.get(&web) else {
++            return 0;
++        };
++        let partners = partners.clone();
++        let mut banks = 0_u8;
++        for p in partners {
++            if let Some(reg) = ra.try_get_reg(p).or_else(|| self.get(p)) {
++                banks |= 1 << (reg % 4);
++            }
+         }
++        banks
+     }
+ 
+     pub fn get(&mut self, ssa: SSAValue) -> Option<u32> {
+@@ -473,6 +526,22 @@
+             }
+         }
+ 
++        if self.file == RegFile::GPR {
++            let avoid = phi_webs.co_read_banks(ssa, self);
++            if avoid != 0 && avoid != 0xf {
++                let reg = (0..4_u8)
++                    .filter(|bank| avoid & (1 << bank) == 0)
++                    .filter_map(|bank| {
++                        self.try_find_unused_reg_range(0, 1, 4, bank)
++                    })
++                    .min();
++                if let Some(reg) = reg {
++                    self.assign_reg(ssa, reg);
++                    return reg;
++                }
++            }
++        }
++
+         let reg = self
+             .try_find_unused_reg_range(0, 1, 1, 0)
+             .expect("Failed to find free register");
+@@ -1521,7 +1590,8 @@
+             }
+         });
+ 
+-        let mut phi_webs = PhiWebs::new(f);
++        let mut phi_webs =
++            PhiWebs::new(f, self.sm.sm() >= 50 && self.sm.sm() < 70);
+ 
+         let mut blocks: Vec<AssignRegsBlock> = Vec::new();
+         for b_idx in 0..f.blocks.len() {
