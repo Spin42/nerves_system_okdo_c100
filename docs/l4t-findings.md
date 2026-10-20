@@ -45,6 +45,18 @@ on 2026-10-20. Raw data is in `docs/l4t-reference/` (collected with
 6. With `c100-bootupd`'s EMC overlay missing, the 4.9 kernel hangs at
    boot; the overlay replaces cboot's EMC node with tables for the
    PCN211181 DRAM.
+7. **With that overlay, L4T never leaves 204 MHz.** The bandwidth manager
+   requests 1600 MHz (`tegra_bwmgr/emc_min_rate` 1600000000, CPU and
+   display floors at 1600 MHz) but `emc_rate` stays at 204000000 and
+   `tegra_emc/stats` shows no time at 1600 MHz and no transitions, even
+   with `jetson_clocks`. The DRAM is the Micron part (MR5 = 0xFF), i.e.
+   the PCN211181 module. Likely cause: OKdo's U-Boot deletes cboot's EMC
+   node, which carries the tables cboot has just trained, and the
+   overlay's untrained tables (`13_1600000_12_V9.8.7_V1.6`, rev 7) do not
+   switch. Memory bandwidth is then about 1/8 of 25.6 GB/s.
+   Check the EMC rate on mainline (`/sys/kernel/debug/clk/emc/clk_rate`)
+   before trusting any memory-bound benchmark; for 1600 MHz, mainline
+   needs cboot's trained tables, not the overlay's.
 
 ### Mesa (Vulkan targets for NVK)
 
@@ -55,6 +67,22 @@ on 2026-10-20. Raw data is in `docs/l4t-reference/` (collected with
    fp16 round-to-nearest-even. Limits: 48 KiB compute shared memory, 1536
    invocations per workgroup, 3.86 GiB + 400 MiB heaps. NVK on sm_53 does
    not expose `shaderFloat16`; that is the main gap.
+
+### Measured with NVIDIA's Vulkan driver (vkpeak, GPU at 921.6 MHz)
+
+| | Measured | Theoretical |
+|---|---|---|
+| fp32 | 227 GFLOPS | 236 |
+| fp16 scalar | 428 GFLOPS | 472 |
+| fp16 vec4 | 329 GFLOPS | |
+| int32, int16 | 77 GIOPS | |
+| fp64 | 7.3 GFLOPS | |
+| int8 dot product, matrix ops | 0 | no hardware |
+
+Board power under this load: about 7.0 W at the 5 V input, 4.7 W on the
+GPU rail, GPU at 51.5 °C. Default and pinned clocks give the same results.
+vkpeak's copy rates (1.2 GB/s) are not a bandwidth measurement, and the
+DRAM was at 204 MHz (item 7). Raw output in `l4t-reference/vkpeak/`.
 
 ### Reference values
 
