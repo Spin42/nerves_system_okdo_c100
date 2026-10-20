@@ -58,9 +58,45 @@ on 2026-10-20. Raw data is in `docs/l4t-reference/` (collected with
    before trusting any memory-bound benchmark; for 1600 MHz, mainline
    needs cboot's trained tables, not the overlay's.
 
+8. **Mainline also runs the DRAM at 204 MHz** (`clk/emc/clk_rate`
+   204000000 with `pll_m`/`pll_mb` at 1600 MHz): cboot leaves it there and
+   `tegra210-emc` fails with `failed to get nominal EMC table: -19`. Memory
+   bandwidth is about 1/8 of what the board can do. This is the single
+   biggest performance issue.
+9. **cboot already provides the trained tables in mainline's format.**
+   cboot's kernel DT (`l4t-reference/cboot/cboot-kernel.dts`, saved at
+   OKdo's U-Boot prompt from `fdt_addr` = 0x83100000) has
+   `reserved-memory/emc-table@83400000` ("nominal") and
+   `emc-table@83410000` ("derated"), each 64 KiB,
+   `compatible = "nvidia,tegra210-emc-table"`, referenced from the EMC
+   node as `memory-region-names = "nominal", "derated"`.
+   - Each holds two entries, 204 MHz (pllp_out0) and 1600 MHz (pllm_ud),
+     revision 7, stride 0x1340.
+   - Mainline's `struct tegra210_emc_timing` is 0x1340 bytes with `rate`
+     at 0x40 and `clock_src` at 0x4c: the same layout. Mainline counts
+     entries until `revision == 0`.
+   - The 128 KiB region was byte-identical at OKdo's U-Boot prompt and at
+     ours after loading the kernel and DTB (dump in
+     `l4t-reference/cboot/emc-tables-0x83400000.bin`), and at the same
+     address on two boots.
+   - Fix: declare both regions in our DTS (`reserved-memory`, same
+     addresses, `nvidia,tegra210-emc-table`) and add `memory-region` and
+     `memory-region-names` to `external-memory-controller@7001b000`.
+     Move `ramdisk_addr_r` (0x83400000 in `uboot/uboot.env`) out of the
+     way. Then something has to request 1600 MHz: check
+     `tegra210-emc` debugfs, or carry the EMC interconnect series.
+
+### CPU
+
+10. Mainline (`cpufreq-dt`) offers up to 1555.5 MHz; NVIDIA caps the
+    Nano at 1479 MHz (DFLL, 1092 mV thermal cap). Cap at 1479 MHz.
+    Mainline GPU voltages are 8–18 mV above NVIDIA's for the same clock
+    (`l4t-reference/mainline-gpu-vf-table.txt`), and 998.4 MHz needs
+    1100 mV, above the 1068 mV nominal maximum.
+
 ### Mesa (Vulkan targets for NVK)
 
-7. NVIDIA's driver (Vulkan 1.2.131) enables on this GPU:
+11. NVIDIA's driver (Vulkan 1.2.131) enables on this GPU:
    `shaderFloat16 = 1`, `shaderInt8 = 1`, 8/16-bit storage, subgroup size
    32 with basic, vote, arithmetic, ballot, shuffle, shuffle_relative,
    clustered, quad and partitioned (NV) operations in compute,
