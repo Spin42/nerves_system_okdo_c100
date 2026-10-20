@@ -25,6 +25,83 @@
 		mmc1 = "/mmc@700b0400";
 	};
 
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		/*
+		 * cboot trains the DRAM at every boot and leaves the resulting
+		 * timing tables (204 and 1600 MHz) at these fixed addresses.
+		 */
+		emc_table_nominal: emc-table@83400000 {
+			compatible = "nvidia,tegra210-emc-table";
+			reg = <0x0 0x83400000 0x0 0x10000>;
+		};
+
+		emc_table_derated: emc-table@83410000 {
+			compatible = "nvidia,tegra210-emc-table";
+			reg = <0x0 0x83410000 0x0 0x10000>;
+		};
+	};
+
+	host1x@50000000 {
+		i2c@546c0000 {
+			power-sensor@40 {
+				compatible = "ti,ina3221";
+				reg = <0x40>;
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				input@0 {
+					reg = <0x0>;
+					label = "POM_5V_IN";
+					shunt-resistor-micro-ohms = <5000>;
+				};
+
+				input@1 {
+					reg = <0x1>;
+					label = "POM_5V_GPU";
+					shunt-resistor-micro-ohms = <5000>;
+				};
+
+				input@2 {
+					reg = <0x2>;
+					label = "POM_5V_CPU";
+					shunt-resistor-micro-ohms = <5000>;
+				};
+			};
+		};
+	};
+
+	external-memory-controller@7001b000 {
+		memory-region = <&emc_table_nominal>, <&emc_table_derated>;
+		memory-region-names = "nominal", "derated";
+	};
+
+	thermal-sensor@700e2000 {
+		/* Over-current inputs as L4T configures them; both are active low */
+		throttle-cfgs {
+			oc1 {
+				nvidia,priority = <50>;
+				nvidia,cpu-throt-percent = <75>;
+				nvidia,gpu-throt-level = <TEGRA_SOCTHERM_THROT_LEVEL_HIGH>;
+				nvidia,count-threshold = <1>;
+				nvidia,alarm-filter = <5100000>;
+				nvidia,polarity-active-low;
+			};
+
+			oc3 {
+				nvidia,priority = <40>;
+				nvidia,cpu-throt-percent = <75>;
+				nvidia,gpu-throt-level = <TEGRA_SOCTHERM_THROT_LEVEL_MED>;
+				nvidia,count-threshold = <15>;
+				nvidia,alarm-filter = <5100000>;
+				nvidia,polarity-active-low;
+			};
+		};
+	};
+
 	/* L4T drives these high on this board; mainline does not use them */
 	gpio@6000d000 {
 		l4t-default-high-px3-hog {

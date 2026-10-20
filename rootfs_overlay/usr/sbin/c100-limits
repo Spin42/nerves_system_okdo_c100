@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# Keep the CPU and GPU within the clock limits NVIDIA validates for the
+# Jetson Nano module. Mainline offers one step more on each (1555.5 MHz CPU,
+# 998.4 MHz GPU); the GPU step needs about 1100 mV, above the 1068 mV
+# nominal maximum. Run by erlinit before Erlang starts.
+
+#
+# The DRAM runs at the 1600 MHz rate cboot trains at every boot. Nothing
+# scales the EMC clock on demand, and 204 MHz cuts memory bandwidth by
+# about 4x for roughly 0.7 W less at idle.
+
+CPU_MAX_KHZ=1479000
+GPU_MAX_HZ=921600000
+GPU_DEVFREQ=/sys/class/devfreq/57000000.gpu
+EMC_HZ=1600000000
+EMC_DEBUGFS=/sys/kernel/debug/emc
+
+for policy in /sys/devices/system/cpu/cpufreq/policy*; do
+	[ -w "$policy/scaling_max_freq" ] && echo $CPU_MAX_KHZ > "$policy/scaling_max_freq"
+done
+
+[ -d $EMC_DEBUGFS ] || mount -t debugfs debugfs /sys/kernel/debug
+grep -qw $EMC_HZ $EMC_DEBUGFS/available_rates 2>/dev/null &&
+	echo $EMC_HZ > $EMC_DEBUGFS/min_rate
+
+# nouveau is a module and loads after Erlang starts
+(
+	i=0
+	while [ $i -lt 120 ] && [ ! -w $GPU_DEVFREQ/max_freq ]; do
+		sleep 1
+		i=$((i + 1))
+	done
+	[ -w $GPU_DEVFREQ/max_freq ] && echo $GPU_MAX_HZ > $GPU_DEVFREQ/max_freq
+) &
+
+exit 0
