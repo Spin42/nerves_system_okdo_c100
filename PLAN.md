@@ -15,7 +15,7 @@ Constraints:
 
 ---
 
-## 0. Bring-up status (2026-10-18, on hardware)
+## 0. Bring-up status (2026-10-20, on hardware)
 
 Working on the C100 from a microSD card (`mix burn`), booted by OKdo's
 L4T U-Boot chain-loading our mainline U-Boot (`boot.scr`):
@@ -27,21 +27,17 @@ L4T U-Boot chain-loading our mainline U-Boot (`boot.scr`):
 - Hostname `nerves-<last 4 of module serial>` from the module EEPROM.
 - HDMI: console framebuffer, hotplug and EDID. Needed the GPIOs L4T drives
   high (PMIC GPIO1 open-drain high, SoC X3 and CC7) in the board DTS.
-- GPU: nouveau binds GM20B; EGL/GLES 3.2 (Mesa 26.1.8, renderer `tegra`).
+- GPU: nouveau binds GM20B; EGL/GLES 3.2 (Mesa 26.1.8, renderer `tegra`),
+  kmscube renders on HDMI and DP; Vulkan 1.3 through NVK (see
+  `docs/nvk-findings.md`).
+- DRAM at 1600 MHz from cboot's trained EMC tables; CPU and GPU capped at
+  the module's validated maxima (`/usr/sbin/c100-limits`).
 
 Open:
 
-- kmscube segfaults on the first glClear in Mesa nouveau
-  `nvc0_validate_fb` (nvc0_state_validate.c:156/177, via st_Clear ->
-  nvc0_clear), before anything is drawn; no kernel faults. Suspect the
-  `tegra` gallium wrapper handing nouveau a framebuffer surface it cannot
-  use. Reproduce: `kmscube -D /dev/dri/card1 -c 1`. Analyse cores with
-  `scripts/dev/corepc.py` + addr2line on staging libgallium (the
-  toolchain gdb crashes on the core).
-- DisplayPort untested (does the C100 have a DP connector?).
-- EMC DVFS tables do not reach Linux: `boot.scr` passes OKdo U-Boot's
-  control DT to our U-Boot instead of cboot's, so our U-Boot cannot copy
-  carveouts ("failed to get carveout ... -9").
+- GPU golden-context init times out with the EMC at 1600 MHz;
+  `c100-limits` initialises the GPU at 204 MHz first. Root cause open.
+- NAK codegen for sm_53: fp32 at half of NVIDIA's, no fp16, slow int32.
 - U-Boot changes only ship with a fresh install (decided); the test card
   got the MAC-patched u-boot.bin by hand.
 - An unverified write of U-Boot into LNX under LineageOS's cboot
