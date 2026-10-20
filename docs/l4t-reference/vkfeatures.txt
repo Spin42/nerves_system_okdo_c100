@@ -1,0 +1,16 @@
+device: NVIDIA Tegra X1 (nvgpu)  api 1.2.131
+  shaderFloat16 = 1
+  shaderInt8 = 1
+  storageBuffer16BitAccess = 1
+  uniformAndStorageBuffer16BitAccess = 1
+  storagePushConstant16 = 1
+  storageInputOutput16 = 0
+  storageBuffer8BitAccess = 1
+  uniformAndStorageBuffer8BitAccess = 1
+  storagePushConstant8 = 1
+  subgroupSize = 32
+  subgroupOps  = basic, vote, arithmetic, ballot, shuffle, shuffle_relative, clustered, quad, partitioned_nv
+  subgroupStages = 0x3f (compute = True)
+  shaderRoundingModeRTEFloat16 = 1
+  shaderDenormPreserveFloat16 = 0
+  shaderSignedZeroInfNanPreserveFloat16 = 1

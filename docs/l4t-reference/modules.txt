@@ -1,0 +1,26 @@
+$ lsmod
+Module                  Size  Used by
+bnep                   16562  2
+zram                   25920  4
+cfg80211              589358  0
+xt_conntrack            3609  1
+ipt_MASQUERADE          2346  1
+nf_nat_masquerade_ipv4     3111  1 ipt_MASQUERADE
+nf_conntrack_netlink    29413  0
+nfnetlink               7959  2 nf_conntrack_netlink
+xt_addrtype             3734  2
+iptable_filter          2481  1
+iptable_nat             2882  1
+nf_conntrack_ipv4      11992  2
+nf_defrag_ipv4          1836  1 nf_conntrack_ipv4
+nf_nat_ipv4             6712  1 iptable_nat
+nf_nat                 20172  2 nf_nat_masquerade_ipv4,nf_nat_ipv4
+nf_conntrack           99637  6 nf_conntrack_ipv4,nf_conntrack_netlink,nf_nat_masquerade_ipv4,xt_conntrack,nf_nat_ipv4,nf_nat
+br_netfilter           16216  0
+overlay                49625  0
+fuse                  105514  3
+binfmt_misc            13103  1
+userspace_alert         5828  0
+nvgpu                1597641  37
+ip_tables              19313  2 iptable_filter,iptable_nat
+x_tables               30560  5 ip_tables,iptable_filter,ipt_MASQUERADE,xt_addrtype,xt_conntrack

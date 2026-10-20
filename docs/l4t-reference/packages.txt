@@ -1,0 +1,29 @@
+$ sh -c dpkg -l | grep -iE 'nvidia|cuda|cudnn|tensorrt|vulkan|vpi|visionworks|opencv|libnv'
+ii  libvulkan1:arm64                              1.1.70+dfsg1-1ubuntu0.18.04.1              arm64        Vulkan loader library
+ii  nvidia-l4t-3d-core                            32.7.6-20241104234540                      arm64        NVIDIA GL EGL Package
+ii  nvidia-l4t-apt-source                         32.7.6-20241104234540                      arm64        NVIDIA L4T apt source list debian package
+ii  nvidia-l4t-bootloader                         32.7.6-20241104234540                      arm64        NVIDIA Bootloader Package
+ii  nvidia-l4t-camera                             32.7.6-20241104234540                      arm64        NVIDIA Camera Package
+ii  nvidia-l4t-configs                            32.7.6-20241104234540                      arm64        NVIDIA configs debian package
+ii  nvidia-l4t-core                               32.7.6-20241104234540                      arm64        NVIDIA Core Package
+ii  nvidia-l4t-cuda                               32.7.6-20241104234540                      arm64        NVIDIA CUDA Package
+ii  nvidia-l4t-firmware                           32.7.6-20241104234540                      arm64        NVIDIA Firmware Package
+ii  nvidia-l4t-gputools                           32.7.6-20241104234540                      arm64        NVIDIA dgpu helper Package
+ii  nvidia-l4t-graphics-demos                     32.7.6-20241104234540                      arm64        NVIDIA graphics demo applications
+ii  nvidia-l4t-gstreamer                          32.7.6-20241104234540                      arm64        NVIDIA GST Application files
+ii  nvidia-l4t-init                               32.7.6-20241104234540                      arm64        NVIDIA Init debian package
+ii  nvidia-l4t-initrd                             32.7.6-20241104234540                      arm64        NVIDIA initrd debian package
+ii  nvidia-l4t-jetson-io                          32.7.6-20241104234540                      arm64        NVIDIA Jetson.IO debian package
+ii  nvidia-l4t-kernel                             4.9.337-tegra-32.7.6-20241104234540        arm64        NVIDIA Kernel Package
+ii  nvidia-l4t-kernel-dtbs                        4.9.337-tegra-32.7.6-20241104234540        arm64        NVIDIA Kernel DTB Package
+ii  nvidia-l4t-kernel-headers                     4.9.337-tegra-32.7.6-20241104234540        arm64        NVIDIA Linux Tegra Kernel Headers Package
+ii  nvidia-l4t-libvulkan                          32.7.6-20241104234540                      arm64        NVIDIA Vulkan Loader Package
+ii  nvidia-l4t-multimedia                         32.7.6-20241104234540                      arm64        NVIDIA Multimedia Package
+ii  nvidia-l4t-multimedia-utils                   32.7.6-20241104234540                      arm64        NVIDIA Multimedia Package
+ii  nvidia-l4t-oem-config                         32.7.6-20241104234540                      arm64        NVIDIA OEM-Config Package
+ii  nvidia-l4t-tools                              32.7.6-20241104234540                      arm64        NVIDIA Public Test Tools Package
+ii  nvidia-l4t-wayland                            32.7.6-20241104234540                      arm64        NVIDIA Wayland Package
+ii  nvidia-l4t-weston                             32.7.6-20241104234540                      arm64        NVIDIA Weston Package
+ii  nvidia-l4t-x11                                32.7.6-20241104234540                      arm64        NVIDIA X11 Package
+ii  nvidia-l4t-xusb-firmware                      32.7.6-20241104234540                      arm64        NVIDIA USB Firmware Package
+ii  vulkan-utils                                  1.1.70+dfsg1-1ubuntu0.18.04.1              arm64        Miscellaneous Vulkan utilities

@@ -1,0 +1,88 @@
+$ sh -c cat /sys/kernel/debug/regulator/regulator_summary 2>/dev/null || ls /sys/class/regulator
+ regulator                      use open bypass voltage current     min     max
+-------------------------------------------------------------------------------
+ regulator-dummy                  0    0      0     0mV     0mA     0mV     0mV 
+ vdd-ac-bat                       0    3      0  5000mV     0mA  5000mV  5000mV 
+    tegradc.1                                                       0mV     0mV
+    tegradc.1                                                       0mV     0mV
+    usb2-1                                                          0mV     0mV
+ vdd-5v0-sys                     13    4      0  5000mV     0mA  5000mV  5000mV 
+    vdd-5v0-hdmi                  2    2      0  5000mV     0mA  5000mV  5000mV 
+       tegradc.1                                                    0mV     0mV
+       tegradc.0                                                    0mV     0mV
+    vdd-fan                       0    1      0  5000mV     0mA  5000mV  5000mV 
+       pwm-fan                                                      0mV     0mV
+    vdd-usb-vbus                  0    1      0  5000mV     0mA  5000mV  5000mV 
+       usb2-0                                                       0mV     0mV
+    vdd-3v3-sys                   8    6      0  3300mV     0mA  3300mV  3300mV 
+       sdhci-tegra.3                                                0mV     0mV
+       700d0000.xudc                                                0mV     0mV
+       70090000.xusb                                                0mV     0mV
+       vdd-1v8-sys                1    1      0  1800mV     0mA  1800mV  1800mV 
+          vdd-usb-hub-en          0    0      0  5000mV     0mA  5000mV  5000mV 
+       vdd-usb-vbus2              0    1      0  5000mV     0mA  5000mV  5000mV 
+          usb2-2                                                    0mV     0mV
+       vdd-3v3-sd                 1    1      0  3300mV     0mA  3300mV  3300mV 
+          sdhci-tegra.2                                             0mV     0mV
+ vdd-core                         0    1      0   900mV     0mA   600mV  1162mV 
+    dvfs                                                          900mV  1162mV
+ vdd-ddr-1v1                      0    0      0  1150mV     0mA  1150mV  1150mV 
+ vdd-pre-reg-1v35                 0    0      0  1350mV     0mA  1350mV  1350mV 
+ vdd-1v8                          0   26      0  1800mV     0mA  1800mV  1800mV 
+    tegradc.1                                                       0mV     0mV
+    54080000.vi                                                     0mV     0mV
+    tegra210-i2s.3                                                  0mV     0mV
+    tegra210-i2s.2                                                  0mV     0mV
+    sdhci-tegra.3                                                1800mV  1950mV
+    700d0000.xudc                                                   0mV     0mV
+    70090000.xusb                                                   0mV     0mV
+    tegradc.0                                                       0mV     0mV
+    pmc-iopower                                                     0mV     0mV
+    pmc-iopower                                                     0mV     0mV
+    pmc-iopower                                                     0mV     0mV
+    pmc-iopower                                                     0mV     0mV
+    pmc-iopower                                                     0mV     0mV
+    pmc-iopower                                                     0mV     0mV
+    pmc-iopower                                                     0mV     0mV
+    pmc-iopower                                                     0mV     0mV
+    pmc-iopower                                                     0mV     0mV
+    pmc-iopower                                                     0mV     0mV
+    1003000.pcie                                                    0mV     0mV
+    1003000.pcie                                                    0mV     0mV
+    1003000.pcie                                                    0mV     0mV
+    7009f000.xusb_padctl                                            0mV     0mV
+    7009f000.xusb_padctl                                            0mV     0mV
+    7009f000.xusb_padctl                                            0mV     0mV
+    7009f000.xusb_padctl                                            0mV     0mV
+    546c0000.i2c                                                    0mV     0mV
+ avdd-sys-1v2                     1    1      0  1200mV     0mA  1200mV  1200mV 
+    70090000.xusb                                                   0mV     0mV
+ vdd-pex-1v0                      0    6      0  1050mV     0mA  1050mV  1050mV 
+    700d0000.xudc                                                   0mV     0mV
+    70090000.xusb                                                   0mV     0mV
+    1003000.pcie                                                    0mV     0mV
+    1003000.pcie                                                    0mV     0mV
+    7009f000.xusb_padctl                                            0mV     0mV
+    7009f000.xusb_padctl                                            0mV     0mV
+ vddio-sdmmc-ap                   0    1      0  3300mV     0mA  1800mV  3300mV 
+    pmc-iopower                                                     0mV     0mV
+ max77620-ldo3                    0    0      0  3100mV     0mA     0mV     0mV 
+ vdd-rtc                          0    0      0  1000mV     0mA   850mV  1100mV 
+ max77620-ldo5                    0    0      0  3100mV     0mA     0mV     0mV 
+ vddio-sdmmc3-ap                  1    1      0  3300mV     0mA  3300mV  3300mV 
+    sdhci-tegra.2                                                3300mV  3600mV
+ avdd-1v05-pll                    0    4      0  1050mV     0mA  1050mV  1050mV 
+    70090000.xusb                                                   0mV     0mV
+    1003000.pcie                                                    0mV     0mV
+    7009f000.xusb_padctl                                            0mV     0mV
+    avdd-io-edp-1v05              1    1      0  1050mV     0mA  1050mV  1050mV 
+       tegradc.1                                                    0mV     0mV
+ avdd-io-hdmi-dp                  0    4      0  1050mV     0mA  1050mV  1050mV 
+    70090000.xusb                                                   0mV     0mV
+    tegradc.0                                                       0mV     0mV
+    7009f000.xusb_padctl                                            0mV     0mV
+    7009f000.xusb_padctl                                            0mV     0mV
+ vdd-cpu                          0    1      0   708mV     0mA   708mV  1322mV 
+    dvfs                                                            0mV     0mV
+ vdd-gpu                          0    1      0   818mV     0mA   708mV  1323mV 
+    dvfs                                                          818mV  1300mV

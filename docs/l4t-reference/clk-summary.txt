@@ -1,0 +1,597 @@
+$ cat /sys/kernel/debug/clk/clk_summary
+   clock                                           enable_cnt  prepare_cnt        rate    req_rate   accuracy   phase
+----------------------------------------------------------------------------------------------------------------------
+ dfllCPU_out                                                1            1  1479000000  1479000000          0 0  
+ *[        default_freq                                       0]
+    cclk_g                                                  1            1  1479000000           0          0 0  
+    *[        default_freq                                       0]
+ 32khz_out0                                                 0            0       32768       32768          0 0  
+ *[        default_freq                                       0]
+ vimclk_sync                                                0            0    24576000    24576000          0 0  
+ *[        default_freq                                       0]
+ i2s4_sync                                                  0            0    24576000    24576000          0 0  
+ *[        default_freq                                       0]
+ i2s3_sync                                                  0            0    24576000    24576000          0 0  
+ *[        default_freq                                       0]
+ i2s2_sync                                                  0            0    24576000    24576000          0 0  
+ *[        default_freq                                       0]
+ i2s1_sync                                                  0            0    24576000    24576000          0 0  
+ *[        default_freq                                       0]
+ i2s0_sync                                                  0            0    24576000    24576000          0 0  
+ *[        default_freq                                       0]
+    dmic3_sync_clk_mux                                      0            0    24576000           0          0 0  
+    *[        default_freq                                       0]
+       dmic3_sync_clk                                       0            0    24576000           0          0 0  
+       *[        default_freq                                       0]
+    dmic2_sync_clk_mux                                      0            0    24576000           0          0 0  
+    *[        default_freq                                       0]
+       dmic2_sync_clk                                       0            0    24576000           0          0 0  
+       *[        default_freq                                       0]
+    dmic1_sync_clk_mux                                      0            0    24576000           0          0 0  
+    *[        default_freq                                       0]
+       dmic1_sync_clk                                       0            0    24576000           0          0 0  
+       *[        default_freq                                       0]
+ spdif_in_sync                                              0            0    24576000    24576000          0 0  
+ *[        default_freq                                       0]
+    spdif_mux                                               0            0    24576000           0          0 0  
+    *[        default_freq                                       0]
+       spdif                                                0            0    24576000           0          0 0  
+       *[        default_freq                                       0]
+          spdif_doubler                                     0            0    49152000           0          0 0  
+          *[        default_freq                                       0]
+             spdif_div                                      0            0    49152000           0          0 0  
+             *[        default_freq                                       0]
+                spdif_2x                                    0            0    49152000           0          0 0  
+                *[        default_freq                                       0]
+    audio4_mux                                              0            0    24576000           0          0 0  
+    *[        default_freq                                       0]
+       audio4                                               0            0    24576000           0          0 0  
+       *[        default_freq                                       0]
+    audio3_mux                                              0            0    24576000           0          0 0  
+    *[        default_freq                                       0]
+       audio3                                               0            0    24576000           0          0 0  
+       *[        default_freq                                       0]
+    audio2_mux                                              0            0    24576000           0          0 0  
+    *[        default_freq                                       0]
+       audio2                                               0            0    24576000           0          0 0  
+       *[        default_freq                                       0]
+    audio1_mux                                              0            0    24576000           0          0 0  
+    *[        default_freq                                       0]
+       audio1                                               0            0    24576000           0          0 0  
+       *[        default_freq                                       0]
+    audio0_mux                                              0            0    24576000           0          0 0  
+    *[        default_freq                                       0]
+       audio0                                               0            0    24576000           0          0 0  
+       *[        default_freq                                       0]
+ pd2vi                                                      0            0           0           0          0 0  
+ *[        default_freq                                       0]
+ sor1_brick                                                 0            0   297000000   297000000          0 0  
+ *[        default_freq                                       0]
+ clk_32k                                                    1            1       32768       32768          0 0  
+ *[        default_freq                                       0]
+    blink_override                                          0            0       32768       32768          0 0  
+    *[        default_freq                                       0]
+       blink                                                0            0       32768       32768          0 0  
+       *[        default_freq                                       0]
+    rtc                                                     1            1       32768       32768          0 0  
+    *[        default_freq                                       0]
+ osc                                                        4            4    38400000    38400000          0 0  
+ *[        default_freq                                       0]
+    clk_out_2_mux                                           0            0    38400000    38400000          0 0  
+    *[        default_freq                                       0]
+       clk_out_2                                            0            0    38400000    38400000          0 0  
+       *[        default_freq                                       0]
+    usb2_hsic_trk                                           1            1     9600000     9600000          0 0  
+    *[        default_freq                                       0]
+       hsic_trk                                             0            0     9600000           0          0 0  
+       *[        default_freq                                       0]
+       usb2_trk                                             1            1     9600000           0          0 0  
+       *[        default_freq                                       0]
+    xusb_gate                                               1            1    38400000    38400000          0 0  
+    *[        default_freq                                       0]
+    pll_mb                                                  0            0  1600000000  1600000000          0 0  
+    *[        default_freq                                       0]
+       pll_mb_ud                                            0            0  1600000000  1600000000          0 0  
+       *[        default_freq                                       0]
+    pll_m                                                   0            0  1600000000  1600000000          0 0  
+    *[        default_freq                                       0]
+       pll_m_ud                                             0            0  1600000000  1600000000          0 0  
+       *[        default_freq                                       0]
+    pll_ref                                                 9            9    38400000    38400000          0 0  
+    *[        default_freq                                       0]
+       pll_x                                                0            0  1017600000  1017600000          0 0  
+       *[        default_freq                                       0]
+          pll_x_out0                                        0            0   508800000   508800000          0 0  
+          *[        default_freq                                       0]
+       pll_a1                                               0            0   307200000   307200000          0 0  
+       *[        default_freq                                       0]
+          aclk                                              0            0   307200000    19200000          0 0  
+          *[        default_freq                                       0]
+             adsp_neon                                      0            0   307200000    19200000          0 0  
+             *[        default_freq                                       0]
+             adsp                                           0            0   307200000    19200000          0 0  
+             *[        default_freq                                       0]
+          abus                                              0            0   307200000   307200000          0 0  
+             override.abus                                  0            0   307200000   307200000          0 0  
+             cap.vcore.abus                                 0            0   844800000  4294967295          0 0  
+             adsp.cpu.abus                                  0            0   307200000   307200000          0 0  
+       pll_a                                                2            2   338687500   338688000          0 0  
+       *[        default_freq                                       0]
+          pll_a_out0_div                                    1            1    45158334    61440000          0 0  
+          *[        default_freq                                       0]
+             pll_a_out0                                     2            2    45158334    45158400          0 0  
+             *[        default_freq                                       0]
+                i2s4                                        0            0    45158334    11289600          0 0  
+                *[        default_freq                                       0]
+                i2s3                                        0            0     1411198     1411200          0 0  
+                *[        default_freq                                       0]
+                i2s2                                        0            0     6021112     1536000          0 0  
+                *[        default_freq                                       0]
+                i2s1                                        0            0    45158334    11289600          0 0  
+                *[        default_freq                                       0]
+                i2s0                                        0            0    45158334    11289600          0 0  
+                *[        default_freq                                       0]
+                extern1                                     2            2    11289584    11289600          0 0  
+                *[        default_freq                                       0]
+                   clk_out_1_mux                            2            2    11289584    38400000          0 0  
+                   *[        default_freq                                       0]
+                      clk_out_1                             1            1    11289584    38400000          0 0  
+                      *[        default_freq                                       0]
+                dmic1                                       0            0    11289584     3072000          0 0  
+                *[        default_freq                                       0]
+                dmic2                                       0            0    11289584     3072000          0 0  
+                *[        default_freq                                       0]
+                dmic3                                       0            0    45158334           0          0 0  
+                *[        default_freq                                       0]
+          pll_a_out_adsp                                    0            0   338687500           0          0 0  
+          *[        default_freq                                       0]
+          pll_a_out0_out_adsp                               0            0   338687500           0          0 0  
+          *[        default_freq                                       0]
+       pllg_ref                                             2            2    38400000    38400000          0 0  
+       *[        default_freq                                       0]
+          gpcclk                                            1            1    76800000    76800000          0 0  
+          *[        default_freq                                       0]
+             gbus                                           1            1    76800000    76800000          0 0  
+                floor.profile_gbus                          0            0    76800000           0          0 0  
+                floor.gbus                                  0            0    76800000           0          0 0  
+                override.gbus                               0            0    76800000           0          0 0  
+                cap.profile_gbus                            0            0  1300000000  1300000000          0 0  
+                cap.throttle_gbus                           0            0  1300000000  1300000000          0 0  
+                cap.vgpu.gbus                               0            0  1300000000  1300000000          0 0  
+                edp.gbus                                    0            0  1300000000  1300000000          0 0  
+                cap.gbus                                    0            0  1300000000  1300000000          0 0  
+                gm20b.gbus                                  1            1    76800000    76800000          0 0  
+       gpu                                                  1            1    38400000    38400000          0 0  
+       *[        default_freq                                       0]
+       pll_p                                               20           26   408000000   408000000          0 0  
+       *[        default_freq                                       0]
+          d_audio                                           0            0    81600000    81600000          0 0  
+          *[        default_freq                                       0]
+          pwm                                               2            1    48000000    48000000          0 0  
+          *[        default_freq                                       0]
+          vii2c                                             0            1    81600000    83200000          0 0  
+          *[        default_freq                                       0]
+          cilab                                             0            0   102000000   102000000          0 0  
+          *[        default_freq                                       0]
+          cilcd                                             0            0   102000000   102000000          0 0  
+          *[        default_freq                                       0]
+          cile                                              0            0   102000000   102000000          0 0  
+          *[        default_freq                                       0]
+          extern3                                           0            0    24000000    24000000          0 0  
+          *[        default_freq                                       0]
+             clk_out_3_mux                                  0            0    24000000    38400000          0 0  
+             *[        default_freq                                       0]
+                clk_out_3                                   0            0    24000000    38400000          0 0  
+                *[        default_freq                                       0]
+          clk72mhz                                          0            0    68000000    68000000          0 0  
+          *[        default_freq                                       0]
+             mipi-cal                                       0            0    68000000   408000000          0 0  
+             *[        default_freq                                       0]
+          sata_oob                                          0            0   204000000   204000000          0 0  
+          *[        default_freq                                       0]
+          sata                                              0            0   102000000   104000000          0 0  
+          *[        default_freq                                       0]
+          sbc4                                              1            1    12000000    12000000          0 0  
+          *[        default_freq                                       0]
+          dfll_ref                                          2            2    51000000    51000000          0 0  
+          *[        default_freq                                       0]
+          dfll_soc                                          2            2    51000000    51000000          0 0  
+          *[        default_freq                                       0]
+          sclk_mux                                          2            2   408000000   204000000          0 0  
+          *[        default_freq                                       0]
+             sclk                                           2            2   102000000   102000000          0 0  
+             *[        default_freq                                       0]
+                sclk_skipper                                2            2   102000000   408000000          0 0  
+                *[        default_freq                                       0]
+                   sbus                                     1            1   102000000   102000000          0 0  
+                      vcm.sclk                              0            0   102000000   204000000          0 0  
+                      cap.vcore.sclk                        0            0   408000000  4294967295          0 0  
+                      camera.sclk                           0            0   102000000   204000000          0 0  
+                      mon.avp                               0            0   102000000   204000000          0 0  
+                      wake.sclk                             0            0   102000000   204000000          0 0  
+                      bsea.sclk                             0            0   102000000   204000000          0 0  
+                      avp.sclk                              0            0   102000000   204000000          0 0  
+                      override.sclk                         0            0   102000000   204000000          0 0  
+                      floor.sclk                            0            0   102000000   204000000          0 0  
+                      cap.throttle.sclk                     0            0   408000000   408000000          0 0  
+                      cap.sclk                              0            0   408000000   408000000          0 0  
+                      ahb.sclk                              1            1   102000000    51000000          0 0  
+                         vcm.ahb.sclk                       0            0   102000000   204000000          0 0  
+                         sdmmc4.sclk                        0            0   102000000   204000000          0 0  
+                         usb2.sclk                          0            0   102000000   204000000          0 0  
+                         usb1.sclk                          0            0   102000000   204000000          0 0  
+                         usbd.sclk                          0            0   102000000   204000000          0 0  
+                         apb.sclk                           1            1    51000000    51000000          0 0  
+                            wifi.sclk                       0            0    51000000   102000000          0 0  
+                            vcm.apb.sclk                    0            0    51000000   102000000          0 0  
+                            boot.apb.sclk                   1            1    51000000    51000000          0 0  
+                            qspi.sclk                       0            0    51000000   102000000          0 0  
+                            sbc4.sclk                       0            0    51000000   102000000          0 0  
+                            sbc3.sclk                       0            0    51000000   102000000          0 0  
+                            sbc2.sclk                       0            0    51000000   102000000          0 0  
+                            sbc1.sclk                       0            0    51000000   102000000          0 0  
+                   hclk_div                                 1            1   102000000   204000000          0 0  
+                   *[        default_freq                                       0]
+                      hclk                                  1            1   102000000    24000000          0 0  
+                      *[        default_freq                                       0]
+                         pclk_div                           1            1    51000000   102000000          0 0  
+                         *[        default_freq                                       0]
+                            pclk                            2            2    51000000    12000000          0 0  
+                            *[        default_freq                                       0]
+                               cec                          1            1    51000000           0          0 0  
+                               *[        default_freq                                       0]
+          uartd                                             0            0   408000000   408000000          0 0  
+          *[        default_freq                                       0]
+          uartc                                             0            0   408000000   408000000          0 0  
+          *[        default_freq                                       0]
+          uartb                                             1            1     1858770     1861632          0 0  
+          *[        default_freq                                       0]
+          hda                                               1            1    51000000    51000000          0 0  
+          *[        default_freq                                       0]
+          hda2codec_2x                                      1            1    48000000    48000000          0 0  
+          *[        default_freq                                       0]
+          ape                                               1            1    25500000    25500000          0 0  
+          *[        default_freq                                       0]
+             ape_master                                     0            0    25500000   204000000          0 0  
+                override.ape                                0            0    25500000   204000000          0 0  
+                xbar.ape                                    0            0    25500000   204000000          0 0  
+                adsp.ape                                    0            0    25500000   204000000          0 0  
+                adma.ape                                    0            0    25500000   204000000          0 0  
+          sdmmc2                                            0            0   204000000   204000000          0 0  
+          *[        default_freq                                       0]
+          pll_p_out_adsp                                    0            0   408000000   408000000          0 0  
+          *[        default_freq                                       0]
+          pll_p_out_cpu                                     0            0   408000000   408000000          0 0  
+          *[        default_freq                                       0]
+             pll_p_out4_div                                 0            0   102000000           0          0 0  
+             *[        default_freq                                       0]
+                pll_p_out4                                  0            0   102000000   102000000          0 0  
+                *[        default_freq                                       0]
+          dpaux1                                            0            0   408000000   408000000          0 0  
+          *[        default_freq                                       0]
+          uarta                                             1            1   408000000   408000000          0 0  
+          *[        default_freq                                       0]
+          csite                                             1            1   136000000   136000000          0 0  
+          *[        default_freq                                       0]
+          vi_sensor                                         0            0   408000000   408000000          0 0  
+          *[        default_freq                                       0]
+          soc_therm                                         1            1    51000000    51000000          0 0  
+          *[        default_freq                                       0]
+          vi_sensor2                                        0            0   408000000   408000000          0 0  
+          *[        default_freq                                       0]
+          sdmmc3                                            0            0     3175098      100000          0 0  
+          *[        default_freq                                       0]
+          sdmmc1                                            0            0   204000000   204000000          0 0  
+          *[        default_freq                                       0]
+          spdif_in                                          0            0   408000000   408000000          0 0  
+          *[        default_freq                                       0]
+          mselect                                           2            2   204000000   204000000          0 0  
+          *[        default_freq                                       0]
+             mselect_master                                 0            0   204000000   102000000          0 0  
+                override.mselect                            0            0   204000000   102000000          0 0  
+                pcie.mselect                                0            0   204000000   102000000          0 0  
+                cpu.mselect                                 0            0   204000000   102000000          0 0  
+             afi                                            1            1   204000000   102000000          0 0  
+             *[        default_freq                                       0]
+          host1x                                            2            2    81600000   136000000          0 0  
+          *[        default_freq                                       0]
+             host1x_master                                  1            1    81600000    81000000          0 0  
+                override.host1x                             0            0    81600000   163200000          0 0  
+                floor.host1x                                0            0    81600000   163200000          0 0  
+                cap.vcore.host1x                            0            0   408000000  4294967295          0 0  
+                cap.host1x                                  0            0   408000000   408000000          0 0  
+                vii2c.host1x                                0            0    81600000   163200000          0 0  
+                vi.host1x                                   0            0    81600000   163200000          0 0  
+                nv.host1x                                   1            1    81600000    81000000          0 0  
+          i2c6                                              0            1    81600000    83200000          0 0  
+          *[        default_freq                                       0]
+          i2c5                                              1            2   136000000   136000000          0 0  
+          *[        default_freq                                       0]
+          i2c4                                              0            1    20400000    20800000          0 0  
+          *[        default_freq                                       0]
+          i2c3                                              0            1    81600000    83200000          0 0  
+          *[        default_freq                                       0]
+          i2c2                                              0            1    20400000    20700000          0 0  
+          *[        default_freq                                       0]
+          i2c1                                              0            1    81600000    83200000          0 0  
+          *[        default_freq                                       0]
+          pll_p_out_hsio                                    1            1   408000000   408000000          0 0  
+          *[        default_freq                                       0]
+             pll_p_out_xusb                                 2            2   408000000   408000000          0 0  
+             *[        default_freq                                       0]
+                xusb_dev_src                                1            1   102000000   102000000          0 0  
+                *[        default_freq                                       0]
+                   xusb_dev                                 1            1   102000000    19200000          0 0  
+                   *[        default_freq                                       0]
+                xusb_host_src                               1            1   102000000   102000000          0 0  
+                *[        default_freq                                       0]
+                   xusb_host                                1            1   102000000    19200000          0 0  
+                   *[        default_freq                                       0]
+          pll_p_out5_div                                    1            1   204000000   408000000          0 0  
+          *[        default_freq                                       0]
+             pll_p_out5                                     1            1   204000000   204000000          0 0  
+             *[        default_freq                                       0]
+          pll_p_out3_div                                    0            0   102000000   408000000          0 0  
+          *[        default_freq                                       0]
+             pll_p_out3                                     0            0   102000000   102000000          0 0  
+             *[        default_freq                                       0]
+                csi                                         0            0   102000000   408000000          0 0  
+                *[        default_freq                                       0]
+                sdmmc_legacy                                0            0    12000000    12000000          0 0  
+                *[        default_freq                                       0]
+          pll_p_out1_div                                    0            0   408000000   408000000          0 0  
+          *[        default_freq                                       0]
+             pll_p_out1                                     0            0   408000000   408000000          0 0  
+             *[        default_freq                                       0]
+          pll_p_out2                                        0            0   204000000           0          0 0  
+          *[        default_freq                                       0]
+          pll_p_ud                                          0            0   408000000           0          0 0  
+          *[        default_freq                                       0]
+          sor_safe                                          1            1    24000000           0          0 0  
+          *[        default_freq                                       0]
+             sor1                                           0            0    24000000           0          0 0  
+             *[        default_freq                                       0]
+          emc                                               3            3   204000000  1600000000          0 0  
+             emc_master                                     1            1   204000000  1600000000          0 0  
+                bwmgr.emc                                   1            1   204000000  1600000000          0 0  
+                override.emc                                0            0   204000000   204000000          0 0  
+             mc                                             4            4    51000000           0          0 0  
+             *[        default_freq                                       0]
+                mc_cdpa                                     1            1    51000000    51000000          0 0  
+                *[        default_freq                                       0]
+                mc_ccpa                                     1            1    51000000    51000000          0 0  
+                *[        default_freq                                       0]
+                mc_cbpa                                     1            1    51000000    51000000          0 0  
+                *[        default_freq                                       0]
+                mc_capa                                     1            1    51000000    51000000          0 0  
+                *[        default_freq                                       0]
+       pll_d2                                               0            0   297000000   148350781          0 0  
+       *[        default_freq                                       0]
+          pll_d2_out0                                       0            0   297000000   297000000          0 0  
+          *[        default_freq                                       0]
+             disp1                                          0            0   297000000   148350781          0 0  
+             *[        default_freq                                       0]
+             sor1_mux                                       0            0   297000000   148350781          0 0  
+             *[        default_freq                                       0]
+       pll_dp                                               2            2   270000000   270000000          0 0  
+       *[        default_freq                                       0]
+          sor0                                              1            1   270000000           0          0 0  
+          *[        default_freq                                       0]
+       pll_c4_vco                                           0            0   998400000   998400000          0 0  
+       *[        default_freq                                       0]
+          pll_c4_out2                                       0            0   199680000   134400000          0 0  
+          *[        default_freq                                       0]
+             sdmmc4                                         0            0   199680000   200000000          0 0  
+             *[        default_freq                                       0]
+          pll_c4_out1                                       0            0   332800000   224000000          0 0  
+          *[        default_freq                                       0]
+          pll_c4_out0                                       0            0   998400000           0          0 0  
+          *[        default_freq                                       0]
+             pll_c4_out3_div                                0            0   998400000   672000000          0 0  
+             *[        default_freq                                       0]
+                pll_c4_out3                                 0            0   998400000   672000000          0 0  
+                *[        default_freq                                       0]
+       pll_e                                                2            2   100000000   100000000          0 0  
+       *[        default_freq                                       0]
+          cml1                                              0            0   100000000   100000000          0 0  
+          *[        default_freq                                       0]
+          cml0                                              0            0   100000000   100000000          0 0  
+          *[        default_freq                                       0]
+       pll_re_vco                                           3            3   672000000   672000000          0 0  
+       *[        default_freq                                       0]
+          pll_re_out1_div                                   0            0   672000000   624000000          0 0  
+          *[        default_freq                                       0]
+             pll_re_out1                                    0            0   672000000   624000000          0 0  
+             *[        default_freq                                       0]
+          pll_re_out                                        1            1   672000000   624000000          0 0  
+          *[        default_freq                                       0]
+             xusb_falcon_src                                1            1   336000000   336000000          0 0  
+             *[        default_freq                                       0]
+       pll_d                                                1            1   297000000   326400000          0 0  
+       *[        default_freq                                       0]
+          pll_d_out0                                        1            1   148500000   148500000          0 0  
+          *[        default_freq                                       0]
+             disp2                                          2            2   148500000    19200000          0 0  
+             *[        default_freq                                       0]
+             pll_d_dsi_out                                  0            0   148500000   163200000          0 0  
+             *[        default_freq                                       0]
+                dsib                                        0            0   148500000   163200000          0 0  
+                *[        default_freq                                       0]
+                dsia                                        0            0   148500000   163200000          0 0  
+                *[        default_freq                                       0]
+       pll_u_vco                                            2            2   480000000   480000000          0 0  
+       *[        default_freq                                       0]
+          pll_u_480M                                        1            1   480000000   480000000          0 0  
+          *[        default_freq                                       0]
+             xusb_ss_src                                    3            3   120000000   120000000          0 0  
+             *[        default_freq                                       0]
+                xusb_ss                                     2            2   120000000    19200000          0 0  
+                *[        default_freq                                       0]
+                xusb_ssp_src                                1            1   120000000    19200000          0 0  
+                *[        default_freq                                       0]
+                xusb_hs_src                                 2            2   120000000    19200000          0 0  
+                *[        default_freq                                       0]
+                xusb_ss_div2                                0            0    60000000           0          0 0  
+                *[        default_freq                                       0]
+          pll_u_out                                         2            2   240000000   240000000          0 0  
+          *[        default_freq                                       0]
+             pll_u_out2_div                                 1            1    60000000   240000000          0 0  
+             *[        default_freq                                       0]
+                pll_u_out2                                  1            1    60000000    60000000          0 0  
+                *[        default_freq                                       0]
+                   pll_u_60M                                0            0    60000000   240000000          0 0  
+                   *[        default_freq                                       0]
+             pll_u_out1_div                                 1            1    48000000   240000000          0 0  
+             *[        default_freq                                       0]
+                pll_u_out1                                  2            2    48000000    48000000          0 0  
+                *[        default_freq                                       0]
+                   pll_u_48M                                1            1    48000000   240000000          0 0  
+                   *[        default_freq                                       0]
+                      xusb_fs_src                           2            2    48000000    19200000          0 0  
+                      *[        default_freq                                       0]
+       pll_c3                                               0            0   192000000   192000000          0 0  
+       *[        default_freq                                       0]
+          nvdec                                             0            0   192000000   408000000          0 0  
+          *[        default_freq                                       0]
+          nvenc                                             0            0   192000000   408000000          0 0  
+          *[        default_freq                                       0]
+          c3bus                                             0            0   192000000           0          0 0  
+             cap.vcore.c3bus                                0            0  1200000000  4294967295          0 0  
+             floor.c3bus                                    0            0   192000000   307200000          0 0  
+             override.c3bus                                 0            0   192000000   307200000          0 0  
+             cap.throttle.c3bus                             0            0  1200000000  1200000000          0 0  
+             cap.c3bus                                      0            0  1200000000  1200000000          0 0  
+             nvdec.cbus                                     0            0   192000000           0          0 0  
+             nvenc.cbus                                     0            0   192000000  1200000000          0 0  
+       pll_c2                                               0            0   140800000   140800000          0 0  
+       *[        default_freq                                       0]
+          se                                                0            0   140800000   537600000          0 0  
+          *[        default_freq                                       0]
+          tsecb                                             0            0   140800000   140800000          0 0  
+          *[        default_freq                                       0]
+          nvjpg                                             0            0   140800000   408000000          0 0  
+          *[        default_freq                                       0]
+          vic03                                             0            0   140800000   140800000          0 0  
+          *[        default_freq                                       0]
+          c2bus                                             0            0   140800000           0          0 0  
+             vic.floor.cbus                                 0            0   140800000           0          0 0  
+             cap.vcore.c2bus                                0            0  1200000000  4294967295          0 0  
+             edp.c2bus                                      0            0  1200000000  1200000000          0 0  
+             override.c2bus                                 0            0   140800000   307200000          0 0  
+             floor.c2bus                                    0            0   140800000   307200000          0 0  
+             cap.throttle.c2bus                             0            0  1200000000  1200000000          0 0  
+             cap.c2bus                                      0            0  1200000000  1200000000          0 0  
+             tsecb.cbus                                     0            0   140800000  1200000000          0 0  
+             se.cbus                                        0            0   140800000   510000000          0 0  
+             nvjpg.cbus                                     0            0   140800000  1200000000          0 0  
+             vic03.cbus                                     0            0   140800000   140800000          0 0  
+       pll_c                                                0            0   217600000   217600000          0 0  
+       *[        default_freq                                       0]
+          isp                                               0            0   217600000   408000000          0 0  
+          *[        default_freq                                       0]
+             ispb                                           0            0   217600000    19200000          0 0  
+             *[        default_freq                                       0]
+             ispa                                           0            0   217600000    19200000          0 0  
+             *[        default_freq                                       0]
+          vi                                                0            0   217600000   408000000          0 0  
+          *[        default_freq                                       0]
+             vi_output                                      0            0   217600000           0          0 0  
+             *[        default_freq                                       0]
+          cbus                                              0            0   217600000           0          0 0  
+             override.cbus                                  0            0   217600000   307200000          0 0  
+             isp.cbus                                       0            0   217600000   307200000          0 0  
+                ispb.isp.cbus                               0            0   217600000  4294967295          0 0  
+                ispa.isp.cbus                               0            0   217600000  4294967295          0 0  
+             vi.cbus                                        0            0   217600000   307200000          0 0  
+                vi_bypass.cbus                              0            0   217600000   307200000          0 0  
+                vi_v4l2.cbus                                0            0   217600000  1200000000          0 0  
+          pll_c_ud                                          0            0   217600000   307200000          0 0  
+          *[        default_freq                                       0]
+          pll_c_out1_div                                    0            0   217600000   307200000          0 0  
+          *[        default_freq                                       0]
+             pll_c_out1                                     0            0   217600000   307200000          0 0  
+             *[        default_freq                                       0]
+    clk_m                                                  11           11    19200000    19200000          0 0  
+    *[        default_freq                                       0]
+       tsensor                                              1            1      400000      400000          0 0  
+       *[        default_freq                                       0]
+       cclk_lp                                              0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       iqc2                                                 0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       iqc1                                                 0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       apb2ape                                              0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       dpaux                                                1            1    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       pcie                                                 1            1    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       vim2_clk                                             0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       dtv                                                  0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       dp2                                                  0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       csus                                                 0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       usb2                                                 0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       usbd                                                 0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       bsev                                                 0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       hda2hdmi                                             1            1    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       kfuse                                                1            1    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       fuse_burn                                            0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       fuse                                                 5            5    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       apbdma                                               1            1    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       timer                                                3            3    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       maud                                                 0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       uartape                                              0            0     9600000     9600000          0 0  
+       *[        default_freq                                       0]
+       mipibif                                              0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       qspi                                                 0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+          qspi_out                                          0            0    19200000    19200000          0 0  
+          *[        default_freq                                       0]
+       dbgapb                                               1            1    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       entropy                                              1            1    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       extern2                                              0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       sbc3                                                 0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       sbc2                                                 0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       sbc1                                                 0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       i2cslow                                              0            0      984616      984616          0 0  
+       *[        default_freq                                       0]
+       actmon                                               2            2    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       dsiblp                                               0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       dsialp                                               0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       owr                                                  0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       la                                                   0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       spdif_out                                            0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       tsec                                                 0            0    19200000    19200000          0 0  
+       *[        default_freq                                       0]
+       clk_m_div4                                           0            0     4800000     4800000          0 0  
+       *[        default_freq                                       0]
+       clk_m_div2                                           0            0     9600000     9600000          0 0  
+       *[        default_freq                                       0]

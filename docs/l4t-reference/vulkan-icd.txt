@@ -1,0 +1,15 @@
+$ sh -c ls -la /etc/vulkan/icd.d /usr/share/vulkan/icd.d 2>&1; cat /etc/vulkan/icd.d/*.json /usr/share/vulkan/icd.d/*.json 2>/dev/null; command -v vulkaninfo
+ls: cannot access '/usr/share/vulkan/icd.d': No such file or directory
+/etc/vulkan/icd.d:
+total 8
+drwxr-xr-x 2 root root 4096 déc.  14  2025 .
+drwxr-xr-x 3 root root 4096 déc.  14  2025 ..
+lrwxrwxrwx 1 root root   48 nov.   5  2024 nvidia_icd.json -> /usr/lib/aarch64-linux-gnu/tegra/nvidia_icd.json
+{
+    "file_format_version" : "1.0.0",
+    "ICD": {
+        "library_path": "libGLX_nvidia.so.0",
+        "api_version" : "1.2.131"
+    }
+}
+/usr/bin/vulkaninfo

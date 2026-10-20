@@ -1,0 +1,38 @@
+$ sh -c for f in /sys/devices/57000000.gpu/*; do [ -f "$f" ] && [ -r "$f" ] && echo "$f: $(head -c 400 "$f" 2>&1 | tr "\n" " ")"; done
+/sys/devices/57000000.gpu/aelpg_enable: 1 
+/sys/devices/57000000.gpu/aelpg_param: 1000000 100 10000 2000 200 
+/sys/devices/57000000.gpu/allow_all: 0 
+/sys/devices/57000000.gpu/blcg_enable: 1 
+/sys/devices/57000000.gpu/comptag_mem_deduct: 0 
+/sys/devices/57000000.gpu/counters: 812902 102818632 
+/sys/devices/57000000.gpu/counters_reset: 812902 103718383 
+/sys/devices/57000000.gpu/czf_bypass: 0 
+/sys/devices/57000000.gpu/driver_override: (null) 
+/sys/devices/57000000.gpu/elcg_enable: 1 
+/sys/devices/57000000.gpu/elpg_enable: 1 
+/sys/devices/57000000.gpu/emc3d_ratio: 750 
+/sys/devices/57000000.gpu/enable_3d_scaling: 1 
+/sys/devices/57000000.gpu/fmax_at_vmin_safe: 460800000 
+/sys/devices/57000000.gpu/force_idle: 0 
+/sys/devices/57000000.gpu/freq_request: 921600000 
+/sys/devices/57000000.gpu/gfxp_wfi_timeout_count: 0 
+/sys/devices/57000000.gpu/gfxp_wfi_timeout_unit: sysclk 
+/sys/devices/57000000.gpu/gpu_powered_on: 1 
+/sys/devices/57000000.gpu/is_railgated: no 
+/sys/devices/57000000.gpu/ldiv_slowdown_factor: 0 
+/sys/devices/57000000.gpu/load: 0 
+/sys/devices/57000000.gpu/max_timeslice_us: 50000 
+/sys/devices/57000000.gpu/min_timeslice_us: 1000 
+/sys/devices/57000000.gpu/modalias: of:NgpuT<NULL>Cnvidia,tegra210-gm20bCnvidia,gm20b
+/sys/devices/57000000.gpu/mscg_enable: 0 
+/sys/devices/57000000.gpu/pd_max_batches: 0 
+/sys/devices/57000000.gpu/ptimer_ref_freq: 31250000 
+/sys/devices/57000000.gpu/ptimer_scale_factor: 1.644736 
+/sys/devices/57000000.gpu/ptimer_src_freq: 19200000 
+/sys/devices/57000000.gpu/railgate_delay: 500 
+/sys/devices/57000000.gpu/railgate_enable: 1 
+/sys/devices/57000000.gpu/slcg_enable: 1 
+/sys/devices/57000000.gpu/tpc_fs_mask: 0x1 
+/sys/devices/57000000.gpu/tpc_pg_mask: 0 
+/sys/devices/57000000.gpu/uevent: DRIVER=gk20a OF_NAME=gpu OF_FULLNAME=/gpu OF_COMPATIBLE_0=nvidia,tegra210-gm20b OF_COMPATIBLE_1=nvidia,gm20b OF_COMPATIBLE_N=2 MODALIAS=of:NgpuT<NULL>Cnvidia,tegra210-gm20bCnvidia,gm20b 
+/sys/devices/57000000.gpu/user: 0 

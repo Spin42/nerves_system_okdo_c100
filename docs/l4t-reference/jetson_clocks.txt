@@ -1,0 +1,11 @@
+$ jetson_clocks --show
+SOC family:tegra210  Machine:NVIDIA Jetson Nano Developer Kit
+Online CPUs: 0-3
+cpu0: Online=1 Governor=schedutil MinFreq=102000 MaxFreq=1479000 CurrentFreq=1224000 IdleStates: WFI=1 c7=1 
+cpu1: Online=1 Governor=schedutil MinFreq=102000 MaxFreq=1479000 CurrentFreq=1479000 IdleStates: WFI=1 c7=1 
+cpu2: Online=1 Governor=schedutil MinFreq=102000 MaxFreq=1479000 CurrentFreq=1036800 IdleStates: WFI=1 c7=1 
+cpu3: Online=1 Governor=schedutil MinFreq=102000 MaxFreq=1479000 CurrentFreq=1326000 IdleStates: WFI=1 c7=1 
+GPU MinFreq=76800000 MaxFreq=921600000 CurrentFreq=76800000
+EMC MinFreq=1600000000 MaxFreq=1600000000 CurrentFreq=204000000 FreqOverride=0
+Fan: PWM=0
+NV Power Mode: MAXN
