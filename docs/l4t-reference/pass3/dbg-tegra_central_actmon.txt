@@ -1,0 +1,30 @@
+== /sys/kernel/debug/tegra_central_actmon/mc_all/actv_type
+Frequency Activity Monitor
+
+== /sys/kernel/debug/tegra_central_actmon/mc_all/boost_rate_dec
+50
+
+== /sys/kernel/debug/tegra_central_actmon/mc_all/boost_rate_inc
+200
+
+== /sys/kernel/debug/tegra_central_actmon/mc_all/boost_step
+1
+
+== /sys/kernel/debug/tegra_central_actmon/mc_all/boost_threshold_dn
+40
+
+== /sys/kernel/debug/tegra_central_actmon/mc_all/boost_threshold_up
+60
+
+== /sys/kernel/debug/tegra_central_actmon/mc_all/down_wmark
+3
+
+== /sys/kernel/debug/tegra_central_actmon/mc_all/state
+1
+
+== /sys/kernel/debug/tegra_central_actmon/mc_all/up_wmark
+1
+
+== /sys/kernel/debug/tegra_central_actmon/period
+20
+

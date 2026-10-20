@@ -1,0 +1,18 @@
+== /sys/kernel/debug/57000000.gpu_scaling/bias
+80
+
+== /sys/kernel/debug/57000000.gpu_scaling/block_window
+50000
+
+== /sys/kernel/debug/57000000.gpu_scaling/damp
+7
+
+== /sys/kernel/debug/57000000.gpu_scaling/load_max
+900
+
+== /sys/kernel/debug/57000000.gpu_scaling/load_target
+700
+
+== /sys/kernel/debug/57000000.gpu_scaling/smooth
+10
+

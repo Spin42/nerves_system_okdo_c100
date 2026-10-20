@@ -1,0 +1,74 @@
+== /sys/kernel/debug/tegra_sor0/crc
+NV_SOR[0]_CRCB = 0x00000000
+
+== /sys/kernel/debug/tegra_sor0/hw_index
+Hardware index: 0
+
+== /sys/kernel/debug/tegra_sor0/regs
+NV_SOR_SUPER_STATE0               001  00000000
+NV_SOR_SUPER_STATE1               002  0000000e
+NV_SOR_STATE0                     003  00000000
+NV_SOR_STATE1                     004  000a0842
+nv_sor_head_state0(0)             005  00000000
+nv_sor_head_state0(1)             006  0000000c
+nv_sor_head_state1(0)             007  01011000
+nv_sor_head_state1(1)             008  04650898
+nv_sor_head_state2(0)             009  00000001
+nv_sor_head_state2(1)             00a  0004002b
+nv_sor_head_state3(0)             00b  00010011
+nv_sor_head_state3(1)             00c  002800bf
+nv_sor_head_state4(0)             00d  00110100
+nv_sor_head_state4(1)             00e  0460083f
+nv_sor_head_state5(0)             00f  00000001
+nv_sor_head_state5(1)             010  00000001
+NV_SOR_CRC_CNTRL                  011  00000000
+NV_SOR_CLK_CNTRL                  013  0000002b
+NV_SOR_CAP                        014  01000003
+NV_SOR_PWR                        015  00000000
+NV_SOR_TEST                       016  00802600
+nv_sor_pll0()                     017  010003c0
+nv_sor_pll1()                     018  00400f00
+nv_sor_pll2()                     019  04020014
+nv_sor_pll3()                     01a  38002440
+NV_SOR_CSTM                       01b  0001c800
+NV_SOR_LVDS                       01c  00014800
+NV_SOR_CRCA                       01d  00000000
+NV_SOR_CRCB                       01e  00000000
+NV_SOR_SEQ_CTL                    020  00008800
+NV_SOR_LANE_SEQ_CTL               021  0010f3e8
+NV_SOR_SEQ_INST(0)                022  01008000
+NV_SOR_SEQ_INST(1)                023  01008000
+NV_SOR_SEQ_INST(2)                024  01008000
+NV_SOR_SEQ_INST(3)                025  01008000
+NV_SOR_SEQ_INST(4)                026  01008000
+NV_SOR_SEQ_INST(5)                027  01008000
+NV_SOR_SEQ_INST(6)                028  01008000
+NV_SOR_SEQ_INST(7)                029  01008000
+NV_SOR_SEQ_INST(8)                02a  01008000
+NV_SOR_PWM_DIV                    032  00000400
+NV_SOR_PWM_CTL                    033  00000400
+NV_SOR_MSCHECK                    049  80002200
+NV_SOR_XBAR_CTRL                  04a  8d111828
+NV_SOR_XBAR_POL                   04b  00000000
+NV_SOR_DP_LINKCTL(0)              04c  000f40e1
+NV_SOR_DP_LINKCTL(1)              04d  00000100
+NV_SOR_DC(0)                      04e  13131313
+NV_SOR_DC(1)                      04f  00000000
+NV_SOR_LANE_DRIVE_CURRENT(0)      04e  13131313
+NV_SOR_PR(0)                      052  00000000
+NV_SOR_LANE4_PREEMPHASIS(0)       054  00000000
+NV_SOR_POSTCURSOR(0)              056  00000000
+NV_SOR_DP_CONFIG(0)               058  940a1712
+NV_SOR_DP_CONFIG(1)               059  94000000
+NV_SOR_DP_MN(0)                   05a  00008000
+NV_SOR_DP_MN(1)                   05b  00008000
+nv_sor_dp_padctl(0)               05c  00c0200f
+nv_sor_dp_padctl(1)               05d  00000000
+NV_SOR_DP_DEBUG(0)                05e  00000000
+NV_SOR_DP_DEBUG(1)                05f  00000000
+NV_SOR_DP_SPARE(0)                060  00000005
+NV_SOR_DP_SPARE(1)                061  00000000
+NV_SOR_DP_TPG                     06d  50505050
+NV_SOR_HDMI_CTRL                  0c0  00000000
+NV_SOR_HDMI2_CTRL                 13e  00000000
+

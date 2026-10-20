@@ -1,0 +1,21 @@
+== /sys/kernel/debug/dma-vpr/cma_base
+0x00000000d7000000
+
+== /sys/kernel/debug/dma-vpr/cma_chunk_size
+0x0000000002000000
+
+== /sys/kernel/debug/dma-vpr/cma_size
+0x0000000019000000
+
+== /sys/kernel/debug/dma-vpr/curr_base
+0x00000000d7000000
+
+== /sys/kernel/debug/dma-vpr/curr_size
+0x0000000002000000
+
+== /sys/kernel/debug/dma-vpr/floor_size
+0x0000000000000000
+
+== /sys/kernel/debug/dma-vpr/num_cma_chunks
+0x0000000d
+

@@ -1,0 +1,132 @@
+== /sys/kernel/debug/tegra_host/dbg_mask
+0
+
+== /sys/kernel/debug/tegra_host/force_timeout_dump
+0
+
+== /sys/kernel/debug/tegra_host/status
+---- mlocks ----
+
+---- syncpts ----
+id 1 (disp0_a) min 464 max 464 refs 1 (previous client : )
+id 2 (disp0_b) min 2 max 2 refs 1 (previous client : )
+id 3 (disp0_c) min 2 max 2 refs 1 (previous client : )
+id 4 (disp1_a) min 535 max 536 refs 1 (previous client : )
+id 5 (disp1_b) min 4 max 4 refs 1 (previous client : )
+id 6 (disp1_c) min 4 max 4 refs 1 (previous client : )
+id 7 (54340000.vic_0) min 81864 max 81864 refs 1 (previous client : gm20b_507)
+id 8 (gm20b_507) min 11412 max 11414 refs 1 (previous client : gm20b_506)
+id 9 (gm20b_506) min 5806 max 5806 refs 1 (previous client : gm20b_505)
+id 13 (gm20b_504) min 1848 max 1854 refs 1 (previous client : )
+id 22 (gm20b_503) min 704 max 704 refs 1 (previous client : )
+id 23 (gm20b_502) min 24 max 24 refs 1 (previous client : )
+id 24 (gm20b_501) min 2 max 2 refs 1 (previous client : )
+id 25 (gm20b_500) min 2 max 2 refs 1 (previous client : )
+id 26 (vblank0) min -2 max -4 refs 1 (previous client : )
+id 27 (vblank1) min 22038 max -10 refs 1 (previous client : )
+id 28 (gm20b_499) min 6 max 6 refs 1 (previous client : )
+
+---- channels ----
+
+---- host general irq ----
+
+sync_hintmask_ext = 0xc0000000
+sync_hintmask = 0x80000000
+sync_intc0mask = 0x00000001
+sync_intmask = 0x00000011
+
+---- host syncpt irq mask ----
+
+syncpt_thresh_int_mask(0) = 0x04010001
+syncpt_thresh_int_mask(1) = 0x00100000
+syncpt_thresh_int_mask(2) = 0x00000000
+syncpt_thresh_int_mask(3) = 0x00000000
+syncpt_thresh_int_mask(4) = 0x00000000
+syncpt_thresh_int_mask(5) = 0x00000000
+syncpt_thresh_int_mask(6) = 0x00000000
+syncpt_thresh_int_mask(7) = 0x00000000
+syncpt_thresh_int_mask(8) = 0x00000000
+syncpt_thresh_int_mask(9) = 0x00000000
+syncpt_thresh_int_mask(10) = 0x00000000
+syncpt_thresh_int_mask(11) = 0x00000000
+
+---- host syncpt irq status ----
+
+syncpt_thresh_cpu0_int_status(0) = 0x00000000
+syncpt_thresh_cpu0_int_status(1) = 0x00000000
+syncpt_thresh_cpu0_int_status(2) = 0x00000000
+syncpt_thresh_cpu0_int_status(3) = 0x00000000
+syncpt_thresh_cpu0_int_status(4) = 0x00000000
+syncpt_thresh_cpu0_int_status(5) = 0x00000000
+
+---- host syncpt thresh ----
+
+syncpt_int_thresh_thresh_0(0) = 1
+syncpt_int_thresh_thresh_0(8) = 11414
+syncpt_int_thresh_thresh_0(13) = 1850
+syncpt_int_thresh_thresh_0(26) = 4294967295
+
+== /sys/kernel/debug/tegra_host/status_all
+---- mlocks ----
+
+---- syncpts ----
+id 1 (disp0_a) min 464 max 464 refs 1 (previous client : )
+id 2 (disp0_b) min 2 max 2 refs 1 (previous client : )
+id 3 (disp0_c) min 2 max 2 refs 1 (previous client : )
+id 4 (disp1_a) min 535 max 536 refs 1 (previous client : )
+id 5 (disp1_b) min 4 max 4 refs 1 (previous client : )
+id 6 (disp1_c) min 4 max 4 refs 1 (previous client : )
+id 7 (54340000.vic_0) min 81864 max 81864 refs 1 (previous client : gm20b_507)
+id 8 (gm20b_507) min 11416 max 11416 refs 1 (previous client : gm20b_506)
+id 9 (gm20b_506) min 5806 max 5806 refs 1 (previous client : gm20b_505)
+id 13 (gm20b_504) min 1848 max 1854 refs 1 (previous client : )
+id 22 (gm20b_503) min 704 max 704 refs 1 (previous client : )
+id 23 (gm20b_502) min 24 max 24 refs 1 (previous client : )
+id 24 (gm20b_501) min 2 max 2 refs 1 (previous client : )
+id 25 (gm20b_500) min 2 max 2 refs 1 (previous client : )
+id 26 (vblank0) min -2 max -4 refs 1 (previous client : )
+id 27 (vblank1) min 22039 max -10 refs 1 (previous client : )
+id 28 (gm20b_499) min 6 max 6 refs 1 (previous client : )
+
+---- channels ----
+
+---- host general irq ----
+
+sync_hintmask_ext = 0xc0000000
+sync_hintmask = 0x80000000
+sync_intc0mask = 0x00000001
+sync_intmask = 0x00000011
+
+---- host syncpt irq mask ----
+
+syncpt_thresh_int_mask(0) = 0x04000001
+syncpt_thresh_int_mask(1) = 0x00100000
+syncpt_thresh_int_mask(2) = 0x00000000
+syncpt_thresh_int_mask(3) = 0x00000000
+syncpt_thresh_int_mask(4) = 0x00000000
+syncpt_thresh_int_mask(5) = 0x00000000
+syncpt_thresh_int_mask(6) = 0x00000000
+syncpt_thresh_int_mask(7) = 0x00000000
+syncpt_thresh_int_mask(8) = 0x00000000
+syncpt_thresh_int_mask(9) = 0x00000000
+syncpt_thresh_int_mask(10) = 0x00000000
+syncpt_thresh_int_mask(11) = 0x00000000
+
+---- host syncpt irq status ----
+
+syncpt_thresh_cpu0_int_status(0) = 0x00000000
+syncpt_thresh_cpu0_int_status(1) = 0x00000000
+syncpt_thresh_cpu0_int_status(2) = 0x00000000
+syncpt_thresh_cpu0_int_status(3) = 0x00000000
+syncpt_thresh_cpu0_int_status(4) = 0x00000000
+syncpt_thresh_cpu0_int_status(5) = 0x00000000
+
+---- host syncpt thresh ----
+
+syncpt_int_thresh_thresh_0(0) = 1
+syncpt_int_thresh_thresh_0(13) = 1850
+syncpt_int_thresh_thresh_0(26) = 4294967295
+
+== /sys/kernel/debug/tegra_host/timeout_default_ms
+10000
+

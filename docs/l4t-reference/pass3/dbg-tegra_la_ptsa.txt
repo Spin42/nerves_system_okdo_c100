@@ -1,0 +1,30 @@
+== /sys/kernel/debug/tegra_la_ptsa/camera/bw_mbps
+0
+
+== /sys/kernel/debug/tegra_la_ptsa/camera/is_hiso
+0
+
+== /sys/kernel/debug/tegra_la_ptsa/camera/la_id
+0
+
+== /sys/kernel/debug/tegra_la_ptsa/camera/set_ptsa
+head: error reading '/sys/kernel/debug/tegra_la_ptsa/camera/set_ptsa': Permission denied
+
+== /sys/kernel/debug/tegra_la_ptsa/display/bw_mbps
+0
+
+== /sys/kernel/debug/tegra_la_ptsa/display/emc_freq_hz
+0
+
+== /sys/kernel/debug/tegra_la_ptsa/display/set_la_ptsa
+head: error reading '/sys/kernel/debug/tegra_la_ptsa/display/set_la_ptsa': Permission denied
+
+== /sys/kernel/debug/tegra_la_ptsa/other/bw_mbps
+0
+
+== /sys/kernel/debug/tegra_la_ptsa/other/la_id
+0
+
+== /sys/kernel/debug/tegra_la_ptsa/other/set_la_ptsa
+head: error reading '/sys/kernel/debug/tegra_la_ptsa/other/set_la_ptsa': Permission denied
+

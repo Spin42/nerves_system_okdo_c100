@@ -1,0 +1,44 @@
+== /sys/kernel/debug/clk/emc/clk_accuracy
+0
+
+== /sys/kernel/debug/clk/emc/clk_enable_count
+3
+
+== /sys/kernel/debug/clk/emc/clk_flags
+0x00000048
+
+== /sys/kernel/debug/clk/emc/clk_notifier_count
+1
+
+== /sys/kernel/debug/clk/emc/clk_parent
+pll_p
+
+== /sys/kernel/debug/clk/emc/clk_phase
+0
+
+== /sys/kernel/debug/clk/emc/clk_possible_parents
+pll_m pll_c pll_p clk_m pll_m_ud pll_mb pll_mb_ud pll_p_ud
+
+== /sys/kernel/debug/clk/emc/clk_prepare_count
+3
+
+== /sys/kernel/debug/clk/emc/clk_rate
+204000000
+
+== /sys/kernel/debug/clk/emc/clk_state
+1
+
+== /sys/kernel/debug/clk/emc/clk_update_rate
+1
+
+== /sys/kernel/debug/clk/emc/dvfs_freq_offs
+0
+
+== /sys/kernel/debug/clk/emc/frequency_stats_table
+
+== /sys/kernel/debug/clk/emc/pto_cycles
+16
+
+== /sys/kernel/debug/clk/emc/pto_rate
+203991000
+

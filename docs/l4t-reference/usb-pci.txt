@@ -1,0 +1,12 @@
+$ sh -c lsusb; lspci -nnk
+Bus 002 Device 002: ID 05e3:0620 Genesys Logic, Inc. 
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 001 Device 004: ID 045e:007d Microsoft Corp. Notebook Optical Mouse
+Bus 001 Device 003: ID 046d:c318 Logitech, Inc. Illuminated Keyboard
+Bus 001 Device 002: ID 05e3:0610 Genesys Logic, Inc. 4-port hub
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+00:02.0 PCI bridge [0604]: NVIDIA Corporation Device [10de:0faf] (rev a1)
+	Kernel driver in use: pcieport
+01:00.0 Ethernet controller [0200]: Realtek Semiconductor Co., Ltd. RTL8111/8168/8411 PCI Express Gigabit Ethernet Controller [10ec:8168] (rev 19)
+	Subsystem: Realtek Semiconductor Co., Ltd. RTL8111/8168 PCI Express Gigabit Ethernet controller [10ec:8168]
+	Kernel driver in use: r8168

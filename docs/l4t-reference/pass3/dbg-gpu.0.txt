@@ -1,0 +1,1074 @@
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_1
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_10
+base = 67108864, limit = 60062433280, blk_size = 4096
+Internal params:
+  start = 0x4000000
+  end   = 0xe00000000
+  count = 0xdfc000000
+  blks  = 0xdfc000
+  max_order = 23
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   23     0       0         1
+   22     2       0         1
+   21     1       0         1
+   20     1       0         2
+   19     1       1         3
+   18     1       3         3
+   17     1       3         3
+   16     1       3         3
+   15     2       2         3
+   14     3       3         1
+   13     0       1         1
+   12     0       1         1
+   11     1       0         1
+   10     1       0         1
+    9     0       1         1
+    8     0       1         1
+    7     0       1         1
+    6     0       1         1
+    5     0       1         1
+    4     1       1         0
+
+Fixed alloc (1): [0x8000000 -> 0x100000000]
+Fixed alloc (1): [0x100000000 -> 0x1f73f0000]
+
+Bytes allocated:        8308850688
+Bytes allocated (real): 8308850688
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_10_lp
+base = 60129542144, limit = 73014444032, blk_size = 65536
+Internal params:
+  start = 0xe00000000
+  end   = 0x1f00000000
+  count = 0x1100000000
+  blks  = 0x110000
+  max_order = 20
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   20     0       0         1
+   19     1       0         1
+   18     1       0         1
+   17     1       0         1
+   16     1       1         1
+   15     0       1         1
+   14     0       1         1
+   13     0       1         1
+   12     0       1         1
+   11     0       0         2
+   10     1       1         2
+    9     0       2         2
+    8     0       2         2
+    7     1       1         2
+    6     1       1         2
+    5     0       2         2
+    4     0       2         2
+    3     0       2         2
+    2     0       2         2
+    1     0       2         2
+    0     1       3         0
+
+Fixed alloc (1): [0xe00000000 -> 0xf00000000]
+Fixed alloc (1): [0xf00000000 -> 0xff73f0000]
+Fixed alloc (1): [0xff73f0000 -> 0xffb3f0000]
+
+Bytes allocated:        8510177280
+Bytes allocated (real): 8510177280
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_10-sys
+base = 133143986176, limit = 4294967296, blk_size = 4096
+Internal params:
+  start = 0x1f00000000
+  end   = 0x2000000000
+  count = 0x100000000
+  blks  = 0x100000
+  max_order = 20
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   20     0       0         1
+   19     1       0         1
+   18     1       0         1
+   17     1       0         1
+   16     1       0         1
+   15     1       0         1
+   14     1       0         1
+   13     1       0         1
+   12     1       0         1
+   11     1       0         1
+   10     1       0         1
+    9     0       0         2
+    8     0       0         4
+    7     0       4         4
+    6     0       5         3
+    5     0       4         2
+    4     0       0         4
+    3     0       7         1
+    2     0       0         2
+    1     1       2         1
+    0     0       2         0
+
+
+Bytes allocated:        3497984
+Bytes allocated (real): 4186112
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_11
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_11_lp
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_11-sys
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_12
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_12_lp
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_12-sys
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_1_lp
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_1-sys
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_2
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_2_lp
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_2-sys
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_3
+base = 67108864, limit = 60062433280, blk_size = 4096
+Internal params:
+  start = 0x4000000
+  end   = 0xe00000000
+  count = 0xdfc000000
+  blks  = 0xdfc000
+  max_order = 23
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   23     1       0         0
+   22     1       0         0
+   20     1       0         0
+   19     1       0         0
+   18     1       0         0
+   17     1       0         0
+   16     1       0         0
+   15     1       0         0
+   14     1       0         0
+
+
+Bytes allocated:        0
+Bytes allocated (real): 0
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_3_lp
+base = 60129542144, limit = 73014444032, blk_size = 65536
+Internal params:
+  start = 0xe00000000
+  end   = 0x1f00000000
+  count = 0x1100000000
+  blks  = 0x110000
+  max_order = 20
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   20     1       0         0
+   16     1       0         0
+
+
+Bytes allocated:        0
+Bytes allocated (real): 0
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_3-sys
+base = 133143986176, limit = 4294967296, blk_size = 4096
+Internal params:
+  start = 0x1f00000000
+  end   = 0x2000000000
+  count = 0x100000000
+  blks  = 0x100000
+  max_order = 20
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   20     1       0         0
+
+
+Bytes allocated:        0
+Bytes allocated (real): 0
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_4
+base = 67108864, limit = 60062433280, blk_size = 4096
+Internal params:
+  start = 0x4000000
+  end   = 0xe00000000
+  count = 0xdfc000000
+  blks  = 0xdfc000
+  max_order = 23
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   23     1       0         0
+   22     1       0         0
+   20     1       0         0
+   19     1       0         0
+   18     1       0         0
+   17     1       0         0
+   16     1       0         0
+   15     1       0         0
+   14     0       0         1
+   13     1       0         1
+   12     1       0         1
+   11     1       0         1
+   10     1       0         1
+    9     1       0         1
+    8     1       0         1
+    7     1       0         1
+    6     1       0         1
+    5     1       0         1
+    4     1       0         1
+    3     1       0         1
+    2     0       0         2
+    1     1       0         3
+    0     1       5         0
+
+
+Bytes allocated:        20480
+Bytes allocated (real): 20480
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_4_lp
+base = 60129542144, limit = 73014444032, blk_size = 65536
+Internal params:
+  start = 0xe00000000
+  end   = 0x1f00000000
+  count = 0x1100000000
+  blks  = 0x110000
+  max_order = 20
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   20     1       0         0
+   16     0       0         1
+   15     1       0         1
+   14     1       0         1
+   13     1       0         1
+   12     0       0         2
+   11     1       0         3
+   10     1       0         5
+    9     1       0         9
+    8     0       16        2
+    7     0       1         3
+    6     1       2         3
+    5     0       1         5
+    4     0       1         9
+    3     1       1         16
+    2     2       14        16
+    1     2       21        9
+    0     1       17        0
+
+
+Bytes allocated:        377880576
+Bytes allocated (real): 643366912
+Bytes freed:            346947584
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_4-sys
+base = 133143986176, limit = 4294967296, blk_size = 4096
+Internal params:
+  start = 0x1f00000000
+  end   = 0x2000000000
+  count = 0x100000000
+  blks  = 0x100000
+  max_order = 20
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   20     0       0         1
+   19     1       0         1
+   18     1       0         1
+   17     1       0         1
+   16     1       0         1
+   15     1       0         1
+   14     1       0         1
+   13     1       0         1
+   12     1       0         1
+   11     1       0         1
+   10     1       0         1
+    9     0       0         2
+    8     1       0         3
+    7     0       4         2
+    6     1       0         3
+    5     1       4         1
+    4     0       0         2
+    3     0       2         2
+    2     0       2         2
+    1     0       2         2
+    0     0       4         0
+
+
+Bytes allocated:        2064384
+Bytes allocated (real): 2752512
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_5
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_5_lp
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_5-sys
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_6
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_6_lp
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_6-sys
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_7
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_7_lp
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_7-sys
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_8
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_8_lp
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_8-sys
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_9
+base = 67108864, limit = 60062433280, blk_size = 4096
+Internal params:
+  start = 0x4000000
+  end   = 0xe00000000
+  count = 0xdfc000000
+  blks  = 0xdfc000
+  max_order = 23
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   23     1       0         0
+   22     1       0         0
+   20     1       0         0
+   19     1       0         0
+   18     1       0         0
+   17     1       0         0
+   16     1       0         0
+   15     1       0         0
+   14     1       0         0
+
+
+Bytes allocated:        0
+Bytes allocated (real): 0
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_9_lp
+base = 60129542144, limit = 73014444032, blk_size = 65536
+Internal params:
+  start = 0xe00000000
+  end   = 0x1f00000000
+  count = 0x1100000000
+  blks  = 0x110000
+  max_order = 20
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   20     1       0         0
+   16     0       0         1
+   15     1       0         1
+   14     1       0         1
+   13     1       0         1
+   12     0       0         2
+   11     1       0         3
+   10     1       0         5
+    9     1       0         9
+    8     0       13        5
+    7     1       0         9
+    6     0       11        7
+    5     0       8         6
+    4     0       2         10
+    3     0       4         16
+    2     0       11        21
+    1     3       23        16
+    0     2       30        0
+
+
+Bytes allocated:        485883904
+Bytes allocated (real): 791085056
+Bytes freed:            498008064
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_as_9-sys
+base = 133143986176, limit = 4294967296, blk_size = 4096
+Internal params:
+  start = 0x1f00000000
+  end   = 0x2000000000
+  count = 0x100000000
+  blks  = 0x100000
+  max_order = 20
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   20     0       0         1
+   19     1       0         1
+   18     1       0         1
+   17     1       0         1
+   16     1       0         1
+   15     1       0         1
+   14     1       0         1
+   13     1       0         1
+   12     1       0         1
+   11     1       0         1
+   10     1       0         1
+    9     1       0         1
+    8     0       0         2
+    7     1       2         1
+    6     0       0         2
+    5     1       2         1
+    4     0       0         2
+    3     0       3         1
+    2     1       0         1
+    1     0       1         1
+    0     1       1         0
+
+
+Bytes allocated:        1077248
+Bytes allocated (real): 1421312
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_bar1-sys
+base = 65536, limit = 16711680, blk_size = 4096
+Internal params:
+  start = 0x10000
+  end   = 0x1000000
+  count = 0xff0000
+  blks  = 0xff0
+  max_order = 11
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   11     1       0         0
+   10     1       0         0
+    9     1       0         0
+    8     1       0         0
+    7     1       0         0
+    6     0       1         0
+    5     1       0         0
+    4     1       0         0
+
+
+Bytes allocated:        262144
+Bytes allocated (real): 262144
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_cde
+base = 67108864, limit = 137371844608, blk_size = 4096
+Internal params:
+  start = 0x4000000
+  end   = 0x2000000000
+  count = 0x1ffc000000
+  blks  = 0x1ffc000
+  max_order = 24
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   24     1       0         0
+   23     1       0         0
+   22     1       0         0
+   21     1       0         0
+   20     1       0         0
+   19     1       0         0
+   18     1       0         0
+   17     1       0         0
+   16     1       0         0
+   15     1       0         0
+   14     1       0         0
+
+
+Bytes allocated:        0
+Bytes allocated (real): 0
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_cde-sys
+base = 137438953472, limit = 4294967296, blk_size = 4096
+Internal params:
+  start = 0x2000000000
+  end   = 0x2100000000
+  count = 0x100000000
+  blks  = 0x100000
+  max_order = 20
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   20     0       0         1
+   19     1       0         1
+   18     1       0         1
+   17     1       0         1
+   16     1       0         1
+   15     1       0         1
+   14     1       0         1
+   13     0       0         2
+   12     1       0         3
+   11     1       4         1
+   10     0       0         2
+    9     1       0         3
+    8     0       0         6
+    7     0       8         4
+    6     1       0         7
+    5     1       8         5
+    4     0       4         6
+    3     0       8         4
+    2     1       0         7
+    1     0       8         6
+    0     0       12        0
+
+
+Bytes allocated:        23085056
+Bytes allocated (real): 39436288
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_ce
+base = 67108864, limit = 137371844608, blk_size = 4096
+Internal params:
+  start = 0x4000000
+  end   = 0x2000000000
+  count = 0x1ffc000000
+  blks  = 0x1ffc000
+  max_order = 24
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   24     1       0         0
+   23     1       0         0
+   22     1       0         0
+   21     1       0         0
+   20     1       0         0
+   19     1       0         0
+   18     1       0         0
+   17     1       0         0
+   16     1       0         0
+   15     1       0         0
+   14     1       0         0
+
+
+Bytes allocated:        0
+Bytes allocated (real): 0
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_ce-sys
+base = 137438953472, limit = 4294967296, blk_size = 4096
+Internal params:
+  start = 0x2000000000
+  end   = 0x2100000000
+  count = 0x100000000
+  blks  = 0x100000
+  max_order = 20
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   20     1       0         0
+
+
+Bytes allocated:        0
+Bytes allocated (real): 0
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_pmu_dmem
+Bitmap allocator params:
+  start = 0x5240
+  end   = 0x6000
+  blks  = 0x6e
+Stats:
+  Number allocs = 0x53
+  Number fixed  = 0x0
+  Bytes alloced = 0xa60
+  Bytes freed   = 0xa40
+  Outstanding   = 0x20
+
+== /sys/kernel/debug/gpu.0/allocators/gk20a_system-sys
+base = 65536, limit = 536805376, blk_size = 4096
+Internal params:
+  start = 0x10000
+  end   = 0x20000000
+  count = 0x1fff0000
+  blks  = 0x1fff0
+  max_order = 16
+
+Buddy blocks:
+  Order   Free    Alloced   Split
+  -----   ----    -------   -----
+   16     1       0         0
+   15     1       0         0
+   14     1       0         0
+   13     1       0         0
+   12     1       0         0
+   11     1       0         0
+   10     1       0         0
+    9     1       0         0
+    8     1       0         0
+    7     1       0         0
+    6     1       0         0
+    5     0       0         1
+    4     1       1         1
+    3     0       1         1
+    2     0       1         1
+    1     0       0         2
+    0     1       3         0
+
+
+Bytes allocated:        86016
+Bytes allocated (real): 126976
+Bytes freed:            0
+
+== /sys/kernel/debug/gpu.0/cde_ctx_count
+4
+
+== /sys/kernel/debug/gpu.0/cde_ctx_count_top
+4
+
+== /sys/kernel/debug/gpu.0/cde_ctx_usecount
+0
+
+== /sys/kernel/debug/gpu.0/cde_parameter
+0
+
+== /sys/kernel/debug/gpu.0/ce_app_ctx_count
+0
+
+== /sys/kernel/debug/gpu.0/ce_app_next_ctx_id
+0
+
+== /sys/kernel/debug/gpu.0/ce_app_state
+1
+
+== /sys/kernel/debug/gpu.0/ch_wdt_timeout_ms
+5000
+
+== /sys/kernel/debug/gpu.0/disable_bigpage
+N
+
+== /sys/kernel/debug/gpu.0/disable_syncpoints
+0
+
+== /sys/kernel/debug/gpu.0/dump_ctxsw_stats_on_channel_close
+N
+
+== /sys/kernel/debug/gpu.0/elpg_residency
+Time in ELPG: 64956538 us
+Time out of ELPG: 32551174 us
+ELPG residency ratio: 666
+ELPG Entry Count: 5
+ELPG Avg Entry latency 86 us
+ELPG Avg Exit latency 82 us
+
+== /sys/kernel/debug/gpu.0/elpg_transitions
+4180
+
+== /sys/kernel/debug/gpu.0/fifo/sched
+chid     tsgid    pid      timeslice  timeout  interleave graphics_preempt compute_preempt
+                            (usecs)   (msecs)
+499      9        14630    0         3000     0          0        0       
+500      8        14630    0         3000     0          0        2       
+501      8        14630    0         3000     0          0        2       
+502      8        14630    0         3000     0          0        2       
+503      8        14630    0         3000     0          0        2       
+504      7        16039    2600      3000     0          0        0       
+506      5        15215    0         3000     0          0        0       
+507      4        15215    0         3000     0          0        0       
+508      3        4108     0         3000     0          0        2       
+509      2        4108     0         3000     0          0        2       
+510      1        4108     0         3000     0          0        2       
+511      0        4108     0         3000     0          0        2       
+
+== /sys/kernel/debug/gpu.0/fmax2x_at_vmin_safe_t
+829440
+
+== /sys/kernel/debug/gpu.0/force_preemption_cilp
+N
+
+== /sys/kernel/debug/gpu.0/force_preemption_gfxp
+N
+
+== /sys/kernel/debug/gpu.0/gr_default_attrib_cb_size
+1024
+
+== /sys/kernel/debug/gpu.0/gr_idle_timeout_default_us
+3000
+
+== /sys/kernel/debug/gpu.0/gr_status
+NV_PGRAPH_STATUS: 0x3200823
+NV_PGRAPH_STATUS1: 0x1
+NV_PGRAPH_STATUS2: 0x3
+NV_PGRAPH_ENGINE_STATUS: 0x1
+NV_PGRAPH_GRFIFO_STATUS : 0xc02
+NV_PGRAPH_GRFIFO_CONTROL : 0x10001
+NV_PGRAPH_PRI_FECS_HOST_INT_STATUS : 0x0
+NV_PGRAPH_EXCEPTION  : 0x0
+NV_PGRAPH_FECS_INTR  : 0x0
+NV_PFIFO_ENGINE_STATUS(GR) : 0x90073007
+NV_PGRAPH_ACTIVITY0: 0x140
+NV_PGRAPH_ACTIVITY1: 0x600
+NV_PGRAPH_ACTIVITY2: 0x1b
+NV_PGRAPH_ACTIVITY4: 0x1
+NV_PGRAPH_PRI_SKED_ACTIVITY: 0x0
+NV_PGRAPH_PRI_GPC0_GPCCS_GPC_ACTIVITY0: 0xa2db6d
+NV_PGRAPH_PRI_GPC0_GPCCS_GPC_ACTIVITY1: 0x140a28
+NV_PGRAPH_PRI_GPC0_GPCCS_GPC_ACTIVITY2: 0x3600
+NV_PGRAPH_PRI_GPC0_GPCCS_GPC_ACTIVITY3: 0x1
+NV_PGRAPH_PRI_GPC0_TPC0_TPCCS_TPC_ACTIVITY0: 0x350
+NV_PGRAPH_PRI_GPC0_TPCS_TPCCS_TPC_ACTIVITY0: 0x250
+NV_PGRAPH_PRI_GPCS_GPCCS_GPC_ACTIVITY0: 0xa2db6d
+NV_PGRAPH_PRI_GPCS_GPCCS_GPC_ACTIVITY1: 0x140a28
+NV_PGRAPH_PRI_GPCS_GPCCS_GPC_ACTIVITY2: 0x3600
+NV_PGRAPH_PRI_GPCS_GPCCS_GPC_ACTIVITY3: 0x1
+NV_PGRAPH_PRI_GPCS_TPC0_TPCCS_TPC_ACTIVITY0: 0x250
+NV_PGRAPH_PRI_GPCS_TPCS_TPCCS_TPC_ACTIVITY0: 0x350
+NV_PGRAPH_PRI_BE0_BECS_BE_ACTIVITY0: 0x3
+NV_PGRAPH_PRI_BE1_BECS_BE_ACTIVITY0: 0x3
+NV_PGRAPH_PRI_BES_BECS_BE_ACTIVITY0: 0x3
+NV_PGRAPH_PRI_DS_MPIPE_STATUS: 0x0
+NV_PGRAPH_PRI_FE_GO_IDLE_ON_STATUS: 0x2e
+NV_PGRAPH_PRI_FE_GO_IDLE_TIMEOUT : 0x800
+NV_PGRAPH_PRI_FE_GO_IDLE_CHECK : 0x800
+NV_PGRAPH_PRI_FE_GO_IDLE_INFO : 0x23000710
+NV_PGRAPH_PRI_GPC0_TPC0_TEX_M_TEX_SUBUNITS_STATUS: 0x14014831
+NV_PGRAPH_PRI_CWD_FS: 0x101
+NV_PGRAPH_PRI_FE_TPC_FS: 0x1
+NV_PGRAPH_PRI_CWD_GPC_TPC_ID(0): 0x0
+NV_PGRAPH_PRI_CWD_SM_ID(0): 0x0
+NV_PGRAPH_PRI_FECS_CTXSW_STATUS_FE_0: 0x2
+NV_PGRAPH_PRI_FECS_CTXSW_STATUS_1: 0x340
+NV_PGRAPH_PRI_GPC0_GPCCS_CTXSW_STATUS_GPC_0: 0x0
+NV_PGRAPH_PRI_GPC0_GPCCS_CTXSW_STATUS_1: 0x300
+NV_PGRAPH_PRI_FECS_CTXSW_IDLESTATE : 0xf
+NV_PGRAPH_PRI_GPC0_GPCCS_CTXSW_IDLESTATE : 0xf
+NV_PGRAPH_PRI_FECS_CURRENT_CTX : 0x807ff7d3
+NV_PGRAPH_PRI_FECS_NEW_CTX : 0x807ff7d3
+NV_PGRAPH_PRI_BE0_CROP_STATUS1 : 0x6000003
+NV_PGRAPH_PRI_BES_CROP_STATUS1 : 0x6000003
+NV_PGRAPH_PRI_BE0_ZROP_STATUS : 0x0
+NV_PGRAPH_PRI_BE0_ZROP_STATUS2 : 0x0
+NV_PGRAPH_PRI_BES_ZROP_STATUS : 0x0
+NV_PGRAPH_PRI_BES_ZROP_STATUS2 : 0x0
+NV_PGRAPH_PRI_BE0_BECS_BE_EXCEPTION: 0x0
+NV_PGRAPH_PRI_BE0_BECS_BE_EXCEPTION_EN: 0x0
+NV_PGRAPH_PRI_GPC0_GPCCS_GPC_EXCEPTION: 0x0
+NV_PGRAPH_PRI_GPC0_GPCCS_GPC_EXCEPTION_EN: 0x30000
+NV_PGRAPH_PRI_GPC0_TPC0_TPCCS_TPC_EXCEPTION: 0x0
+NV_PGRAPH_PRI_GPC0_TPC0_TPCCS_TPC_EXCEPTION_EN: 0x3
+
+== /sys/kernel/debug/gpu.0/hal/gops
+gm20b_determine_L2_size_bytes+0x0/0xd8 [nvgpu]
+          (null)
+gm20b_ltc_init_comptags+0x0/0x178 [nvgpu]
+gm20b_ltc_cbc_ctrl+0x0/0x4c8 [nvgpu]
+gm20b_ltc_set_zbc_color_entry+0x0/0x78 [nvgpu]
+gm20b_ltc_set_zbc_depth_entry+0x0/0x60 [nvgpu]
+          (null)
+gm20b_ltc_init_cbc+0x0/0x118 [nvgpu]
+gm20b_ltc_set_enabled+0x0/0x60 [nvgpu]
+gm20b_ltc_init_fs_state+0x0/0x150 [nvgpu]
+gm20b_ltc_isr+0x0/0x178 [nvgpu]
+gm20b_ltc_cbc_fix_config+0x0/0x90 [nvgpu]
+gm20b_flush_ltc+0x0/0x190 [nvgpu]
+          (null)
+gm20b_ltc_pri_is_ltc_addr+0x0/0x38 [nvgpu]
+gm20b_ltc_is_ltcs_ltss_addr+0x0/0x70 [nvgpu]
+gm20b_ltc_is_ltcn_ltss_addr+0x0/0xd8 [nvgpu]
+gm20b_ltc_split_lts_broadcast_addr+0x0/0xa8 [nvgpu]
+gm20b_ltc_split_ltc_broadcast_addr+0x0/0x80 [nvgpu]
+gk20a_ce2_isr+0x0/0xe0 [nvgpu]
+gk20a_ce2_nonstall_isr+0x0/0xc0 [nvgpu]
+          (null)
+          (null)
+gr_gk20a_get_patch_slots+0x0/0x20 [nvgpu]
+gr_gm20b_init_fs_state+0x0/0xe0 [nvgpu]
+          (null)
+          (null)
+gr_gm20b_bundle_cb_defaults+0x0/0x38 [nvgpu]
+gr_gm20b_cb_size_default+0x0/0x40 [nvgpu]
+gr_gm20b_calc_global_ctx_buffer_size+0x0/0x50 [nvgpu]
+gr_gm20b_commit_global_attrib_cb+0x0/0x98 [nvgpu]
+gr_gm20b_commit_global_bundle_cb+0x0/0x130 [nvgpu]
+gr_gm20b_commit_global_cb_manager+0x0/0x2a8 [nvgpu]
+gr_gm20b_commit_global_pagepool+0x0/0x80 [nvgpu]
+gr_gm20b_init_gpc_mmu+0x0/0x118 [nvgpu]
+gr_gm20b_handle_sw_method+0x0/0x178 [nvgpu]
+gr_gm20b_set_alpha_circular_buffer_size+0x0/0x1a0 [nvgpu]
+gr_gm20b_set_circular_buffer_size+0x0/0x1d0 [nvgpu]
+          (null)
+          (null)
+gr_gk20a_enable_hww_exceptions+0x0/0x50 [nvgpu]
+gr_gm20b_is_valid_class+0x0/0x78 [nvgpu]
+gr_gm20b_is_valid_gfx_class+0x0/0x30 [nvgpu]
+gr_gm20b_is_valid_compute_class+0x0/0x30 [nvgpu]
+gr_gm20b_get_sm_dsm_perf_regs+0x0/0x40 [nvgpu]
+gr_gm20b_get_sm_dsm_perf_ctrl_regs+0x0/0x50 [nvgpu]
+gk20a_gr_get_ovr_perf_regs+0x0/0x40 [nvgpu]
+gr_gm20b_set_hww_esr_report_mask+0x0/0x50 [nvgpu]
+          (null)
+gr_gm20b_load_ctxsw_ucode_segments+0x0/0xa0 [nvgpu]
+gr_gm20b_load_ctxsw_ucode+0x0/0x2d8 [nvgpu]
+          (null)
+gr_gm20b_get_gpc_tpc_mask+0x0/0x50 [nvgpu]
+gr_gm20b_set_gpc_tpc_mask+0x0/0xb8 [nvgpu]
+gk20a_alloc_obj_ctx+0x0/0xad0 [nvgpu]
+gr_gk20a_bind_ctxsw_zcull+0x0/0x1c0 [nvgpu]
+gr_gk20a_get_zcull_info+0x0/0xb8 [nvgpu]
+          (null)
+          (null)
+gr_gm20b_is_tpc_addr+0x0/0xd0 [nvgpu]
+          (null)
+          (null)
+          (null)
+gr_gm20b_get_tpc_num+0x0/0xb0 [nvgpu]
+          (null)
+gr_gm20b_detect_sm_arch+0x0/0x48 [nvgpu]
+gr_gk20a_add_zbc_color+0x0/0x138 [nvgpu]
+gr_gk20a_add_zbc_depth+0x0/0xd0 [nvgpu]
+          (null)
+gk20a_gr_zbc_set_table+0x0/0xc8 [nvgpu]
+gr_gk20a_query_zbc+0x0/0x210 [nvgpu]
+          (null)
+          (null)
+          (null)
+gk20a_pmu_save_zbc+0x0/0x170 [nvgpu]
+gr_gk20a_add_zbc+0x0/0x2f0 [nvgpu]
+          (null)
+gr_gm20b_pagepool_default_size+0x0/0x20 [nvgpu]
+gr_gk20a_init_ctx_state+0x0/0x210 [nvgpu]
+gr_gm20b_alloc_gr_ctx+0x0/0xd0 [nvgpu]
+gr_gk20a_free_gr_ctx+0x0/0x190 [nvgpu]
+          (null)
+gr_gm20b_update_ctxsw_preemption_mode+0x0/0xe0 [nvgpu]
+gr_gk20a_update_smpc_ctxsw_mode+0x0/0x190 [nvgpu]
+          (null)
+gr_gk20a_update_hwpm_ctxsw_mode+0x0/0x478 [nvgpu]
+          (null)
+          (null)
+          (null)
+gr_gm20b_dump_gr_status_regs+0x0/0xa20 [nvgpu]
+gr_gm20b_update_pc_sampling+0x0/0xe8 [nvgpu]
+gr_gm20b_get_max_fbps_count+0x0/0x38 [nvgpu]
+gr_gm20b_get_fbp_en_mask+0x0/0x58 [nvgpu]
+gr_gm20b_get_max_ltc_per_fbp+0x0/0x38 [nvgpu]
+gr_gm20b_get_max_lts_per_ltc+0x0/0x38 [nvgpu]
+gr_gm20b_rop_l2_en_mask+0x0/0xe8 [nvgpu]
+gr_gm20b_init_sm_dsm_reg_info+0x0/0x40 [nvgpu]
+gk20a_gr_init_ovr_sm_dsm_perf+0x0/0xc8 [nvgpu]
+gr_gk20a_wait_idle+0x0/0x908 [nvgpu]
+gr_gm20b_init_cyclestats+0x0/0x50 [nvgpu]
+gr_gm20b_enable_cde_in_fecs+0x0/0x50 [nvgpu]
+gr_gk20a_set_sm_debug_mode+0x0/0x180 [nvgpu]
+gr_gm20b_bpt_reg_info+0x0/0x368 [nvgpu]
+gr_gm20b_get_access_map+0x0/0x40 [nvgpu]
+gk20a_gr_handle_fecs_error+0x0/0x1d0 [nvgpu]
+          (null)
+gk20a_gr_get_sm_hww_warp_esr+0x0/0x70 [nvgpu]
+gk20a_gr_get_sm_hww_global_esr+0x0/0x70 [nvgpu]
+gk20a
+== /sys/kernel/debug/gpu.0/log_mask
+0
+
+== /sys/kernel/debug/gpu.0/lpwr_debug
+ELPG Enabled: 1
+ELPG ref count: 1
+ELPG state: 1
+
+== /sys/kernel/debug/gpu.0/ltc_enabled
+Y
+
+== /sys/kernel/debug/gpu.0/ltc/intr_illegal_compstat_enable
+N
+
+== /sys/kernel/debug/gpu.0/monitor
+914640
+
+== /sys/kernel/debug/gpu.0/mscg_residency
+Time in MSCG: 64536771 us
+Time out of MSCG: 31972098 us
+MSCG residency ratio: 668
+MSCG Entry Count: 0
+MSCG Avg Entry latency 0
+MSCG Avg Exit latency 0
+
+== /sys/kernel/debug/gpu.0/mscg_transitions
+4175
+
+== /sys/kernel/debug/gpu.0/perfmon_events_count
+0
+
+== /sys/kernel/debug/gpu.0/perfmon_events_enable
+0
+
+== /sys/kernel/debug/gpu.0/pll_na_mode
+1
+
+== /sys/kernel/debug/gpu.0/pll_param
+ADC offs = 617900 uV, ADC slope = 10714 uV, VCO ctrl = 0x38
+
+== /sys/kernel/debug/gpu.0/pll_reg
+bypassctrl = vco, sel_vco = vco, cfg  = 0x20005 : enabled : locked : sync_on
+coef = 0x13001 : m = 1 : n = 48 : pl = 1 : pll_f(gpu_f) = 1843200(921600) kHz
+dvfs0 = 0x29 : d = 41 : dmax = 0 : doffs = 0
+
+== /sys/kernel/debug/gpu.0/pll_reg_raw
+GPCPLL REGISTERS:
+[0x137000] = 0x00020005
+[0x137004] = 0x00013001
+[0x137008] = 0x10000000
+[0x13700c] = 0x0400f0f0
+[0x137010] = 0x00000029
+[0x137014] = 0xe2010000
+[0x137018] = 0x27050038
+[0x13701c] = 0x4100372a
+[0x132820] = 0x00000028
+
+GPC CLK OUT REGISTERS:
+[0x137100] = 0x00000001
+[0x137250] = 0x81100000
+[0x137340] = 0x00000000
+
+== /sys/kernel/debug/gpu.0/pmu_security
+3
+
+== /sys/kernel/debug/gpu.0/railgate_residency
+Time with Rails Gated: 416804 ms
+Time with Rails UnGated: 209936 ms
+Total railgating cycles: 81
+
+== /sys/kernel/debug/gpu.0/rate
+921600000
+
+== /sys/kernel/debug/gpu.0/reload_cde_firmware
+head: error reading '/sys/kernel/debug/gpu.0/reload_cde_firmware': Invalid argument
+
+== /sys/kernel/debug/gpu.0/runlist_interleave
+Y
+
+== /sys/kernel/debug/gpu.0/sched_ctrl
+control_locked=0
+busy=0
+bitmap_size=64
+active_tsg_bitmap
+	0x00000000000003b0
+	0x0000000000000000
+	0x0000000000000000
+	0x0000000000000000
+	0x0000000000000000
+	0x0000000000000000
+	0x0000000000000000
+	0x0000000000000000
+recent_tsg_bitmap
+	0x00000000000003b0
+	0x0000000000000000
+	0x0000000000000000
+	0x0000000000000000
+	0x0000000000000000
+	0x0000000000000000
+	0x0000000000000000
+	0x0000000000000000
+
+== /sys/kernel/debug/gpu.0/status
+gm20b pbdma 0: id: 7 (tsg), next_id: 7 (tsg) chan status: valid
+PBDMA_PUT: 0000001e0e2135a8 PBDMA_GET: 0000001e0e213580 GP_PUT: 00000708 GP_GET: 00000702 FETCH: 00000708 HEADER: 20001b08
+HDR: 200406c0 SHADOW0: 00006fc0 SHADOW1: 0000201f
+gm20b eng 0: id: 7 (tsg), next_id: 7 (tsg), ctx status: valid busy 
+gm20b eng 1: id: 0 (channel), next_id: 0 (channel), ctx status: invalid 
+
+499-gm20b, pid 16101, refs 2: channel status:  in use idle not busy
+RAMFC : TOP: 8000001f00280048 PUT: 0000001f00280048 GET: 0000001f00280048 FETCH: 0000001f00280048
+HEADER: 60400000 COUNT: 80000000
+SYNCPOINT 00000000 00001c01 SEMAPHORE 00000000 00000000 00000000 00000000
+
+500-gm20b, pid 16101, refs 2: channel status:  in use idle not busy
+RAMFC : TOP: 8000001f00240018 PUT: 0000001f00240018 GET: 0000001f00240018 FETCH: 0000001f00240018
+HEADER: 60400000 COUNT: 80000000
+SYNCPOINT 00000000 00001901 SEMAPHORE 00000000 00000000 00000000 00000000
+
+501-gm20b, pid 16101, refs 2: channel status:  in use idle not busy
+RAMFC : TOP: 8000001f00200018 PUT: 0000001f00200018 GET: 0000001f00200018 FETCH: 0000001f00200018
+HEADER: 60400000 COUNT: 80000000
+SYNCPOINT 00000000 00001801 SEMAPHORE 00000000 00000000 00000000 00000000
+
+502-gm20b, pid 16101, refs 2: channel status:  in use idle not busy
+RAMFC : TOP: 8000001f00140120 PUT: 0000001f00140120 GET: 0000001f00140120 FETCH: 0000001f00140120
+HEADER: 60400000 COUNT: 80000000
+SYNCPOINT 00000000 00001701 SEMAPHORE 00000001 0002fff0 00000142 00000004
+
+503-gm20b, pid 16101, refs 2: channel status:  in use idle not busy
+RAMFC : TOP: 8000001f00042100 PUT: 0000001f00042100 GET: 0000001f00042100 FETCH: 0000001f00042100
+HEADER: 60400000 COUNT: 80000000
+SYNCPOINT 00000000 00001601 SEMAPHORE 00000001 0002ffb0 00000003 00001004
+
+504-gm20b, pid 16039, refs 6: channel status:  in use pending_acquire busy
+RAMFC : TOP: 8000001e0e2107f0 PUT: 0000001e0e2135a8 GET: 0000001e0e2107f0 FETCH: 0043501e0e211400
+HEADER: 200011e8 COUNT: 01110002
+SYNCPOINT 00000000 00000d01 SEMAPHORE 0000001e 04080aa0 0000067a 00001004
+
+506-gm20b, pid 15215, refs 2: channel status:  in use idle not busy
+RAMFC : TOP: 8000001f0000c108 PUT: 0000001f0000c108 GET: 0000001f0000c108 FETCH: 0000001f0000c108
+HEADER: 60400000 COUNT: 80000000
+SYNCPOINT 00000000 00000901 SEMAPHORE 00000000 00000000 00000000 00000000
+
+507-gm20b, pid 15215, refs 2: channel status:  in use idle not busy
+RAMFC : TOP: 8000001f00006fe0 PUT: 0000001f00006fe0 GET: 0000001f00006fe0 FETCH: 0000001f00006fe0
+HEADER: 60400000 COUNT: 80000000
+SYNCPOINT 00000000 00000801 SEMAPHORE 0000000d fc001000 05f82d77 01100002
+
+508-gm20b, pid 4108, refs 2: channel status:  in use idle not busy
+RAMFC : TOP: 0000000000000000 PUT: 0000000000000000 GET: 0000000000000000 FETCH: 0000000000000000
+HEADER: 60400000 COUNT: 00000000
+SYNCPOINT 00000000 00000000 SEMAPHORE 00000000 00000000 00000000 00000000
+
+509-gm20b, pid 4108, refs 2: channel status:  in use idle not busy
+RAMFC : TOP: 0000000000000000 PUT: 0000000000000000 GET: 0000000000000000 FETCH: 0000000000000000
+HEADER: 60400000 COUNT: 00000000
+SYNCPOINT 00000000 00000000 SEMAPHORE 00000000 00000000 00000000 00000000
+
+510-gm20b, pid 4108, refs 2: channel status:  in use idle not busy
+RAMFC : TOP: 0000000000000000 PUT: 0000000000000000 GET: 0000000000000000 FETCH: 0000000000000000
+HEADER: 60400000 COUNT: 00000000
+SYNCPOINT 00000000 00000000 SEMAPHORE 00000000 00000000 00000000 00000000
+
+511-gm20b, pid 4108, refs 2: channel status:  in use idle not busy
+RAMFC : TOP: 0000000000000000 PUT: 0000000000000000 GET: 0000000000000000 FETCH: 0000000000000000
+HEADER: 60400000 COUNT: 00000000
+SYNCPOINT 00000000 00000000 SEMAPHORE 00000000 00000000 00000000 00000000
+
+
+== /sys/kernel/debug/gpu.0/timeouts_enabled
+Y
+
+== /sys/kernel/debug/gpu.0/timeslice_high_priority_us
+5200
+
+== /sys/kernel/debug/gpu.0/timeslice_low_priority_us
+1300
+
+== /sys/kernel/debug/gpu.0/timeslice_medium_priority_us
+2600
+
+== /sys/kernel/debug/gpu.0/voltage
+1046
+

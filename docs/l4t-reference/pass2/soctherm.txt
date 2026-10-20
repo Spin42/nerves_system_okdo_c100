@@ -1,0 +1,101 @@
+== /sys/kernel/debug/soctherm/cpu/pllx_offset_max
+14
+
+== /sys/kernel/debug/soctherm/cpu/pllx_offset_min
+2
+
+== /sys/kernel/debug/soctherm/cpu/temp
+37000
+
+== /sys/kernel/debug/soctherm/cpu/thermtrip
+102500
+
+== /sys/kernel/debug/soctherm/cpu/thermtrip_en
+1
+
+== /sys/kernel/debug/soctherm/gpu/pllx_offset_max
+8
+
+== /sys/kernel/debug/soctherm/gpu/pllx_offset_min
+4
+
+== /sys/kernel/debug/soctherm/gpu/temp
+38500
+
+== /sys/kernel/debug/soctherm/gpu/thermtrip
+103000
+
+== /sys/kernel/debug/soctherm/gpu/thermtrip_en
+1
+
+== /sys/kernel/debug/soctherm/mem/pllx_offset_max
+0
+
+== /sys/kernel/debug/soctherm/mem/pllx_offset_min
+0
+
+== /sys/kernel/debug/soctherm/mem/temp
+36000
+
+== /sys/kernel/debug/soctherm/pll/temp
+36000
+
+== /sys/kernel/debug/soctherm/pllx_offset_en
+head: error reading '/sys/kernel/debug/soctherm/pllx_offset_en': Permission denied
+
+== /sys/kernel/debug/soctherm/reg_contents
+-----TSENSE (convert HW)-----
+cpu0: En(1) tiddq(1) ten_count(1) tsample(120) Temp(1/36500) Capture(1/8519) Stop(0) Tall(16300) Over(0/0/0) Therm_A/B(1742/-1738)
+cpu1: En(1) tiddq(1) ten_count(1) tsample(120) Temp(1/34000) Capture(1/8643) Stop(0) Tall(16300) Over(0/0/0) Therm_A/B(1863/-1897)
+cpu2: En(1) tiddq(1) ten_count(1) tsample(120) Temp(1/36500) Capture(1/8728) Stop(0) Tall(16300) Over(0/0/0) Therm_A/B(1759/-1801)
+cpu3: En(1) tiddq(1) ten_count(1) tsample(120) Temp(1/33000) Capture(1/8690) Stop(0) Tall(16300) Over(0/0/0) Therm_A/B(1890/-1938)
+mem0: En(1) tiddq(1) ten_count(1) tsample(120) Temp(1/35000) Capture(1/8724) Stop(0) Tall(16300) Over(0/0/0) Therm_A/B(1728/-1770)
+mem1: En(1) tiddq(1) ten_count(1) tsample(120) Temp(1/36000) Capture(1/8781) Stop(0) Tall(16300) Over(0/0/0) Therm_A/B(1965/-2034)
+gpu: En(1) tiddq(1) ten_count(1) tsample(120) Temp(0/35000) Capture(0/8501) Stop(0) Tall(16300) Over(0/0/0) Therm_A/B(1666/-1658)
+pllx: En(1) tiddq(1) ten_count(1) tsample(120) Temp(1/36000) Capture(1/8724) Stop(0) Tall(16300) Over(0/0/0) Therm_A/B(1703/-1741)
+PDIV: 0x8888
+HOTSPOT: 0xa0500
+HW_PLLX_OFFSET_MAX: 0x80e
+HW_PLLX_OFFSET_MIN: 0x402
+
+-----SOC_THERM-----
+Temperatures: CPU(36500)  GPU(38000)  PLLX(36000)  MEM(36000)
+cpu:
+   0: Up/Dn(66000 /-127000 ) En(1) CPU Throt(none) GPU Throt(none) Status(In)
+   1: Up/Dn(0 /0 ) En(0) CPU Throt(none) GPU Throt(none) Status(HI)
+   2: Up/Dn(100500 /100500 ) En(1) CPU Throt(H) GPU Throt(H) Status(LO)
+   3: Up/Dn(0 /0 ) En(0) CPU Throt(none) GPU Throt(none) Status(HI)
+gpu:
+   0: Up/Dn(70000 /-127000 ) En(1) CPU Throt(none) GPU Throt(none) Status(In)
+   1: Up/Dn(0 /0 ) En(0) CPU Throt(none) GPU Throt(none) Status(HI)
+   2: Up/Dn(101000 /101000 ) En(1) CPU Throt(H) GPU Throt(H) Status(LO)
+   3: Up/Dn(0 /0 ) En(0) CPU Throt(none) GPU Throt(none) Status(HI)
+pll:
+   0: Up/Dn(0 /0 ) En(0) CPU Throt(none) GPU Throt(none) Status(HI)
+   1: Up/Dn(0 /0 ) En(0) CPU Throt(none) GPU Throt(none) Status(HI)
+   2: Up/Dn(0 /0 ) En(0) CPU Throt(none) GPU Throt(none) Status(HI)
+   3: Up/Dn(0 /0 ) En(0) CPU Throt(none) GPU Throt(none) Status(HI)
+mem:
+   0: Up/Dn(0 /0 ) En(0) CPU Throt(none) GPU Throt(none) Status(HI)
+   1: Up/Dn(0 /0 ) En(0) CPU Throt(none) GPU Throt(none) Status(HI)
+   2: Up/Dn(0 /0 ) En(0) CPU Throt(none) GPU Throt(none) Status(HI)
+   3: Up/Dn(0 /0 ) En(0) CPU Throt(none) GPU Throt(none) Status(HI)
+STATS: Up(En) Dn(En)
+  Level_0 Up(4) Dn(0)
+  Level_1 Up(4) Dn(0)
+  Level_2 Up(4) Dn(2)
+  Level_3 Up(4) Dn(0)
+Thermtrip Any En(0)
+     cpu En(1) Thresh(102500)
+     gpu En(1) Thresh(103000)
+     pll En(0) Thresh(105000)
+     mem En(0) Thresh(103000)
+
+GLOBAL THROTTLE CONFIG: 0x00000001
+---------------------------------------------------
+THROT STATUS: breach(0) state(0) enabled(1)
+CPU PSKIP STATUS: M(0) N(0) enabled(0)
+
+== /sys/kernel/debug/soctherm/tempoverride
+0
+

@@ -1,0 +1,44 @@
+== /sys/kernel/debug/clk/gbus/clk_accuracy
+0
+
+== /sys/kernel/debug/clk/gbus/clk_enable_count
+0
+
+== /sys/kernel/debug/clk/gbus/clk_flags
+0x00002040
+
+== /sys/kernel/debug/clk/gbus/clk_notifier_count
+2
+
+== /sys/kernel/debug/clk/gbus/clk_parent
+gpcclk
+
+== /sys/kernel/debug/clk/gbus/clk_phase
+0
+
+== /sys/kernel/debug/clk/gbus/clk_possible_rates
+76800 153600 230400 307200 384000 460800 537600 614400 691200 768000 844800 921600 (kHz)
+
+== /sys/kernel/debug/clk/gbus/clk_prepare_count
+0
+
+== /sys/kernel/debug/clk/gbus/clk_rate
+76800000
+
+== /sys/kernel/debug/clk/gbus/clk_round_pass_thru
+0
+
+== /sys/kernel/debug/clk/gbus/clk_shared_bus_flags
+0x00000002
+
+== /sys/kernel/debug/clk/gbus/clk_state
+0
+
+== /sys/kernel/debug/clk/gbus/clk_update_rate
+0
+
+== /sys/kernel/debug/clk/gbus/dvfs_freq_offs
+0
+
+== /sys/kernel/debug/clk/gbus/frequency_stats_table
+

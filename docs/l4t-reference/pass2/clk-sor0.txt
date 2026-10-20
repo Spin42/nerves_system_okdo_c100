@@ -1,0 +1,39 @@
+== /sys/kernel/debug/clk/sor0/clk_accuracy
+0
+
+== /sys/kernel/debug/clk/sor0/clk_enable_count
+1
+
+== /sys/kernel/debug/clk/sor0/clk_flags
+0x00000004
+
+== /sys/kernel/debug/clk/sor0/clk_notifier_count
+1
+
+== /sys/kernel/debug/clk/sor0/clk_parent
+pll_dp
+
+== /sys/kernel/debug/clk/sor0/clk_phase
+0
+
+== /sys/kernel/debug/clk/sor0/clk_possible_parents
+sor_safe pll_dp
+
+== /sys/kernel/debug/clk/sor0/clk_prepare_count
+1
+
+== /sys/kernel/debug/clk/sor0/clk_rate
+270000000
+
+== /sys/kernel/debug/clk/sor0/clk_state
+1
+
+== /sys/kernel/debug/clk/sor0/clk_update_rate
+1
+
+== /sys/kernel/debug/clk/sor0/dvfs_freq_offs
+0
+
+== /sys/kernel/debug/clk/sor0/frequency_stats_table
+ [        default_freq                                       0]
+

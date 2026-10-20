@@ -1,0 +1,54 @@
+== /sys/kernel/debug/tegra_dp1/bitsperpixel
+
+DP Bits Per Pixel: 24
+
+== /sys/kernel/debug/tegra_dp1/dpaux_dpcd/addr
+0
+
+== /sys/kernel/debug/tegra_dp1/dpaux_dpcd/data
+
+== /sys/kernel/debug/tegra_dp1/dpaux_dpcd/num_bytes
+0
+
+== /sys/kernel/debug/tegra_dp1/dpaux_i2c/addr
+0
+
+== /sys/kernel/debug/tegra_dp1/dpaux_i2c/data
+head: error reading '/sys/kernel/debug/tegra_dp1/dpaux_i2c/data': Invalid argument
+
+== /sys/kernel/debug/tegra_dp1/dpaux_i2c/num_bytes
+0
+
+== /sys/kernel/debug/tegra_dp1/dpaux_regs
+DPAUX_INTR_EN_AUX                 001	00000007
+DPAUX_INTR_AUX                    005	00000008
+DPAUX_DP_AUXADDR                  029	00000102
+DPAUX_DP_AUXCTL                   02d	00008000
+DPAUX_DP_AUXSTAT                  031	10000000
+DPAUX_HPD_CONFIG                  03d	07d000fa
+DPAUX_HPD_IRQ_CONFIG              041	000000fa
+DPAUX_DP_AUX_CONFIG               045	00000190
+DPAUX_HYBRID_PADCTL               049	000024c2
+DPAUX_HYBRID_SPARE                04d	00000000
+
+== /sys/kernel/debug/tegra_dp1/hotplug
+dp hpd state: 0
+
+== /sys/kernel/debug/tegra_dp1/lanes
+
+DP Lane_Count: 	4
+
+== /sys/kernel/debug/tegra_dp1/linkspeed
+
+DP Link Speed: 	10
+
+== /sys/kernel/debug/tegra_dp1/test_settings
+	Drive strength: 0
+	Preemphasis level: 0
+	Lanes: 4
+	Bitrate: rbr
+	Test pattern: none
+	SSC enabled
+	TX_PU enabled
+	Panel type : External
+

@@ -1,0 +1,78 @@
+== /sys/kernel/debug/tegra_bwmgr/bwmgr_clients_info
+         Client          Floor       SharedBw    SharedIsoBw            Cap         IsoCap (Khz)
+ cpu_cluster_0*        1600000              0              0        1600000        1600000
+ cpu_cluster_1               0              0              0        1600000        1600000
+ cpu_cluster_2               0              0              0        1600000        1600000
+ cpu_cluster_3               0              0              0        1600000        1600000
+        disp_0*              0              0              0        1600000        1600000
+        disp_1*              0              0          37125        1600000        1600000
+        disp_2               0              0              0        1600000        1600000
+  disp1_la_emc*        1600000              0              0        1600000        1600000
+  disp2_la_emc*        1600000              0              0        1600000        1600000
+          usbd*              0              0              0        1600000        1600000
+          xhci               0              0              0        1600000        1600000
+        sdmmc1*              0              0              0        1600000        1600000
+        sdmmc2               0              0              0        1600000        1600000
+        sdmmc3               0              0              0        1600000        1600000
+        sdmmc4               0              0              0        1600000        1600000
+           mon*        1749561              0              0        1600000        1600000
+           gpu*        1600000              0              0        1600000        1600000
+         msenc*              0              0              0        1600000        1600000
+        nvenc1               0              0              0        1600000        1600000
+         nvjpg*              0              0              0        1600000        1600000
+         nvdec*              0              0              0        1600000        1600000
+        nvdec1               0              0              0        1600000        1600000
+          tsec*              0              0              0        1600000        1600000
+         tsecb*              0              0              0        1600000        1600000
+            vi*              0              0              0        1600000        1600000
+          ispa*              0              0              0        1600000        1600000
+          ispb*              0              0              0        1600000        1600000
+        camera*              0              0              0        1600000        1600000
+camera_non_iso               0              0              0        1600000        1600000
+        camrtc               0              0              0        1600000        1600000
+        isomgr*          37125              0              0        1600000        1600000
+       thermal*              0              0              0        1600000        1600000
+           vic*         204000              0              0        1600000        1600000
+          adsp               0              0              0        1600000        1600000
+          adma               0              0              0        1600000        1600000
+          pcie*         102000              0              0        1600000        1600000
+        pcie_1               0              0              0        1600000        1600000
+        pcie_2               0              0              0        1600000        1600000
+        pcie_3               0              0              0        1600000        1600000
+        pcie_4               0              0              0        1600000        1600000
+        pcie_5               0              0              0        1600000        1600000
+         bbc_0               0              0              0        1600000        1600000
+          eqos               0              0              0        1600000      
+== /sys/kernel/debug/tegra_bwmgr/clk_update_disabled
+N
+
+== /sys/kernel/debug/tegra_bwmgr/core_emc_rate
+102000000
+
+== /sys/kernel/debug/tegra_bwmgr/debug_client_bw
+0
+
+== /sys/kernel/debug/tegra_bwmgr/debug_client_cap
+1600000000
+
+== /sys/kernel/debug/tegra_bwmgr/debug_client_floor
+0
+
+== /sys/kernel/debug/tegra_bwmgr/debug_client_iso_bw
+0
+
+== /sys/kernel/debug/tegra_bwmgr/debug_client_iso_cap
+1600000000
+
+== /sys/kernel/debug/tegra_bwmgr/emc_max_rate
+1600000000
+
+== /sys/kernel/debug/tegra_bwmgr/emc_min_rate
+1600000000
+
+== /sys/kernel/debug/tegra_bwmgr/emc_rate
+204000000
+
+== /sys/kernel/debug/tegra_bwmgr/num_dram_channels
+2
+

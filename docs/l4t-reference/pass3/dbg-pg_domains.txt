@@ -1,0 +1,42 @@
+== /sys/kernel/debug/pg_domains/ape/state
+1
+
+== /sys/kernel/debug/pg_domains/disa/state
+0
+
+== /sys/kernel/debug/pg_domains/disb/state
+1
+
+== /sys/kernel/debug/pg_domains/nvdec/state
+0
+
+== /sys/kernel/debug/pg_domains/nvenc/state
+0
+
+== /sys/kernel/debug/pg_domains/nvjpg/state
+0
+
+== /sys/kernel/debug/pg_domains/pcie/state
+1
+
+== /sys/kernel/debug/pg_domains/sor/state
+1
+
+== /sys/kernel/debug/pg_domains/ve2/state
+0
+
+== /sys/kernel/debug/pg_domains/ve/state
+0
+
+== /sys/kernel/debug/pg_domains/vic/state
+0
+
+== /sys/kernel/debug/pg_domains/xusba/state
+1
+
+== /sys/kernel/debug/pg_domains/xusbb/state
+1
+
+== /sys/kernel/debug/pg_domains/xusbc/state
+1
+

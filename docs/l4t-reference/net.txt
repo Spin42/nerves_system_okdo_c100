@@ -1,0 +1,15 @@
+$ sh -c ip -br addr; ip -br link
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+dummy0           DOWN           
+eth0             UP             192.168.0.31/24 fe80::ea88:4066:d981:78b5/64 
+docker0          DOWN           172.17.0.1/16 
+l4tbr0           DOWN           
+rndis0           DOWN           
+usb0             DOWN           
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+dummy0           DOWN           da:15:8c:a3:29:f4 <BROADCAST,NOARP> 
+eth0             UP             48:b0:2d:9b:42:5e <BROADCAST,MULTICAST,UP,LOWER_UP> 
+docker0          DOWN           02:42:81:17:0c:8c <NO-CARRIER,BROADCAST,MULTICAST,UP> 
+l4tbr0           DOWN           ae:9b:ae:ef:6a:41 <BROADCAST,MULTICAST> 
+rndis0           DOWN           ae:9b:ae:ef:6a:41 <NO-CARRIER,BROADCAST,MULTICAST,UP> 
+usb0             DOWN           ae:9b:ae:ef:6a:43 <NO-CARRIER,BROADCAST,MULTICAST,UP> 
