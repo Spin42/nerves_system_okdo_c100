@@ -93,9 +93,14 @@ are slow variable-latency ops on Maxwell, for every integer multiply.
   GM20B rejects, so the hardware has the last word.
 - ncnn's layer tests (GPU against CPU) are run on the board with
   `OMP_NUM_THREADS=1`, the GPU capped at 768 MHz and a thermal guard that
-  pauses a test above 70 °C until it is back below 55 °C.
-- Stock Mesa bug, not ours: `test_binaryop_atan2_special` fails the same
-  way on stock and patched NVK (3π/4 instead of 0 for a special case).
+  pauses a test above 70 °C until it is back below 55 °C. On the patched
+  driver 177 of 179 pass with no GPU traps; the two others are the atan2
+  case below and `test_squeezenet`, which needs the squeezenet model files
+  that are not copied to the board.
+- `test_binaryop_atan2_special` fails the same way on stock and patched
+  NVK: atan2(0, 0) gives 3π/4 where ncnn expects C's 0. GLSL and SPIR-V
+  leave atan(y, x) undefined when both are 0, so this is a test
+  assumption, not a driver bug.
 
 What is left: int8 dot products are emulated (no DP4A before SM61),
 fp16 min/max go through f32 (no HMNMX2 before SM80), and memory bandwidth
