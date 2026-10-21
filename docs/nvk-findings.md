@@ -94,9 +94,9 @@ are slow variable-latency ops on Maxwell, for every integer multiply.
 - ncnn's layer tests (GPU against CPU) are run on the board with
   `OMP_NUM_THREADS=1`, the GPU capped at 768 MHz and a thermal guard that
   pauses a test above 70 °C until it is back below 55 °C. On the patched
-  driver 177 of 179 pass with no GPU traps; the two others are the atan2
-  case below and `test_squeezenet`, which needs the squeezenet model files
-  that are not copied to the board.
+  driver 178 of 179 pass with no GPU traps; the other is the atan2 case
+  below. `test_squeezenet` loads its model from `../../examples`, so the
+  squeezenet_v1.1 files must be copied there next to the tests.
 - `test_binaryop_atan2_special` fails the same way on stock and patched
   NVK: atan2(0, 0) gives 3π/4 where ncnn expects C's 0. GLSL and SPIR-V
   leave atan(y, x) undefined when both are 0, so this is a test
