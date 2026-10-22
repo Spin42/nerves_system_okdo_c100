@@ -86,6 +86,47 @@ on 2026-10-20. Raw data is in `docs/l4t-reference/` (collected with
      way. Then something has to request 1600 MHz: check
      `tegra210-emc` debugfs, or carry the EMC interconnect series.
 
+### Follow-up: L4T's 204 MHz blocker confirmed, 2026-10-22
+
+The stereo comparison's read-only inspection confirms the immediate reason
+for item7: the active Micron/strap0 1600MHz table has `nvidia,trained=0`.
+R32.7.6 `drivers/memory/tegra/tegra210-emc.c:1580` rejects requests above
+204MHz when that field is zero. MAXN already requests1600MHz (EMC min/max
+1600000000, current204000000), so another power-mode request is insufficient.
+
+OKdo's `c100-bootupd` patch0005 deletes the existing EMC node before applying
+the static PCN211181 overlay. The earlier CBoot snapshot in
+`l4t-reference/cboot/cboot-kernel.dts` has the matching1600MHz Micron table
+trained=1 and nonzero training values; the active replacement has zeroes.
+This strongly identifies loss of CBoot training data in the C100 boot path.
+The current extlinux entry has no FDT line, so removing one is not a remedy.
+Preserve the trained node/data and necessary SDMMC3 support; do not fake the
+training flag or bypass the clock driver's validation. No boot changes have
+been made or tested at the diagnosis checkpoint. Nerves already ran this
+hardware at actual1600MHz.
+
+The subsequent dedicated `c100_gpu` eMMC boot-script fix is now installed:
+it retains CBoot's trained EMC node and the SDMMC3 overlay, preserving the
+existing SD-first target and Nerves chain-loader without flashing U-Boot.
+A one-shot and an unattended L4T boot reach1600MHz. The unchanged D64 graph
+improves from17.02 to45.80FPS at640x480, and5.68 to15.59FPS at1280x720
+(resident inputs; camera/network/readback excluded). Four output checks
+and four timing probes pass with zero GPU errors. CPU/GPU governors/caps
+are unchanged. The user subsequently booted Nerves from SD, bootID
+`a1415b28-a332-4bfe-9652-7069b9fc2819`, validated slotB, EMC1600MHz,
+fresh GPU log with zero errors. This verifies preservation of the SD boot
+path. Source, rollback and limitations: sibling `c100_gpu/docs/l4t-emc.md`.
+
+The unchanged D64 resident graph on Nerves/NVK now measures30.686FPS VGA
+and10.689FPS720p, versus45.796/15.594 on L4T. Four numeric checks and four
+timings pass with no GPU errors. IREE3.11 requires the two existing generic
+host-cache maintenance fixes on NVK; the isolated backport leaves models,
+shaders, inputs and allocator unchanged. The L4T baseline is untouched.
+The report records this runtime delta and the separate3.13 profiling results.
+
+The comparison, raw evidence and upstream links are recorded in sibling
+`nx_iree/docs/reference/stereo-nvidia-20261022/README.md`.
+
 ### CPU
 
 10. Mainline (`cpufreq-dt`) offers up to 1555.5 MHz; NVIDIA caps the

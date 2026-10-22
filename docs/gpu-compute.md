@@ -1,5 +1,45 @@
 # GPU compute on the C100: inventory and investigation plan
 
+## Current direction, 2026-10-22
+
+The active stack is `~/Projects/nx_iree`: Nx/Elixir, host AOT compilation
+through IREE, and a runtime-only Vulkan deployment on the C100. It already
+supports cross compilation and has run matmul and DistilBERT on this board;
+the older inventory below predates that work.
+
+The target is full-performance stereo SGBM without CUDA. Vulkan runtime
+and compiler work must remain generic and is also tested on the host AMD
+discrete GPU. Device-specific performance tuning is separate. Exact image
+size, disparity range, FPS and OpenCV compatibility remain to be defined.
+
+Device-specific code must live in a dedicated Buildroot package or Elixir
+library. `~/Projects/c100_gpu` now owns the C100/Maxwell tuning, target
+capability list and board harness. Shared allocator/compiler changes remain
+in IREE/nx_iree.
+The system's `package/c100-gpu` installs `/usr/sbin/c100-limits`; erlinit
+invokes it from the board configuration. Moving the script out of the
+overlay does not change its accepted clock policy or initialization sequence.
+
+Normal devfreq (76.8–921.6 MHz) is restored; accepted firmware passed 30/30
+warm reboots. See `nvk-reference/nouveau-boots-20261022/README.md`.
+The initial directional SGM recurrence exposed an IREE TLSF slab-reuse
+bug on both GPUs. A shared allocator fix now passes repeated exact-output
+tests on the host and C100. Results, patch and reproduction are in
+`~/Projects/nx_iree/docs/stereo-path.md` and `bench/stereo/`.
+An additional generic compiler repair removes per-step full-volume copies.
+It passes on both GPUs; the host source compiler build is selected explicitly
+with `NX_IREE_COMPILER_DIR`. C100 normal-devfreq latency remains variable.
+An explicit comparison at the existing 921.6 MHz cap showed a speed gain,
+then restored the normal minimum; it is not the default power policy.
+
+The running Mesa 26.1.8 NVK driver reports `shaderFloat16`, `shaderInt8`,
+`shaderInt16`, `shaderInt64`, and 8/16-bit storage support. This supersedes
+the older FP16 inventory below; advertised support does not establish
+half-precision throughput. The captured `vulkaninfo` evidence is in
+`~/Projects/nx_iree/docs/reference/stereo-path-20261022/c100-gpu-features.log`.
+
+The remaining sections are the earlier inventory and investigation plan.
+
 Goal: use the Jetson Nano's GM20B GPU for real AI work from Elixir/Nx, as
 close as possible to what CUDA offers, on mainline Linux + Mesa.
 
