@@ -1,0 +1,60 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Subject: [PATCH] drm/nouveau/gm20b: Add an option to disable the NA PLL
+
+On a Jetson Nano (speedo 2), the first GR init after boot fails much more
+often with the noise-aware GPC PLL than with the non-NA path used on
+speedo 0 parts: with devfreq polling disabled, 5 of 20 boots against 0 of
+10. Failing boots time out in the PMU, or, when checked, show SEL_VCO
+refusing to leave bypass although the PLL reports lock.
+
+Add NvNaPll=0 to select the speedo 0 clock and voltage handling on any
+GM20B. The two go together: the NA voltage table is lower and relies on
+the PLL to follow voltage droop.
+
+---
+--- a/drivers/gpu/drm/nouveau/nvkm/subdev/clk/gm20b.c
++++ b/drivers/gpu/drm/nouveau/nvkm/subdev/clk/gm20b.c
+@@ -24,6 +24,7 @@
+ #include <subdev/volt.h>
+ #include <subdev/timer.h>
+ #include <core/device.h>
++#include <core/option.h>
+ #include <core/tegra.h>
+ 
+ #include "priv.h"
+@@ -1025,8 +1026,12 @@
+ 	struct gk20a_clk_pllg_params *clk_params;
+ 	int ret;
+ 
+-	/* Speedo 0 GPUs cannot use noise-aware PLL */
+-	if (tdev->gpu_speedo_id == 0)
++	/*
++	 * Speedo 0 GPUs cannot use noise-aware PLL. On others it can be turned
++	 * off with NvNaPll=0, which must match the voltage table volt uses.
++	 */
++	if (tdev->gpu_speedo_id == 0 ||
++	    !nvkm_boolopt(device->cfgopt, "NvNaPll", true))
+ 		return gm20b_clk_new_speedo0(device, type, inst, pclk);
+ 
+ 	/* Speedo >= 1, use NAPLL */
+--- a/drivers/gpu/drm/nouveau/nvkm/subdev/volt/gm20b.c
++++ b/drivers/gpu/drm/nouveau/nvkm/subdev/volt/gm20b.c
+@@ -23,6 +23,7 @@
+ #include "priv.h"
+ #include "gk20a.h"
+ 
++#include <core/option.h>
+ #include <core/tegra.h>
+ 
+ static const struct cvb_coef gm20b_cvb_coef[] = {
+@@ -84,7 +85,9 @@
+ 
+ 	vmin = speedo_to_vmin[tdev->gpu_speedo_id];
+ 
+-	if (tdev->gpu_speedo_id >= 1)
++	/* The NA table assumes the clock uses the noise-aware PLL */
++	if (tdev->gpu_speedo_id >= 1 &&
++	    nvkm_boolopt(device->cfgopt, "NvNaPll", true))
+ 		return gk20a_volt_ctor(device, type, inst, gm20b_na_cvb_coef,
+ 				       ARRAY_SIZE(gm20b_na_cvb_coef), vmin, volt);
+ 	else
