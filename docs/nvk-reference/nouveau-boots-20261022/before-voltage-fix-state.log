@@ -1,0 +1,11 @@
+/etc/c100-gpu-test-id=c100-native-v1
+/sys/module/nouveau/parameters/config=NvNaPll=1
+/sys/class/devfreq/57000000.gpu/governor=simple_ondemand
+/sys/class/devfreq/57000000.gpu/cur_freq=76800000
+/sys/class/devfreq/57000000.gpu/max_freq=921600000
+/sys/kernel/debug/clk/fuse/clk_enable_count=1
+/sys/kernel/debug/clk/fuse/clk_rate=19200000
+VDD_GPU=710000
+
+%{"nerves_fw_active" => "b", "nerves_fw_validated" => "1"}
+:ok

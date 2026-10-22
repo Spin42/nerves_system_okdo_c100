@@ -1,0 +1,21 @@
+raised freq=307200000
+uV=819800
+
+restored freq=76800000
+uV=819800
+
+0: platform/7000a000.pwm, npwm: 4
+ pwm-0   ((null)              ):
+  requested configuration: disabled, 0/0 ns, normal polarity
+  actual configuration:    disabled, 0/0 ns, normal polarity
+ pwm-1   (regulator-vdd-gpu   ): requested
+  requested configuration:  enabled, 1440/8000 ns, normal polarity
+  actual configuration:    disabled, 0/0 ns, normal polarity
+ pwm-2   ((null)              ):
+  requested configuration: disabled, 0/0 ns, normal polarity
+  actual configuration:    disabled, 0/0 ns, normal polarity
+ pwm-3   (pwm-fan             ): requested
+  requested configuration: disabled, 0/45334 ns, normal polarity, usage_power
+  actual configuration:    disabled, 0/0 ns, normal polarity
+
+:ok
