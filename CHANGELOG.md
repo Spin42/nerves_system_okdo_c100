@@ -4,6 +4,13 @@
 
 Initial release.
 
+* nouveau runs the GM20B on its native clock path with the fuse clock kept
+  enabled, the initial voltage requested before PLL programming and the
+  frontend idle timeout disabled during golden-context setup; the GPU came
+  up on thirty consecutive warm reboots
+* `c100-limits` is installed by the `c100-gpu` Buildroot package and caps
+  the GPU at 921.6 MHz before the first graphics channel
+
 * Mainline Linux 6.18.57 with an OKdo C100 device tree (eMMC module, carrier
   microSD on SDMMC3) and backported nouveau devfreq for the Tegra GPU
 * Mainline U-Boot 2026.07 running the Nerves A/B logic on microSD or eMMC

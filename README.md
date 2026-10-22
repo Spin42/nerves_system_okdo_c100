@@ -37,6 +37,8 @@ mix burn
 ```
 
 Put the card in the C100 and power it on. Nothing on the eMMC is modified.
+The step-by-step guide, what to expect on the console and how to update over
+the network are in [docs/booting.md](docs/booting.md).
 
 ## How it boots
 
@@ -148,7 +150,22 @@ GPU clock scaling is handled by devfreq; see
 
 ## Known limitations
 
-* The kernel has no memory controller (EMC) frequency tables, so the DRAM runs
-  at the frequency set by NVIDIA's boot firmware.
+* The kernel has no memory controller (EMC) frequency tables, so the DRAM
+  stays at the frequency set by NVIDIA's boot firmware (1600 MHz on the
+  tested boards; `/sys/kernel/debug/clk/emc/clk_rate` shows it).
+* GPU initialization was validated over thirty consecutive warm reboots with
+  the nouveau patches in `linux/`; cold power cycles were not tested in
+  series. See [docs/nouveau-gm20b.md](docs/nouveau-gm20b.md).
 * If NVIDIA's boot firmware itself is damaged, the board has to be recovered
   over USB recovery mode (RCM), which this system does not provide tools for.
+
+## Documentation
+
+* [docs/booting.md](docs/booting.md): booting from a Nerves microSD card.
+* [docs/board-testing.md](docs/board-testing.md): reaching, flashing and
+  boot-testing a board from the host, with the `scripts/board/` helpers.
+* [docs/nouveau-gm20b.md](docs/nouveau-gm20b.md): GPU bring-up notes and the
+  accepted power-management configuration.
+* [docs/gpu-compute.md](docs/gpu-compute.md), [docs/nvk-findings.md](docs/nvk-findings.md),
+  [docs/l4t-findings.md](docs/l4t-findings.md): GPU compute investigation and
+  what L4T configures that this system has to match.
