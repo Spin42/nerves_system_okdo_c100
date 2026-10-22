@@ -1,0 +1,206 @@
+From patchwork Fri Oct 16 16:06:54 2026
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+X-Patchwork-Submitter: Sasha Levin <sashal@kernel.org>
+X-Patchwork-Id: 2322866
+Return-Path: 
+ <linux-tegra+bounces-18325-incoming=patchwork.ozlabs.org@vger.kernel.org>
+X-Original-To: incoming@patchwork.ozlabs.org
+Delivered-To: patchwork-incoming@legolas.ozlabs.org
+Authentication-Results: legolas.ozlabs.org;
+	dkim=pass (2048-bit key;
+ unprotected) header.d=kernel.org header.i=@kernel.org header.a=rsa-sha256
+ header.s=k20260515 header.b=oSiy7S7F;
+	dkim-atps=neutral
+Authentication-Results: legolas.ozlabs.org;
+ spf=pass (sender SPF authorized) smtp.mailfrom=vger.kernel.org
+ (client-ip=2600:3c0a:e001:db::12fc:5321; helo=sea.lore.kernel.org;
+ envelope-from=linux-tegra+bounces-18325-incoming=patchwork.ozlabs.org@vger.kernel.org;
+ receiver=patchwork.ozlabs.org)
+Received: from sea.lore.kernel.org (sea.lore.kernel.org
+ [IPv6:2600:3c0a:e001:db::12fc:5321])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange x25519)
+	(No client certificate requested)
+	by legolas.ozlabs.org (Postfix) with ESMTPS id 4j5rlW0wcCz1xt8
+	for <incoming@patchwork.ozlabs.org>; Sat, 17 Oct 2026 03:59:51 +1100 (AEDT)
+Received: from smtp.subspace.kernel.org (conduit.subspace.kernel.org
+ [100.90.174.1])
+	by sea.lore.kernel.org (Postfix) with ESMTP id 9AC11C1E45
+	for <incoming@patchwork.ozlabs.org>; Fri, 16 Oct 2026 16:07:07 +0000 (UTC)
+Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 5E39B51A138;
+	Fri, 16 Oct 2026 16:07:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org
+ header.b="oSiy7S7F"
+X-Original-To: linux-tegra@vger.kernel.org
+Received: from smtp.kernel.org
+ (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E2AE5187FE;
+	Fri, 16 Oct 2026 16:07:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+ arc=none smtp.client-ip=100.103.45.18
+ARC-Seal: i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1792166827; cv=none;
+ b=GQtLEZoU4GdPpqMAND9BnLhieX++mGcEJmtWQOGlfNNWei+qpPEAUiT/CJyeqdrm39bIk94Ax156LjfVS99fX3rXsVa1PZdoN0mFnmUJK2g/0y0KGLNXcjb5FfJi7Hh8B/kSVeie3Fyy0vl5TTAtyp0HUISQpnnR2OIKbuT3Xsk=
+ARC-Message-Signature: i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1792166827; c=relaxed/simple;
+	bh=Fjg/U77wtX/064bZd+8r9caGC5JdhNR2g80ldhVdTQ8=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version;
+ b=BtDDWeMD56qy6r1qgzTolNh0x5E3tIVYc3s4eurlfF1tZPe2/uHLEp23DCLraSR+CSvrl7lNday9dy/JJRreQBsyL7AKfueNtIDVDIiKdhM/Y0s43Gt2v2kd0A0y5BVVw7A518DIdyc4Qm3mwasacXzOma4Cl8rIk0Bqg/KIXB8=
+ARC-Authentication-Results: i=1; smtp.subspace.kernel.org;
+ dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org
+ header.b=oSiy7S7F; arc=none smtp.client-ip=100.103.45.18
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A2B491F000C6;
+	Fri, 16 Oct 2026 16:07:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1792166825;
+	bh=EyhMIFki24z/GS7kQ9MxTJlK5fDdy74J09DSaxUb78g=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References;
+	b=oSiy7S7F/4VWlSrLEKyL8T7zav3l+9kgUofPlfdPeVnZVIL6SOtZQaJE6VFYcbcne
+	 u5aJq0t3Ep7iW7oTnJFKvH9aBSl62KQ0S/AcdZm8axc4Dtt5e4tdElIyKfUIfZt3vx
+	 OqwY5h5TcOBQkhWwRT42CpUnVkXd1N7vBC8maYs/IRi8ogF782d0aXvdVQpm2nhA7C
+	 jz9o3/ipk3gHBGfBT9A+saejHnahRrKRjPjLp31snRs8pMPwtNBDCGE1TdyEHXIIQ4
+	 iAiKjt82eYacWqbo3OtG5R06//eUNIs+QpVfLK0uZca5lIpClHhQtiWfx+70N4jwHJ
+	 TAv8ND+khwkrA==
+From: Sasha Levin <sashal@kernel.org>
+To: Thierry Reding <thierry.reding@kernel.org>,
+	Jonathan Hunter <jonathanh@nvidia.com>,
+	Lyude Paul <lyude@redhat.com>,
+	Danilo Krummrich <dakr@kernel.org>
+Cc: Sasha Levin <sashal@kernel.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Alexandre Courbot <acourbot@nvidia.com>,
+	Mikko Perttunen <mperttunen@nvidia.com>,
+	Aaron Kling <webgeek1234@gmail.com>,
+	Diogo Ivo <diogo.ivo@bootlin.com>,
+	Svyatoslav Ryhel <clamor95@gmail.com>,
+	Dmitry Osipenko <dmitry.osipenko@collabora.com>,
+	David Airlie <airlied@gmail.com>,
+	Simona Vetter <simona@ffwll.ch>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	Maxime Ripard <mripard@kernel.org>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	dri-devel@lists.freedesktop.org,
+	nouveau@lists.freedesktop.org,
+	devicetree@vger.kernel.org,
+	linux-tegra@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2 1/6] dt-bindings: gpu: nvidia,gk20a: Require the fuse clock
+Date: Fri, 16 Oct 2026 12:06:54 -0400
+Message-ID: <20261016160700.3831336-2-sashal@kernel.org>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20261016160700.3831336-1-sashal@kernel.org>
+References: <20261016160700.3831336-1-sashal@kernel.org>
+Precedence: bulk
+X-Mailing-List: linux-tegra@vger.kernel.org
+List-Id: <linux-tegra.vger.kernel.org>
+List-Subscribe: <mailto:linux-tegra+subscribe@vger.kernel.org>
+List-Unsubscribe: <mailto:linux-tegra+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+
+The GM20B on Tegra210 often fails to initialize unless the fuse clock
+is running while the GPU is powered, and the GPUs on the other Tegra
+generations are expected to have the same requirement. Tegra194 already
+describes the fuse clock for its GV11B.
+
+Make the fuse clock required for all of them, and list the exact clocks
+for each GPU instead of allowing either the reference or the fuse clock
+as the third one: GM20B takes the fuse clock after its reference clock,
+the others take it after the GPU and power clocks.
+
+The nouveau driver keeps treating the fuse clock as optional, so device
+trees that lack it continue to work as before.
+
+Assisted-by: LLM
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ .../devicetree/bindings/gpu/nvidia,gk20a.yaml | 52 ++++++++++++++-----
+ 1 file changed, 40 insertions(+), 12 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/gpu/nvidia,gk20a.yaml b/Documentation/devicetree/bindings/gpu/nvidia,gk20a.yaml
+index 4d856a8b674c5..af0ada6e02557 100644
+--- a/Documentation/devicetree/bindings/gpu/nvidia,gk20a.yaml
++++ b/Documentation/devicetree/bindings/gpu/nvidia,gk20a.yaml
+@@ -39,18 +39,12 @@ properties:
+       Regulator for GPU supply voltage
+ 
+   clocks:
+-    minItems: 2
+-    items:
+-      - description: GPU clock
+-      - description: Power clock
+-      - description: Reference or fuse clock
++    minItems: 3
++    maxItems: 4
+ 
+   clock-names:
+-    minItems: 2
+-    items:
+-      - const: gpu
+-      - const: pwr
+-      - enum: [ ref, fuse ]
++    minItems: 3
++    maxItems: 4
+ 
+   resets:
+     maxItems: 1
+@@ -86,6 +80,39 @@ required:
+   - reset-names
+ 
+ allOf:
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: nvidia,gm20b
++    then:
++      properties:
++        clocks:
++          items:
++            - description: GPU clock
++            - description: Power clock
++            - description: Reference clock
++            - description: Fuse clock
++
++        clock-names:
++          items:
++            - const: gpu
++            - const: pwr
++            - const: ref
++            - const: fuse
++    else:
++      properties:
++        clocks:
++          items:
++            - description: GPU clock
++            - description: Power clock
++            - description: Fuse clock
++
++        clock-names:
++          items:
++            - const: gpu
++            - const: pwr
++            - const: fuse
+   - if:
+       properties:
+         compatible:
+@@ -163,8 +190,9 @@ examples:
+         interrupt-names = "stall", "nonstall";
+         vdd-supply = <&vdd_gpu>;
+         clocks = <&tegra_car TEGRA124_CLK_GPU>,
+-                 <&tegra_car TEGRA124_CLK_PLL_P_OUT5>;
+-        clock-names = "gpu", "pwr";
++                 <&tegra_car TEGRA124_CLK_PLL_P_OUT5>,
++                 <&tegra_car TEGRA124_CLK_FUSE>;
++        clock-names = "gpu", "pwr", "fuse";
+         resets = <&tegra_car 184>;
+         reset-names = "gpu";
+         iommus = <&mc TEGRA_SWGROUP_GPU>;
