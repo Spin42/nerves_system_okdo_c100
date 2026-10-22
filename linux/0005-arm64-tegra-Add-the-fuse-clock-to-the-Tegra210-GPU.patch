@@ -1,0 +1,25 @@
+From: Sasha Levin <sashal@kernel.org>
+Date: Fri, 16 Oct 2026 12:06:58 -0400
+Subject: [PATCH v2 5/6] arm64: tegra: Add the fuse clock to the Tegra210 GPU
+
+The GM20B GPU on Tegra210 needs the fuse clock running while it is
+powered. Describe it so that the GPU driver can keep it enabled.
+
+Fixes: d1b725476104 ("arm64: tegra: p2180: Explicitly enable GPU")
+Assisted-by: LLM
+---
+diff --git a/arch/arm64/boot/dts/nvidia/tegra210.dtsi b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
+index 5f5e5370d7096..2e84b2bda3142 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra210.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra210.dtsi
+@@ -446,8 +446,9 @@ gpu@57000000 {
+ 		interrupt-names = "stall", "nonstall";
+ 		clocks = <&tegra_car TEGRA210_CLK_GPU>,
+ 			 <&tegra_car TEGRA210_CLK_PLL_P_OUT5>,
+-			 <&tegra_car TEGRA210_CLK_PLL_G_REF>;
+-		clock-names = "gpu", "pwr", "ref";
++			 <&tegra_car TEGRA210_CLK_PLL_G_REF>,
++			 <&tegra_car TEGRA210_CLK_FUSE>;
++		clock-names = "gpu", "pwr", "ref", "fuse";
+ 		resets = <&tegra_car 184>;
+ 		reset-names = "gpu";

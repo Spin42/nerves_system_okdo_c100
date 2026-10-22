@@ -1,0 +1,31 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Subject: [PATCH] drm/nouveau/gm20b: Set voltage before initializing clock
+
+gm20b_clk_init programs the lowest performance state directly, bypassing
+the voltage request in nvkm_cstate_prog. On a Nano with the standard PWM
+regulator range, the rail remains at its 710 mV minimum until the first
+frequency transition, below the 818.75 mV minimum in the speedo-2 table.
+
+Request the initial state's voltage before programming the PLL and its
+noise-aware voltage detector. Only raise the voltage, preserving a higher
+boot voltage until normal reclocking can lower it in the correct order.
+
+Assisted-by: Codex:GPT-6
+---
+--- a/drivers/gpu/drm/nouveau/nvkm/subdev/clk/gm20b.c
++++ b/drivers/gpu/drm/nouveau/nvkm/subdev/clk/gm20b.c
+@@ -817,6 +817,14 @@ gm20b_clk_init(struct nvkm_clk *base)
+ 	int ret;
+ 	u32 data;
+ 
++	/* Establish the boot state's voltage before programming the PLL. */
++	ret = nvkm_volt_set_id(device->volt, base->func->pstates[0].base.voltage,
++			       base->func->pstates[0].base.voltage, base->temp, +1);
++	if (ret) {
++		nvkm_error(subdev, "cannot initialize voltage: %d\n", ret);
++		return ret;
++	}
++
+ 	/* get out from IDDQ */
+ 	nvkm_mask(device, GPCPLL_CFG, GPCPLL_CFG_IDDQ, 0);
+ 	nvkm_rd32(device, GPCPLL_CFG);

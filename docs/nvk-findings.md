@@ -108,6 +108,28 @@ is untested beyond vkpeak's copies.
 
 ## Platform issues found
 
+- The VDD_GPU PWM regulator's `regulator-min-microvolt` and
+  `regulator-max-microvolt` define its duty-cycle calibration. Raising the
+  minimum from 710000 to 1000000 does not create a physical 1 V floor:
+  it relabels 0% duty as 1 V and changes every voltage request. Retain the
+  original 710000..1320000 range. Earlier voltage comparisons made with
+  the 1 V override cannot be treated as measurements of rail voltage.
+- With that calibration restored, GM20B clock initialization leaves the
+  regulator reporting 710000 uV until the first frequency transition. On the
+  test board, requesting 307.2 MHz raised the reported voltage to 819800
+  uV; returning to 76.8 MHz retained it. The speedo-2 table minimum is
+  818750 uV. Patch 0007 requests the initial state's voltage before PLL
+  programming. This fixes the missing clock-initialization request.
+  ACR/PMU initialization precedes clock initialization, so this does not
+  establish the cause of the earlier PMU timeout.
+- With native power management restored, a separate intermittent
+  `INJECTED_BUNDLE_ERROR` trap was captured during golden-context bundle
+  injection with FE_GO_IDLE_TIMEOUT enabled. Patch 0008 defers restoring
+  that timeout until injection and a GR idle wait finish, following
+  NVIDIA's Tegra sequence. The clean image with 0007/0008 and the fuse
+  backports passed thirty warm reboots, three bounded frequency transitions
+  and thirty integer-compute cases. Cold power cycles remain untested.
+  [Boot evidence and reproduction](nvk-reference/nouveau-boots-20261022/README.md).
 - nouveau builds the GPU's golden context on the first graphics channel.
   With the EMC at 1600 MHz that times out in FECS
   (`gf100_gr_fecs_bind_pointer`, `gr: init failed, -16`) and leaves the

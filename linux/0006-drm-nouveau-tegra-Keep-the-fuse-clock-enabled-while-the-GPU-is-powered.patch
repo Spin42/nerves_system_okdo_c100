@@ -1,0 +1,104 @@
+From: Sasha Levin <sashal@kernel.org>
+Date: Fri, 16 Oct 2026 12:06:59 -0400
+Subject: [PATCH v2 6/6] drm/nouveau/tegra: Keep the fuse clock enabled while the GPU is powered
+
+Since the GPU on the Jetson TX1 was enabled in commit d1b725476104
+("arm64: tegra: p2180: Explicitly enable GPU"), nouveau often fails to
+bring up the GM20B. Either BOOT_0 reads back garbage ("unknown chipset
+(5ffefa47)"), or PRI reads of the GPC PLL time out ("MMIO read of
+00000000 FAULT at 137000 [ TIMEOUT ]"), or the first register reads in
+nvkm_device_ctor() stall until an asynchronous SError. How often depends
+on the board; one board fails on every boot.
+
+nouveau powers the GPU up with the fuse clock gated: since commit
+24a15252ff04 ("soc/tegra: fuse: Add runtime PM support"), the Tegra fuse
+driver only enables that clock around its own fuse reads. NVIDIA's
+downstream nvgpu driver enables the fuse clock along with the other GPU
+clocks whenever the GPU is powered. Do the same: take an optional "fuse"
+clock and keep it enabled from before the GPU rail is turned on until
+after it is turned off. The clock is optional so that device trees that
+lack it keep working as before.
+
+Tested on eight Jetson TX1 devkits, on mainline and on v6.18. Without
+this patch, the GPU failed to come up in 27 of 109 boots; with it, in 11
+of 291, none of them with a garbage BOOT_0. On the board that failed on
+every boot, 38 of 40 boots now succeed. The remaining failures are
+mostly a register read that stalls until an SError; wherever the console
+shows when, nouveau had already finished probing. Such stalls also occur
+without this patch and are a separate problem. The Jetson Nano, which
+shares the Tegra210 GPU node, still works (24 of 24 boots).
+
+Fixes: d1b725476104 ("arm64: tegra: p2180: Explicitly enable GPU")
+Assisted-by: LLM
+[backport to v6.18: get the fuse clock after the pwr clock, as v6.18 has no PMC lookup]
+---
+--- a/drivers/gpu/drm/nouveau/include/nvkm/core/tegra.h
++++ b/drivers/gpu/drm/nouveau/include/nvkm/core/tegra.h
+@@ -15,6 +15,7 @@
+ 	struct clk *clk;
+ 	struct clk *clk_ref;
+ 	struct clk *clk_pwr;
++	struct clk *clk_fuse;
+ 
+ 	struct regulator *vdd;
+ 
+--- a/drivers/gpu/drm/nouveau/nvkm/engine/device/tegra.c
++++ b/drivers/gpu/drm/nouveau/nvkm/engine/device/tegra.c
+@@ -32,6 +32,10 @@
+ {
+ 	int ret;
+ 
++	ret = clk_prepare_enable(tdev->clk_fuse);
++	if (ret)
++		return ret;
++
+ 	if (tdev->vdd) {
+ 		ret = regulator_enable(tdev->vdd);
+ 		if (ret)
+@@ -75,26 +79,26 @@
+ 	if (tdev->vdd)
+ 		regulator_disable(tdev->vdd);
+ err_power:
++	clk_disable_unprepare(tdev->clk_fuse);
+ 	return ret;
+ }
+ 
+ static int
+ nvkm_device_tegra_power_down(struct nvkm_device_tegra *tdev)
+ {
+-	int ret;
++	int ret = 0;
+ 
+ 	clk_disable_unprepare(tdev->clk_pwr);
+ 	clk_disable_unprepare(tdev->clk_ref);
+ 	clk_disable_unprepare(tdev->clk);
+ 	udelay(10);
+ 
+-	if (tdev->vdd) {
++	if (tdev->vdd)
+ 		ret = regulator_disable(tdev->vdd);
+-		if (ret)
+-			return ret;
+-	}
+-
+-	return 0;
++
++	clk_disable_unprepare(tdev->clk_fuse);
++
++	return ret;
+ }
+ 
+ static void
+@@ -307,6 +311,12 @@
+ 		goto free;
+ 	}
+ 
++	tdev->clk_fuse = devm_clk_get_optional(&pdev->dev, "fuse");
++	if (IS_ERR(tdev->clk_fuse)) {
++		ret = PTR_ERR(tdev->clk_fuse);
++		goto free;
++	}
++
+ 	/**
+ 	 * The IOMMU bit defines the upper limit of the GPU-addressable space.
+ 	 */

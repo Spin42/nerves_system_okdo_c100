@@ -1,0 +1,32 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Subject: [PATCH] drm/nouveau/gm20b: Keep idle timeout disabled during bundle init
+
+Golden-context generation restores FE_GO_IDLE_TIMEOUT before injecting
+the initialization bundles. On a Tegra210 Nano, intermittent frontend
+INJECTED_BUNDLE_ERROR traps occur during this injection while the timeout
+is enabled.
+
+Keep the timeout disabled through bundle injection and wait for GR to
+become idle before restoring it, following the NVIDIA Tegra driver's
+initialization sequence.
+
+Assisted-by: Codex:GPT-6
+---
+--- a/drivers/gpu/drm/nouveau/nvkm/engine/gr/ctxgm20b.c
++++ b/drivers/gpu/drm/nouveau/nvkm/engine/gr/ctxgm20b.c
+@@ -58,13 +58,12 @@ gm20b_grctx_generate_main(struct gf100_gr_chan *chan)
+ 
+ 	gf100_gr_wait_idle(gr);
+ 
+-	nvkm_wr32(device, 0x404154, idle_timeout);
+-	gf100_gr_wait_idle(gr);
+-
+ 	gf100_gr_mthd(gr, gr->method);
+ 	gf100_gr_wait_idle(gr);
+ 
+ 	gf100_gr_icmd(gr, gr->bundle);
++	gf100_gr_wait_idle(gr);
++	nvkm_wr32(device, 0x404154, idle_timeout);
+ 	grctx->pagepool(chan, chan->pagepool->addr);
+ 	grctx->bundle(chan, chan->bundle_cb->addr, grctx->bundle_size);
+ }
