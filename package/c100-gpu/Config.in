@@ -1,0 +1,8 @@
+config BR2_PACKAGE_C100_GPU
+	bool "c100-gpu"
+	depends on BR2_PACKAGE_VULKAN_TOOLS
+	help
+	  CPU/GPU clock limits and graphics-channel initialization for the
+	  OKdo C100's Tegra210 module. Installs c100-limits, invoked by the
+	  board's erlinit configuration before Erlang starts. GPU clocks
+	  continue to scale through nouveau's simple_ondemand governor.

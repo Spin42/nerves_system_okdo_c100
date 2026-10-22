@@ -17,6 +17,12 @@ SPDX-FileCopyrightText = "None"
 SPDX-License-Identifier = "CC0-1.0"
 
 [[annotations]]
+path = ["package/c100-gpu/c100-limits"]
+precedence = "override"
+SPDX-FileCopyrightText = "None"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
 path = [
  "README.md"
 ]

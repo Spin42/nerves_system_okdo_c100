@@ -12,9 +12,8 @@
 # the EMC runs at 1600 MHz, so the EMC stays at 204 MHz until a first
 # channel has been created.
 #
-# nouveau registers the GPU's devfreq device with the userspace governor,
-# so the GPU keeps its lowest boot clock until the first channel is open.
-# The performance governor then holds it at the maximum without polling.
+# nouveau's simple_ondemand governor scales the GPU with load. Cap its
+# maximum before opening the first graphics channel.
 #
 # Each step is logged to the kernel log, and so to the serial console.
 
@@ -48,17 +47,16 @@ done
 		exit 0
 	fi
 
+	if [ -w $GPU_DEVFREQ/max_freq ]; then
+		echo $GPU_MAX_HZ > $GPU_DEVFREQ/max_freq
+	fi
+
 	# Creating a Vulkan device opens the first graphics channel
 	if ! NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1 vulkaninfo --summary > /dev/null 2>&1; then
-		log "vulkaninfo failed, GPU and EMC left at boot clocks"
+		log "vulkaninfo failed, EMC left at boot clock"
 		exit 0
 	fi
 	log "first channel open"
-
-	if [ -w $GPU_DEVFREQ/max_freq ]; then
-		echo $GPU_MAX_HZ > $GPU_DEVFREQ/max_freq
-		echo performance > $GPU_DEVFREQ/governor
-	fi
 
 	grep -qw $EMC_HZ $EMC_DEBUGFS/available_rates 2>/dev/null &&
 		echo $EMC_HZ > $EMC_DEBUGFS/min_rate
