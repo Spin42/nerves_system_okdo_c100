@@ -12,6 +12,10 @@
 # the EMC runs at 1600 MHz, so the EMC stays at 204 MHz until a first
 # channel has been created.
 #
+# nouveau registers the GPU's devfreq device with the userspace governor,
+# so the GPU keeps its lowest boot clock until the first channel is open.
+# The performance governor then holds it at the maximum without polling.
+#
 # Each step is logged to the kernel log, and so to the serial console.
 
 CPU_MAX_KHZ=1479000
@@ -31,7 +35,6 @@ for policy in /sys/devices/system/cpu/cpufreq/policy*; do
 done
 
 [ -d $EMC_DEBUGFS ] || mount -t debugfs debugfs /sys/kernel/debug
-log "start, emc $(cat $EMC_CLK 2>/dev/null)"
 
 # nouveau is a module and loads after Erlang starts
 (
@@ -44,29 +47,22 @@ log "start, emc $(cat $EMC_CLK 2>/dev/null)"
 		log "no nouveau render node after ${i}s, GPU left alone"
 		exit 0
 	fi
-	sleep 2
-
-	# devfreq reprograms the GPU PLL when the load changes, and a switch
-	# while the GPU is busy wedges it (every MMIO access then times out).
-	# The clock is pinned while the GPU is still idle, so it never changes
-	# under load.
-	if [ -w $GPU_DEVFREQ/max_freq ]; then
-		echo $GPU_MAX_HZ > $GPU_DEVFREQ/max_freq
-		echo $GPU_MAX_HZ > $GPU_DEVFREQ/min_freq
-		sleep 1
-	fi
-	log "nouveau up after ${i}s, gpu $(cat $GPU_DEVFREQ/cur_freq 2>/dev/null) Hz, emc $(cat $EMC_CLK 2>/dev/null), opening the first channel"
 
 	# Creating a Vulkan device opens the first graphics channel
 	if ! NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1 vulkaninfo --summary > /dev/null 2>&1; then
-		log "vulkaninfo failed, EMC left unchanged"
+		log "vulkaninfo failed, GPU and EMC left at boot clocks"
 		exit 0
 	fi
 	log "first channel open"
 
+	if [ -w $GPU_DEVFREQ/max_freq ]; then
+		echo $GPU_MAX_HZ > $GPU_DEVFREQ/max_freq
+		echo performance > $GPU_DEVFREQ/governor
+	fi
+
 	grep -qw $EMC_HZ $EMC_DEBUGFS/available_rates 2>/dev/null &&
 		echo $EMC_HZ > $EMC_DEBUGFS/min_rate
-	log "done, emc $(cat $EMC_CLK 2>/dev/null)"
+	log "gpu $(cat $GPU_DEVFREQ/cur_freq 2>/dev/null) Hz, emc $(cat $EMC_CLK 2>/dev/null) Hz"
 ) &
 
 exit 0
