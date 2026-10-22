@@ -186,6 +186,17 @@
 		regulator-boot-on;
 	};
 
+	/*
+	 * The PWM regulator reads back as its 710 mV minimum until nouveau sets
+	 * a voltage, below what the GPU needs even at 76.8 MHz (about 820 mV),
+	 * and nouveau's first context then fails with MMIO timeouts. As L4T
+	 * does at boot, the rail is brought to 1.0 V when the regulator
+	 * registers; nouveau's requests below that are raised to it.
+	 */
+	regulator-vdd-gpu {
+		regulator-min-microvolt = <1000000>;
+	};
+
 	/* The P3448-0002 module has no QSPI flash */
 	spi@70410000 {
 		status = "disabled";
