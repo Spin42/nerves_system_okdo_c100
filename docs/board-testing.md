@@ -61,7 +61,7 @@ median (0.77 + 0.96 ms at VGA) are the only stages still slower than NVIDIA's.
 
 ## Stopped checkpoint, 2026-10-22: resume here
 
-The user requested stopping optimization and writing the handover. No new
+Optimization was paused here at the user's request. No new
 experiment was started after that request. The already-running R44 finished
 successfully. NVIDIA parity remains **unachieved**; do not mark the goal complete.
 No flash, reboot, commit, push, installed driver/runtime replacement, governor
@@ -248,8 +248,8 @@ kernel errors while running, and refuses already contaminated logs.
 `C100_GPU_DIAGNOSTIC=1` explicitly retains a baseline for bounded investigation
 and produces `BOARD_DIAGNOSTIC_PASS`, never clean acceptance. Every new
 error still stops the child. Preserve and investigate failure logs; do not
-clear dmesg to obtain a passing result. See the latest update in the GPU
-handover and `~/Projects/nx_iree/docs/reference/stereo-graph-20261022/README.md`.
+clear dmesg to obtain a passing result. See the latest update in the
+[nouveau notes](nouveau-gm20b.md) and `~/Projects/nx_iree/docs/reference/stereo-graph-20261022/README.md`.
 
 ## Updated boot harness, 2026-10-22
 

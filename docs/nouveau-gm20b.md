@@ -19,7 +19,7 @@ run; this is a performance checkpoint, not a stability claim.
 
 ## Stop checkpoint after optimization experiments, 2026-10-22
 
-The user requested leaving optimization here and recording a handover.
+Optimization was paused here at the user's request.
 Read **board-testing.md, “Stopped checkpoint”** first: it contains
 current board state, exact artifacts, remaining checks and resume steps.
 Best private resident graph: **34.24 FPS VGA / 11.33 FPS 720p**, versus frozen
