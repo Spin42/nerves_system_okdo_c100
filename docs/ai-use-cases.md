@@ -43,8 +43,9 @@ changes nothing, so the CPU figures are compute-bound.
   kernels remain the strongest GPU case on this board.
 * IREE compiles YOLOv5s to a working Vulkan graph once three problems are
   handled (im2col convolutions with channels-last preprocessing, two padded
-  tensor dimensions, and a tuning spec for two matmul families; recipe in
-  `c100_gpu/README.md`). It is 2x faster than ncnn's Vulkan path and the only
+  tensor dimensions, and a tuning spec for two matmul families). The recipe
+  is vendor-neutral, in `nx_iree/bench/yolo`; only the GM20B spec is in
+  `c100_gpu`. It is 2x faster than ncnn's Vulkan path and the only
   way to run the detector inside Nx, but still 30 % behind ncnn on the CPU:
   with 532 ms of GPU time per frame, matmuls take 346 ms at 26-78 GFLOPS and
   memory-bound glue (im2col, transposes, the detect head's 85-wide copies)
