@@ -18,13 +18,21 @@ while (( SECONDS < deadline )); do
       case File.read(path) do {:ok, v} -> IO.puts(key <> "=" <> String.trim(v)); _ -> :ok end
     end
     for r <- Path.wildcard("/sys/class/regulator/regulator.*"), File.read(Path.join(r, "name")) == {:ok, "VDD_GPU\n"}, do: IO.puts("VDD_GPU=" <> String.trim(File.read!(Path.join(r, "microvolts"))))
+    IO.puts("CPU_MAX=" <> String.trim(File.read!("/sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq")))
+    unless File.exists?("/sys/kernel/debug/clk"), do: System.cmd("mount", ["-t", "debugfs", "debugfs", "/sys/kernel/debug"])
+    case File.read("/sys/kernel/debug/clk/emc/clk_rate") do {:ok, v} -> IO.puts("EMC_RATE=" <> String.trim(v)); _ -> :ok end
+    # nouveau is a module; once its render node exists, open the first channel
+    if Path.wildcard("/sys/devices/platform/57000000.gpu/drm/renderD*") != [] do
+      {_, rc} = System.cmd("vulkaninfo", ["--summary"], env: [{"NVK_I_WANT_A_BROKEN_VULKAN_DRIVER", "1"}], stderr_to_stdout: true)
+      IO.puts("FIRST_CHANNEL=" <> if(rc == 0, do: "ok", else: "failed"))
+    end
     {d, rc} = System.cmd("dmesg", [])
     if rc != 0, do: raise("dmesg failed")
     IO.puts(d)
     :ok' > "$output.pending" 2>&1; then
     boot=$(sed -n 's/^BOOT_ID=//p' "$output.pending" | tr -d '\r')
     if [[ -n "$boot" && "$boot" != "$old_boot" ]] && grep -q 'VALIDATED=1' "$output.pending"; then
-      if grep -q 'c100-limits: first channel open\|c100-limits: vulkaninfo failed' "$output.pending"; then
+      if grep -q '^FIRST_CHANNEL=' "$output.pending"; then
         mv "$output.pending" "$output"
         if ! grep -q "$marker" "$output"; then
           printf 'Wrong firmware: expected %s\n' "$marker"
@@ -34,6 +42,8 @@ while (( SECONDS < deadline )); do
           voltage=$(sed -n 's/^VDD_GPU=//p' "$output" | tr -d '\r')
           if ! grep -q '^GOVERNOR=simple_ondemand' "$output" ||
              ! grep -q '^GPU_MAX=921600000' "$output" ||
+             ! grep -q '^CPU_MAX=1479000' "$output" ||
+             ! grep -q '^EMC_RATE=1600000000' "$output" ||
              [[ ! "$voltage" =~ ^[0-9]+$ ]] || (( voltage < 818750 || voltage > 1200000 )); then
             printf 'FAIL power management state: %s\n' "$output"
             exit 1
@@ -45,7 +55,7 @@ while (( SECONDS < deadline )); do
           printf 'FAIL unexpected nouveau override: %s\n' "$output"
           exit 1
         fi
-        if grep -q 'c100-limits: first channel open' "$output" && ! grep -Ei -q 'nouveau.*(timeout|timed out|failed|TRAP|FAULT)' "$output"; then
+        if grep -q '^FIRST_CHANNEL=ok' "$output" && ! grep -Ei -q 'nouveau.*(timeout|timed out|failed|TRAP|FAULT)' "$output"; then
           printf 'PASS %s %s\n' "$boot" "$output"
           exit 0
         fi
