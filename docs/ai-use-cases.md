@@ -19,6 +19,7 @@ messages in every run). Nothing in the firmware changed; boot
 | Vision, YOLOv5s 640x640, OpenCV DNN 4.10 | 931 ms per frame | no Vulkan backend | |
 | Vision, YOLOv5s 640x640, ncnn c189d88 | 453 ms per frame | 1183 ms (fp16), 1561 ms (fp32) | 0.38x |
 | Vision, YOLOv5s, IREE 3.13 compiled graph (fp16, Winograd, rewritten graph, tuned), 640x512 / 640x640 | n/a | 199 / 242 ms | 2.3x / 1.9x vs ncnn CPU at 640x640 |
+| Vision, YOLOv5n, same IREE pipeline, 640x512 / 640x640 (Fairphone 3, OpenCV DNN on 4 A73 cores at 640: about 300 ms) | n/a | 115 / 134 ms | |
 | Stereo SGBM 640x480 D64, our Vulkan kernels (OpenCV module / NxIREE graph) | 15.0 FPS (OpenCV CPU 3WAY) | 42.8 / 49.6 FPS | 2.9-3.3x |
 
 Both whisper runs transcribed the clip correctly; the LLM produced the same
