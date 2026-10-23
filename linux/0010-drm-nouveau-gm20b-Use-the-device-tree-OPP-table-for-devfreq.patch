@@ -1,0 +1,54 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Subject: [PATCH] drm/nouveau/gm20b: Use the device tree OPP table for devfreq
+
+devfreq offers every pstate of the clock driver. On boards whose GPU is
+validated below the top pstate, the device tree is where that limit
+belongs.
+
+When the GPU node has an operating-points-v2 table, register it instead
+of the full pstate list.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+--- a/drivers/gpu/drm/nouveau/nvkm/subdev/clk/gk20a_devfreq.c
++++ b/drivers/gpu/drm/nouveau/nvkm/subdev/clk/gk20a_devfreq.c
+@@ -1,6 +1,7 @@
+ // SPDX-License-Identifier: MIT
+ #include <linux/clk.h>
+ #include <linux/math64.h>
++#include <linux/of.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm_opp.h>
+ 
+@@ -266,7 +267,7 @@
+ 	struct nvkm_pstate *pstates = base->func->pstates;
+ 	int nr_pstates = base->func->nr_pstates;
+ 	struct gk20a_devfreq *new_gdevfreq;
+-	int i;
++	int i, ret;
+ 
+ 	new_gdevfreq = drmm_kzalloc(drm->dev, sizeof(struct gk20a_devfreq), GFP_KERNEL);
+ 	if (!new_gdevfreq)
+@@ -274,9 +275,19 @@
+ 
+ 	new_gdevfreq->regs = tdev->regs;
+ 
+-	for (i = 0; i < nr_pstates; i++)
+-		dev_pm_opp_add(base->subdev.device->dev,
+-			       pstates[i].base.domain[nv_clk_src_gpc] * GK20A_CLK_GPC_MDIV, 0);
++	/*
++	 * A board may restrict the GPU to the frequencies its device tree
++	 * lists; each must be one of the clock driver's pstates.
++	 */
++	if (of_property_present(device->dev->of_node, "operating-points-v2")) {
++		ret = devm_pm_opp_of_add_table(device->dev);
++		if (ret)
++			return ret;
++	} else {
++		for (i = 0; i < nr_pstates; i++)
++			dev_pm_opp_add(device->dev,
++				       pstates[i].base.domain[nv_clk_src_gpc] * GK20A_CLK_GPC_MDIV, 0);
++	}
+ 
+ 	gk20a_pmu_init_perfmon_counter(new_gdevfreq);
+ 	gk20a_devfreq_reset(new_gdevfreq);

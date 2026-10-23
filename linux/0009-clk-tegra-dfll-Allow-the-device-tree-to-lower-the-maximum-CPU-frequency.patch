@@ -1,0 +1,48 @@
+From: Marc Lainez <marc.lainez@gmail.com>
+Subject: [PATCH] clk: tegra: dfll: Allow the device tree to lower the maximum CPU frequency
+
+The DFLL's maximum frequency comes from the SoC speedo table. Some
+modules are validated for less: the Jetson Nano module's CPU is rated at
+1479 MHz, while its speedo entry allows 1555.5 MHz.
+
+Add an optional nvidia,dfll-max-freq-khz property that caps the maximum,
+so the board's limit holds from boot without a userspace cpufreq policy.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+--- a/Documentation/devicetree/bindings/clock/nvidia,tegra124-dfll.txt
++++ b/Documentation/devicetree/bindings/clock/nvidia,tegra124-dfll.txt
+@@ -46,6 +46,10 @@
+ Optional properties for the control loop parameters:
+ - nvidia,cg-scale: Boolean value, see the field DFLL_PARAMS_CG_SCALE in the TRM.
+ 
++Optional properties for the frequency range:
++- nvidia,dfll-max-freq-khz: Highest CPU frequency in kHz. The DFLL does not
++  scale the CPU above it, even if the SoC's speedo supports more.
++
+ Optional properties for mode selection:
+ - nvidia,pwm-to-pmic: Use PWM to control regulator rather then I2C.
+ 
+--- a/drivers/clk/tegra/clk-tegra124-dfll-fcpu.c
++++ b/drivers/clk/tegra/clk-tegra124-dfll-fcpu.c
+@@ -658,6 +658,7 @@
+ {
+ 	int process_id, speedo_id, speedo_value, err;
+ 	struct tegra_dfll_soc_data *soc;
++	u32 max_freq_khz;
+ 	const struct dfll_fcpu_data *fcpu_data;
+ 	struct rail_alignment align;
+ 
+@@ -695,6 +696,12 @@
+ 
+ 	soc->max_freq = fcpu_data->cpu_max_freq_table[speedo_id];
+ 
++	/* A board may limit the CPU below what its SoC supports */
++	if (!of_property_read_u32(pdev->dev.of_node, "nvidia,dfll-max-freq-khz",
++				  &max_freq_khz))
++		soc->max_freq = min_t(unsigned long, soc->max_freq,
++				      max_freq_khz * 1000UL);
++
+ 	soc->cvb = tegra_cvb_add_opp_table(soc->dev, fcpu_data->cpu_cvb_tables,
+ 					   fcpu_data->cpu_cvb_tables_size,
+ 					   &align, process_id, speedo_id,

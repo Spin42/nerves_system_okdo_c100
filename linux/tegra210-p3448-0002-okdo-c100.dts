@@ -79,6 +79,81 @@
 		memory-region-names = "nominal", "derated";
 	};
 
+	/*
+	 * The GPU stops at 921.6 MHz, the module's validated maximum. The
+	 * mainline pstate table goes to 998.4 MHz, which needs about 1100 mV,
+	 * above the 1068 mV nominal maximum.
+	 *
+	 * Nothing scales the EMC on demand, so the GPU, its main bandwidth user,
+	 * requests the 1600 MHz rate cboot trains at every boot when it probes;
+	 * at the 204 MHz boot rate memory bandwidth is about 4x lower.
+	 */
+	gpu@57000000 {
+		operating-points-v2 = <&gpu_opp_table>;
+		assigned-clocks = <&tegra_car TEGRA210_CLK_EMC>;
+		assigned-clock-rates = <1600000000>;
+	};
+
+	gpu_opp_table: opp-table-gpu {
+		compatible = "operating-points-v2";
+
+		opp-76800000 {
+			opp-hz = /bits/ 64 <76800000>;
+		};
+
+		opp-153600000 {
+			opp-hz = /bits/ 64 <153600000>;
+		};
+
+		opp-230400000 {
+			opp-hz = /bits/ 64 <230400000>;
+		};
+
+		opp-307200000 {
+			opp-hz = /bits/ 64 <307200000>;
+		};
+
+		opp-384000000 {
+			opp-hz = /bits/ 64 <384000000>;
+		};
+
+		opp-460800000 {
+			opp-hz = /bits/ 64 <460800000>;
+		};
+
+		opp-537600000 {
+			opp-hz = /bits/ 64 <537600000>;
+		};
+
+		opp-614400000 {
+			opp-hz = /bits/ 64 <614400000>;
+		};
+
+		opp-691200000 {
+			opp-hz = /bits/ 64 <691200000>;
+		};
+
+		opp-768000000 {
+			opp-hz = /bits/ 64 <768000000>;
+		};
+
+		opp-844800000 {
+			opp-hz = /bits/ 64 <844800000>;
+		};
+
+		opp-921600000 {
+			opp-hz = /bits/ 64 <921600000>;
+		};
+	};
+
+	/*
+	 * The CPU stops at 1479 MHz, the module's validated maximum; the
+	 * speedo table allows 1555.5 MHz.
+	 */
+	clock@70110000 {
+		nvidia,dfll-max-freq-khz = <1479000>;
+	};
+
 	thermal-sensor@700e2000 {
 		/* Over-current inputs as L4T configures them; both are active low */
 		throttle-cfgs {

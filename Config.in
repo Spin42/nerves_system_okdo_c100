@@ -4,4 +4,3 @@
 # Nerves or Buildroot.
 
 source "$NERVES_DEFCONFIG_DIR/package/tegra210-firmware/Config.in"
-source "$NERVES_DEFCONFIG_DIR/package/c100-gpu/Config.in"
