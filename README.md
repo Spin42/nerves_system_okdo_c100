@@ -166,6 +166,8 @@ GPU clock scaling is handled by devfreq; see
   boot-testing a board from the host, with the `scripts/board/` helpers.
 * [docs/nouveau-gm20b.md](docs/nouveau-gm20b.md): GPU bring-up notes and the
   accepted power-management configuration.
+* [docs/ai-use-cases.md](docs/ai-use-cases.md): LLM, speech and vision engines
+  measured on the CPU and on the GPU through NVK.
 * [docs/gpu-compute.md](docs/gpu-compute.md), [docs/nvk-findings.md](docs/nvk-findings.md),
   [docs/l4t-findings.md](docs/l4t-findings.md): GPU compute investigation and
   what L4T configures that this system has to match.
