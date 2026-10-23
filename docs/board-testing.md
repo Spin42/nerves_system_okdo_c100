@@ -280,9 +280,12 @@ Accepted firmware UUID: `1ffb5cb3-94bd-54a7-f1e2-ec9661ce6746`, currently
 on validated slot B. It passed thirty warm reboots plus scaling/compute
 checks. Evidence: `docs/nvk-reference/nouveau-boots-20261022/README.md`.
 
-The unchanged `c100-limits` script now belongs to `package/c100-gpu`, enabled
-by `BR2_PACKAGE_C100_GPU`. It installs at the same `/usr/sbin/c100-limits`
-path used by erlinit. This source packaging move has not been flashed.
+The clock limits live in the device tree; there is no startup script. The
+DFLL stops the CPU at 1479 MHz (`nvidia,dfll-max-freq-khz`, patch 0009), the
+GPU's OPP table stops devfreq at 921.6 MHz (patch 0010), and the GPU node's
+`assigned-clocks` set the EMC to 1600 MHz when nouveau probes. Firmware
+`90b936b5-bf91-538c-dac2-a80d107cfcf8` passed thirty warm reboots with these
+clocks and the first channel checked on each.
 Portable Vulkan/Elixir work is in `~/Projects/nx_iree`; C100-specific tuning
 and test tools are in the dedicated `~/Projects/c100_gpu` library.
 
@@ -320,7 +323,7 @@ Common patterns:
 
 ```elixir
 # Kernel log, filtered
-{d, _} = System.cmd("dmesg", []); d |> String.split("\n") |> Enum.filter(&(&1 =~ ~r/nouveau|c100-limits/)) |> Enum.join("\n") |> IO.puts(); :ok
+{d, _} = System.cmd("dmesg", []); d |> String.split("\n") |> Enum.filter(&(&1 =~ ~r/nouveau/)) |> Enum.join("\n") |> IO.puts(); :ok
 
 # Read / write sysfs and debugfs
 IO.puts(File.read!("/sys/class/devfreq/57000000.gpu/cur_freq")); :ok
@@ -341,7 +344,8 @@ Notes:
   inside Elixir.
 - `System.cmd` raises `:enoent` for binaries that do not exist; the rootfs is
   BusyBox (no `tr`, no `uptime`).
-- debugfs is mounted by `/usr/sbin/c100-limits` at boot.
+- debugfs is not mounted at boot:
+  `System.cmd("mount", ~w(-t debugfs debugfs /sys/kernel/debug))`.
 - Files can be copied with `sftp` (the board runs the SFTP subsystem):
   `printf 'put local /root/remote\n' | sftp -q -o BatchMode=yes -b - 192.168.0.31`.
 - `~/.ssh/known_hosts` holds the Nerves host key. Do not add another key for
@@ -426,10 +430,14 @@ The failure under study is intermittent, so tests are series of reboots.
 - `run-series.sh N`: rebuild (`rebuild-dtb.sh`), upload, confirm, delete old
   traces, then `trace-boots.sh N`, then grep the traces for errors.
 - `trace-boots.sh N`: for each boot: reboot via SSH, wait ~45 s, wait for SSH,
-  wait 20 s more for `c100-limits`, then save the nouveau/c100-limits dmesg
-  lines to `traces/boot-<n>.log` and print `boot n: ok|FAILED`.
-  - A boot is **ok** when the log contains `c100-limits: first channel open`
-    (a Vulkan device was created).
+  create a Vulkan device with `vulkaninfo` (the first channel), then save the
+  outcome and the nouveau dmesg lines to `boot-<n>.log` and print
+  `boot n: ok|FAILED`.
+  - A boot is **ok** when the first channel opened.
+- `trace-native-boots.sh N label FIRMWARE_UUID` does the same through
+  `observe-native-boot.sh`, and also requires the validated slot, the
+  expected firmware, simple_ondemand with a 921.6 MHz maximum, a 1479 MHz CPU
+  maximum and the EMC at 1600 MHz.
   - It **stops at the first failed boot**: one failure rejects the
     configuration under test. Do not wait for a full series to finish.
   - About 3.7 minutes per boot.
@@ -445,7 +453,7 @@ What a failing boot looks like in the trace:
 ```
 nouveau 57000000.gpu: pmu:hpq: timeout waiting for queue ready   (or: waiting for reply)
 nouveau 57000000.gpu: gr: init failed, -110
-c100-limits: vulkaninfo failed, GPU and EMC left at boot clocks
+first channel failed
 ```
 
 ## 6. Kernel patches

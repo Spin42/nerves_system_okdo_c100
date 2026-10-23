@@ -8,8 +8,9 @@ Initial release.
   enabled, the initial voltage requested before PLL programming and the
   frontend idle timeout disabled during golden-context setup; the GPU came
   up on thirty consecutive warm reboots
-* `c100-limits` is installed by the `c100-gpu` Buildroot package and caps
-  the GPU at 921.6 MHz before the first graphics channel
+* The device tree keeps the CPU at 1479 MHz and the GPU at 921.6 MHz, the
+  module's validated maxima, and runs the DRAM at 1600 MHz from nouveau's
+  probe; no userspace startup script is needed
 
 * Mainline Linux 6.18.57 with an OKdo C100 device tree (eMMC module, carrier
   microSD on SDMMC3) and backported nouveau devfreq for the Tegra GPU

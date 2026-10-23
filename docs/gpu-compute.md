@@ -16,9 +16,8 @@ Device-specific code must live in a dedicated Buildroot package or Elixir
 library. `~/Projects/c100_gpu` now owns the C100/Maxwell tuning, target
 capability list and board harness. Shared allocator/compiler changes remain
 in IREE/nx_iree.
-The system's `package/c100-gpu` installs `/usr/sbin/c100-limits`; erlinit
-invokes it from the board configuration. Moving the script out of the
-overlay does not change its accepted clock policy or initialization sequence.
+The system needs no startup script: the device tree sets the CPU and GPU
+maxima and the 1600 MHz EMC rate (see `docs/board-testing.md`).
 
 Normal devfreq (76.8–921.6 MHz) is restored; accepted firmware passed 30/30
 warm reboots. See `nvk-reference/nouveau-boots-20261022/README.md`.

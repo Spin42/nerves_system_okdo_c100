@@ -128,8 +128,9 @@ installation are described in the README.
   works without any of that.
 * **After an update the old firmware runs again.** The new slot was not
   validated before a reboot; upload again and let it validate.
-* **GPU messages in `dmesg`.** `c100-limits` logs `first channel open` when
-  the GPU initialized; see `docs/nouveau-gm20b.md` if it reports a failure.
+* **GPU errors in `dmesg`.** nouveau builds the GPU's golden context when the
+  first application opens a channel; see `docs/nouveau-gm20b.md` if that
+  logs a timeout or a trap.
 
 Recovering a board whose NVIDIA boot firmware is damaged requires USB recovery
 mode and `c100-bootupd`; this system provides no tools for that.

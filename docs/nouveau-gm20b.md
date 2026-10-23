@@ -6,6 +6,24 @@ GPU compute work that followed, as dated checkpoints in reverse chronological
 order. The [board testing guide](board-testing.md) explains how to reach and
 test the board.
 
+## Clock limits in the device tree, 2026-10-23
+
+`c100-limits` and its `c100-gpu` package are gone; the kernel sets every
+clock at boot:
+
+- CPU: `nvidia,dfll-max-freq-khz = <1479000>` on the DFLL node (patch 0009)
+  removes 1555.5 MHz from the cpufreq table.
+- GPU: an `operating-points-v2` table on `gpu@57000000`, 76.8 to 921.6 MHz,
+  replaces nouveau's full pstate list for devfreq (patch 0010).
+- EMC: `assigned-clocks` on the GPU node request 1600 MHz when nouveau
+  probes, before any channel exists. The golden-context timeout that once
+  required 204 MHz until the first channel no longer occurs with patch 0008.
+
+Firmware `90b936b5-bf91-538c-dac2-a80d107cfcf8` passed thirty warm reboots
+(`trace-native-boots.sh`, first channel opened by the observer, all clocks
+checked). VGA stereo SGM afterwards: 22.5 ms resident, 28.5 ms with
+readback, 31.5 ms with upload, the same as with the script.
+
 ## NVIDIA parity checkpoint, 2026-10-23
 
 Read **board-testing.md, "NVIDIA parity reached"** first. The

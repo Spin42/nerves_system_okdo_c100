@@ -131,11 +131,10 @@ is untested beyond vkpeak's copies.
   and thirty integer-compute cases. Cold power cycles remain untested.
   [Boot evidence and reproduction](nvk-reference/nouveau-boots-20261022/README.md).
 - nouveau builds the GPU's golden context on the first graphics channel.
-  With the EMC at 1600 MHz that times out in FECS
-  (`gf100_gr_fecs_bind_pointer`, `gr: init failed, -16`) and leaves the
-  GPU unusable until reboot; at 204 MHz it works, and 1600 MHz is fine
-  afterwards. `c100-limits` therefore opens a first channel (with
-  `vulkaninfo`) before raising the EMC. Root cause not known.
+  Without kernel patch 0008 that intermittently timed out in FECS
+  (`gf100_gr_fecs_bind_pointer`, `gr: init failed, -16`) with the EMC at
+  1600 MHz. With it, the EMC runs at 1600 MHz from nouveau's probe and the
+  first channel opened on thirty consecutive warm reboots.
 - `rmmod nouveau` oopses in `nvkm_mmu_dtor` on this GPU, so nouveau
   cannot be reloaded at runtime.
 

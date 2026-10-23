@@ -30,13 +30,12 @@ L4T U-Boot chain-loading our mainline U-Boot (`boot.scr`):
 - GPU: nouveau binds GM20B; EGL/GLES 3.2 (Mesa 26.1.8, renderer `tegra`),
   kmscube renders on HDMI and DP; Vulkan 1.3 through NVK (see
   `docs/nvk-findings.md`).
-- DRAM at 1600 MHz from cboot's trained EMC tables; CPU and GPU capped at
-  the module's validated maxima (`/usr/sbin/c100-limits`).
+- DRAM at 1600 MHz from cboot's trained EMC tables, requested by the GPU
+  node; CPU and GPU capped at the module's validated maxima by the device
+  tree (kernel patches 0009 and 0010).
 
 Open:
 
-- GPU golden-context init times out with the EMC at 1600 MHz;
-  `c100-limits` initialises the GPU at 204 MHz first. Root cause open.
 - NAK codegen for sm_53: fp32 at half of NVIDIA's, no fp16, slow int32.
 - U-Boot changes only ship with a fresh install (decided); the test card
   got the MAC-patched u-boot.bin by hand.
