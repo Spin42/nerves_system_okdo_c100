@@ -26,10 +26,10 @@ The complete four-context 200-pair Elixir loop gives 47.11 FPS (`lean7`) and
 byte-for-byte (R70, R72). The changes are shader restructuring (packed Census
 comparisons, one-candidate-per-term recurrence, cheaper selection), a row-tiled
 layout for byte volumes and interleaved features, and a cost-fused six-dispatch
-graph. They live in `~/Projects/nx_iree/bench/stereo/census/` as
-`census_pair.comp`, `cost_first.comp`, `cost_scan.comp`, `cost_dp.glsl`,
-`cost_select.glsl`, selected by `VIDEO_FUSION=cost` (uncommitted, like the rest
-of that directory). The report is
+graph. Those shaders are now the `~/Projects/nx_stereo` library
+(`NxStereo.sgm/3`, an `NxIREE.Vulkan.Pipeline`); the benchmark directory they
+were developed in, `nx_iree/bench/stereo/census/` with `VIDEO_FUSION=cost`, is
+in nx_iree's history up to commit cae4115. The report is
 `~/Projects/nx_iree/docs/reference/stereo-nvidia-20261022/optimization-round.md`,
 section "Second round". Experiment sources, scripts, NAK listings, ablations,
 logs and per-variant snapshots are in

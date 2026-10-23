@@ -25,7 +25,8 @@ warm reboots. See `nvk-reference/nouveau-boots-20261022/README.md`.
 The initial directional SGM recurrence exposed an IREE TLSF slab-reuse
 bug on both GPUs. A shared allocator fix now passes repeated exact-output
 tests on the host and C100. Results, patch and reproduction are in
-`~/Projects/nx_iree/docs/stereo-path.md` and `bench/stereo/`.
+`~/Projects/nx_iree/docs/stereo-path.md`; the matcher itself is now
+`~/Projects/nx_stereo`.
 An additional generic compiler repair removes per-step full-volume copies.
 It passes on both GPUs; the host source compiler build is selected explicitly
 with `NX_IREE_COMPILER_DIR`. C100 normal-devfreq latency remains variable.
