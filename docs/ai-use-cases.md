@@ -18,7 +18,7 @@ messages in every run). Nothing in the firmware changed; boot
 | Speech, whisper.cpp tiny.en q8_0 | 6.0 s (encode 4.2 s) | 3.5 s (encode 1.6 s) | 1.7x |
 | Vision, YOLOv5s 640x640, OpenCV DNN 4.10 | 931 ms per frame | no Vulkan backend | |
 | Vision, YOLOv5s 640x640, ncnn c189d88 | 453 ms per frame | 1183 ms (fp16), 1561 ms (fp32) | 0.38x |
-| Vision, YOLOv5s 640x640, IREE 3.13 compiled graph (padded model, tuned) | n/a | 589 ms (545 ms with caching allocator) | 0.77x of ncnn CPU |
+| Vision, YOLOv5s 640x640, IREE 3.13 compiled graph (padded, tuned, fp16 with f16 accumulators) | n/a | 458 ms (fp32: 589 ms) | 0.99x of ncnn CPU |
 | Stereo SGBM 640x480 D64, our Vulkan kernels (OpenCV module / NxIREE graph) | 15.0 FPS (OpenCV CPU 3WAY) | 42.8 / 49.6 FPS | 2.9-3.3x |
 
 Both whisper runs transcribed the clip correctly; the LLM produced the same
@@ -41,16 +41,19 @@ changes nothing, so the CPU figures are compute-bound.
   fp16 and in fp32; convolution networks are not a win here.
 * OpenCV DNN has no Vulkan path for these models; the hand-written stereo
   kernels remain the strongest GPU case on this board.
-* IREE compiles YOLOv5s to a working Vulkan graph once three problems are
-  handled (im2col convolutions with channels-last preprocessing, two padded
-  tensor dimensions, and a tuning spec for two matmul families). The recipe
-  is vendor-neutral, in `nx_iree/bench/yolo`; only the GM20B spec is in
-  `c100_gpu`. It is 2x faster than ncnn's Vulkan path and the only
-  way to run the detector inside Nx, but still 30 % behind ncnn on the CPU:
-  with 532 ms of GPU time per frame, matmuls take 346 ms at 26-78 GFLOPS and
-  memory-bound glue (im2col, transposes, the detect head's 85-wide copies)
-  takes the rest at about 2 GB/s. Untuned, the same model took 1.9 s with
-  im2col and 4.2 s with IREE's direct convolutions.
+* IREE compiles YOLOv5s to a working Vulkan graph once im2col convolutions
+  with channels-last preprocessing, two padded tensor dimensions and a
+  per-family tuning spec are used. In fp16 with f16 accumulators it uses
+  the GM20B's packed HFMA2 (NAK/NVK patches 0008 and 0009) and reaches
+  458 ms, level with ncnn on the CPU and 2.6x faster than ncnn's Vulkan
+  path on NVK; without f16 accumulators the importer keeps f32 FMAs and
+  fp16 is slower than fp32. The recipe is vendor-neutral, in
+  `nx_iree/bench/yolo`; only the GM20B specs are in `c100_gpu`.
+* NVIDIA's own stack is still well ahead: ncnn's Vulkan path on the L4T
+  driver runs YOLOv5s at about 5 FPS on 640x480 inputs (Qengineering), about
+  4.5x faster per pixel than the same shaders on NVK, and TensorRT fp16 is
+  reported at roughly 60-100 ms at 640. That gap lies in NAK's Maxwell code
+  generation and NVK, which is where further YOLO speed has to come from.
 
 ## Reproduction
 
