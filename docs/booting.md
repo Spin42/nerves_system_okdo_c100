@@ -47,10 +47,10 @@ mix burn
 `fwup` lists the removable devices and asks which one to write. If it does not
 detect the card, name it: `mix burn -d /dev/sdX` (Linux) or
 `mix burn -d /dev/rdiskN` (macOS). This erases the card and writes the
-partition table, U-Boot's environment, the boot partition with `boot.scr` and
-this system's `u-boot.bin`, root filesystem A with the firmware, and an empty
-application data partition. Root filesystem B stays empty until the first
-update.
+partition table, U-Boot's environment, the bootloader partition with
+`boot.scr` and this system's `u-boot.bin`, slot A (boot partition A with the
+kernel and device tree, root filesystem A), and an empty application data
+partition. Slot B stays empty until the first update.
 
 ## 3. Boot
 
@@ -101,10 +101,11 @@ you will be testing the old firmware. U-Boot itself is only rewritten by
 
 NVIDIA's boot firmware on the module (BCT, nvtboot, TOS, cboot) always starts
 the U-Boot stored in the eMMC `LNX` partition. With a Nerves card inserted,
-that U-Boot's distro boot finds the card's boot partition (marked bootable),
-runs its `boot.scr`, which chain-loads this system's U-Boot from the same
-partition. This system's U-Boot then reads the Nerves environment from the
-card and boots the active root filesystem with the Nerves A/B logic. A Nerves
+that U-Boot's distro boot finds the card's bootloader partition (marked
+bootable), runs its `boot.scr`, which chain-loads this system's U-Boot from
+the same partition. This system's U-Boot then reads the Nerves environment
+from the card, loads the kernel and device tree from the active slot's boot
+partition and boots that slot's root filesystem. A Nerves
 card therefore takes precedence over whatever is installed on the eMMC;
 remove the card to boot the eMMC again. The partition layout and the eMMC
 installation are described in the README.
@@ -117,8 +118,9 @@ installation are described in the README.
 * **OKdo's U-Boot stops at its prompt.** Press nothing during boot; a key
   press on the serial console interrupts distro boot. Type `boot` to continue
   or `reset`.
-* **`Found U-Boot script` appears but Linux never starts.** The boot partition
-  is readable but the root filesystem is not: rewrite the card.
+* **`Found U-Boot script` appears but Linux never starts.** The bootloader
+  partition is readable but the slot's boot partition or root filesystem is
+  not: rewrite the card.
 * **Linux starts, no IEx prompt.** Watch the serial console for `erlinit`
   errors; the console is `ttyS0`. Check that the application was built for
   `MIX_TARGET=okdo_c100`.

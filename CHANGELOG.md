@@ -6,7 +6,9 @@ Initial release.
 
 * Mainline Linux 6.18.57 with an OKdo C100 device tree (eMMC module, carrier
   microSD on SDMMC3)
-* Mainline U-Boot 2026.07 running the Nerves A/B logic on microSD or eMMC
+* Mainline U-Boot 2026.07 running the Nerves A/B logic on microSD or eMMC;
+  as on the Raspberry Pi, each slot has its own boot partition with the
+  kernel and device tree next to its root filesystem
 * `mix burn` installs on a microSD card, booted through the board's existing
   U-Boot; `mix burn --task emmc` installs on the eMMC (exposed with U-Boot's
   `ums`) next to NVIDIA's boot firmware, with no NVIDIA flashing tools

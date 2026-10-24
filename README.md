@@ -45,11 +45,14 @@ the network are in [docs/booting.md](docs/booting.md).
 NVIDIA's boot firmware (BCT, nvtboot, TOS, cboot) stays on the module and is
 never modified. cboot always loads a U-Boot from the eMMC `LNX` partition.
 Nerves runs with this system's mainline U-Boot, which handles the Nerves A/B
-logic and boots Linux from the active root filesystem:
+logic. As on the Raspberry Pi, each firmware slot has its own boot partition:
+U-Boot loads the kernel and device tree from the active slot's boot partition
+and Linux mounts that slot's root filesystem.
 
 * **microSD card**: the U-Boot in `LNX` is whatever the board shipped with
-  (for example OKdo's). Its distro boot finds `boot.scr` in the card's boot
-  partition, which starts this system's U-Boot from the same partition.
+  (for example OKdo's). Its distro boot finds `boot.scr` in the card's
+  bootloader partition, which starts this system's U-Boot from the same
+  partition.
 * **eMMC**: the eMMC install puts this system's U-Boot into `LNX`, so cboot
   starts it directly.
 
@@ -65,19 +68,23 @@ updates work the same on both:
 | Protective MBR + GPT               |
 +------------------------------------+ 2 MiB
 | U-Boot environment (Nerves A/B)    |
-| p1: boot (FAT)                     |  boot.scr, u-boot.bin
+| p5: bootloader (FAT)               |  microSD only: boot.scr, u-boot.bin
 +------------------------------------+ 4 MiB
-| p2: rootfs A (squashfs, 1 GiB)     |  /boot holds Image and the dtb
-| p3: rootfs B (squashfs, 1 GiB)     |
-| p4: application data (f2fs)        |  fills the card; 12 GiB on the eMMC
+| p1: boot A (FAT, 64 MiB)           |  Image and dtb of slot A
+| p2: boot B (FAT, 64 MiB)           |  Image and dtb of slot B
+| p3: rootfs A (squashfs, 1 GiB)     |
+| p4: rootfs B (squashfs, 1 GiB)     |
+| p6: application data (f2fs)        |  fills the card; 11.9 GiB on the eMMC
 +------------------------------------+
-| eMMC only: p5..p16 NVIDIA          |  LNX and LNX-1 hold U-Boot
+| eMMC only: p5, p7..p16 NVIDIA      |  LNX and LNX-1 hold U-Boot
 +------------------------------------+
 ```
 
 On the eMMC, Nerves takes the region that NVIDIA's layout uses for the L4T root
 filesystem (`APP`). The NVIDIA partitions keep the names, offsets and sizes
-from L4T R32.7's layout for this module, so cboot finds `LNX` as before.
+from L4T R32.7's layout for this module, so cboot finds `LNX` as before. A GPT
+written by fwup holds at most 16 entries, so the boot splash (`BMP`) and L4T's
+recovery partitions are left out of the table; their data stays in place.
 
 In Linux, `/dev/mmcblk0` is the eMMC and `/dev/mmcblk1` the microSD card.
 `/dev/rootdisk0` refers to whichever one Nerves booted from.
@@ -129,10 +136,10 @@ install erases the application data partition.
 
 ## Firmware updates
 
-`mix upload` and NervesHub update the inactive root filesystem on the device
-Nerves booted from and switch to it on the next boot, with automatic rollback
-if the new firmware is not validated. Updates do not rewrite U-Boot; an install
-does.
+`mix upload` and NervesHub update the inactive slot, its boot partition and
+its root filesystem, on the device Nerves booted from and switch to it on the
+next boot, with automatic rollback if the new firmware is not validated.
+Updates do not rewrite U-Boot; an install does.
 
 ## GPU
 

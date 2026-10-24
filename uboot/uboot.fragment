@@ -11,9 +11,8 @@ CONFIG_ENV_MMC_EMMC_HW_PARTITION=0
 CONFIG_ENV_OFFSET=0x200000
 CONFIG_ENV_SIZE=0x20000
 
-# The kernel and device tree are loaded from the squashfs root filesystems
-CONFIG_CMD_FS_GENERIC=y
-CONFIG_CMD_SQUASHFS=y
+# The kernel and device tree are loaded from the slot's FAT boot partition
+CONFIG_CMD_FAT=y
 CONFIG_CMD_PART=y
 
 # Only used when no Nerves environment exists on either device. Distro boot
