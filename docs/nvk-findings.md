@@ -6,11 +6,13 @@ sets for the Erlang VM and everything it starts.
 
 ## How it is built
 
-- `patches/buildroot/0001-...` adds `BR2_PACKAGE_MESA3D_VULKAN_DRIVER_NOUVEAU`
-  to Buildroot 2026.08 (nothing upstream has it yet), a `host-cbindgen`
-  package, offline Rust crates for meson, and the host-mesa3d `cpp_rtti`
-  fix. NVK needs no LLVM on the target: its CL shaders are compiled at
-  build time by the host `mesa_clc`.
+- `package/mesa3d-nvk` adds `BR2_PACKAGE_MESA3D_VULKAN_DRIVER_NOUVEAU`
+  (Buildroot has no NVK option yet) by extending Buildroot's own mesa3d
+  package from this external tree: the driver, Rust, offline crates for
+  meson (hashes in `patches/mesa3d/mesa3d.hash`) and the host-mesa3d
+  `cpp_rtti` setting. `package/cbindgen` provides `host-cbindgen`. NVK
+  needs no LLVM on the target: its CL shaders are compiled at build time
+  by the host `mesa_clc`.
 - `patches/mesa3d/` carries two open Mesa MRs, 0001 !45355 (tegra: unwrap
   framebuffer surfaces, fixes the kmscube crash) and 0002 !45402 (nvk: map
   sync range, only wrong on Tegra), and our NAK work for Maxwell:

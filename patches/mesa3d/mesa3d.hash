@@ -1,0 +1,8 @@
+# Rust crates for NVK (package/mesa3d-nvk), from the meson wraps in
+# subprojects/
+sha256  de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c  paste-1.0.14.crate
+sha256  5e719e8df665df0d1c8fbfd238015744736151d4445ec0836b8e628aae103b77  proc-macro2-1.0.86.crate
+sha256  291ec9ab5efd934aaf503a6466c5d5251535d108ee747472c3977cc5acc868ef  quote-1.0.35.crate
+sha256  357703d41365b4b27c590e3ed91eabb1b663f07c4c084095e60cbed4362dff0d  rustc-hash-2.1.1.crate
+sha256  25aa4ce346d03a6dcd68dd8b4010bcb74e54e62c90c573f394c46eae99aba32d  syn-2.0.87.crate
+sha256  3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b  unicode-ident-1.0.12.crate

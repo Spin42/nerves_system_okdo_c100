@@ -1,0 +1,21 @@
+config BR2_PACKAGE_MESA3D_VULKAN_DRIVER_NOUVEAU
+	bool "Vulkan nouveau driver (NVK)"
+	depends on BR2_PACKAGE_MESA3D
+	depends on BR2_TOOLCHAIN_HAS_SYNC_4 || !BR2_PACKAGE_XORG7 # libxshmfence
+	depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
+	select BR2_PACKAGE_HOST_RUSTC
+	select BR2_PACKAGE_LIBDRM_NOUVEAU
+	select BR2_PACKAGE_MESA3D_VULKAN_DRIVER
+	help
+	  Adds the Vulkan driver for NVIDIA GPUs from Kepler onward
+	  (NVK) to Buildroot's mesa3d package.
+
+	  NVK only exposes GPUs it is not conformant on, such as
+	  Maxwell and the Tegra integrated GPUs, when the environment
+	  variable NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1 is set.
+
+	  https://docs.mesa3d.org/drivers/nvk.html
+
+comment "nouveau vulkan needs a rust compiler"
+	depends on BR2_PACKAGE_MESA3D
+	depends on !BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
