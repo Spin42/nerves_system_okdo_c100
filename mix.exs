@@ -80,7 +80,7 @@ defmodule NervesSystemOkdoC100.MixProject do
 
   defp docs do
     [
-      extras: ["README.md", "CHANGELOG.md"],
+      extras: ["README.md", "docs/booting.md", "CHANGELOG.md"],
       main: "readme",
       source_ref: "v#{@version}",
       source_url: @source_url,
@@ -98,6 +98,7 @@ defmodule NervesSystemOkdoC100.MixProject do
 
   defp package_files do
     [
+      "docs",
       "fwup_include",
       "linux",
       "package",
