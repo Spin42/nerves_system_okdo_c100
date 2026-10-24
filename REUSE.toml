@@ -48,6 +48,15 @@ precedence = "override"
 SPDX-FileCopyrightText = "Various"
 SPDX-License-Identifier = "GPL-2.0-only"
 
+# Mesa derived or related files
+[[annotations]]
+path = [
+ "patches/mesa3d/**"
+]
+precedence = "override"
+SPDX-FileCopyrightText = "Various"
+SPDX-License-Identifier = "MIT"
+
 # U-Boot derived or related files
 [[annotations]]
 path = [

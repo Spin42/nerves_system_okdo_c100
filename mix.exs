@@ -101,6 +101,7 @@ defmodule NervesSystemOkdoC100.MixProject do
       "fwup_include",
       "linux",
       "package",
+      "patches",
       "rootfs_overlay",
       "scripts",
       "uboot",
