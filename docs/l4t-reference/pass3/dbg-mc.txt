@@ -1,9 +1,0 @@
-== /sys/kernel/debug/mc/err/mcerr
-swgroup            client             decerr-emem  secerr       arb-emem     smmu-err     apb_err      decerr-vpr   decerr-sec   decerr-mts   decerr-gsc   decerr-untranslated
-
-== /sys/kernel/debug/mc/err/mcerr_throttle
-1
-
-== /sys/kernel/debug/mc/err/quiet
-0
-

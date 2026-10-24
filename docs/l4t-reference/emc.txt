@@ -1,51 +1,0 @@
-$ sh -c ls /sys/kernel/debug/tegra_emc 2>&1; for f in /sys/kernel/debug/tegra_emc/*; do [ -f "$f" ] && echo "== $f" && head -c 2000 "$f"; done; cat /sys/kernel/debug/bwmgr/bwmgr 2>&1
-clkchange_delay
-dram_info
-dram_temp
-dram_therm
-efficiency
-emc_iso_share
-emc_usage_table
-over_temp_state
-stats
-tables_info
-training_timer_period
-== /sys/kernel/debug/tegra_emc/clkchange_delay
-100
-== /sys/kernel/debug/tegra_emc/dram_info
-DRAM strap: 0
-Manufacturer ID (MR5): 255
-Revision ID-1 (MR6): 0
-Revision ID-2 (MR7): 1
-IO Width/Density/Type (MR8): 0x10
-== /sys/kernel/debug/tegra_emc/dram_temp
-2
-== /sys/kernel/debug/tegra_emc/efficiency
-80
-== /sys/kernel/debug/tegra_emc/emc_iso_share
-100
-== /sys/kernel/debug/tegra_emc/emc_usage_table
-EMC USAGE		ISO SHARE % @ last bw 0
-[0]: DC1			= 56(vary across bw)
-[1]: DC2			= 56(vary across bw)
-[2]: DC1+DC2			= 56(vary across bw)
-[3]: DC1+VI			= 56(vary across bw)
-[4]: DC1+DC2+VI			= 56(vary across bw)
-== /sys/kernel/debug/tegra_emc/over_temp_state
-0
-== /sys/kernel/debug/tegra_emc/stats
-rate kHz   time      
-1600000    0         
-transitions:    0
-time-stamp:     1717990027
-== /sys/kernel/debug/tegra_emc/tables_info
-Table Version Info (Table version, rev, rate):
-13_1600000_12_V9.8.7_V1.6
-7
-1600000
-13_204000_12_V9.8.7_V1.6
-7
-204000
-== /sys/kernel/debug/tegra_emc/training_timer_period
-100
-cat: /sys/kernel/debug/bwmgr/bwmgr: No such file or directory

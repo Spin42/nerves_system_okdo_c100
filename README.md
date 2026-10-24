@@ -7,7 +7,7 @@ production module (P3448-0002, 16 GB eMMC).
 | Feature              | Description                                        |
 | -------------------- | -------------------------------------------------- |
 | CPU                  | 1.43 GHz quad-core Cortex-A57 (Tegra X1 / T210)    |
-| GPU                  | 128-core Maxwell (GM20B), OpenGL ES via Mesa       |
+| GPU                  | 128-core Maxwell (GM20B), OpenGL ES and Vulkan via Mesa |
 | Memory               | 4 GB LPDDR4                                        |
 | Storage              | microSD (default) or 16 GB eMMC                    |
 | Linux kernel         | 6.18 (mainline)                                    |
@@ -136,38 +136,38 @@ does.
 
 ## GPU
 
-The GM20B GPU is driven by nouveau and Mesa's `tegra` and `nouveau` Gallium
-drivers. The display controller is `/dev/dri/card0` (tegra-drm) and the
-GPU render node is provided by nouveau. To check OpenGL ES with a display on
-HDMI:
+The GM20B GPU is driven by nouveau. The display controller is
+`/dev/dri/card0` (tegra-drm) and the GPU render node is provided by nouveau.
 
-```elixir
-cmd("kmscube")
-```
+* OpenGL ES 3.2 and EGL/GBM come from Mesa's `tegra` and `nouveau` Gallium
+  drivers. To check them with a display on HDMI:
 
-GPU clock scaling is handled by devfreq; see
-`/sys/class/devfreq/57000000.gpu/`.
+  ```elixir
+  cmd("kmscube")
+  ```
+
+* Vulkan 1.3 comes from Mesa's NVK driver. NVK only exposes GPUs it is not
+  conformant on, such as this one, when `NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1`
+  is set; erlinit sets it for the Erlang VM and everything it starts.
+  `vulkaninfo` is included.
+
+The GPU clock scales with load between 76.8 and 921.6 MHz (devfreq,
+`/sys/class/devfreq/57000000.gpu/`) and the CPU up to 1479 MHz, the module's
+validated maxima. The DRAM runs at 1600 MHz, the rate NVIDIA's boot firmware
+trains.
 
 ## Known limitations
 
-* The kernel has no memory controller (EMC) frequency tables, so the DRAM
-  stays at the frequency set by NVIDIA's boot firmware (1600 MHz on the
-  tested boards; `/sys/kernel/debug/clk/emc/clk_rate` shows it).
+* The DRAM clock does not scale with load; it stays at 1600 MHz.
 * GPU initialization was validated over thirty consecutive warm reboots with
   the nouveau patches in `linux/`; cold power cycles were not tested in
-  series. See [docs/nouveau-gm20b.md](docs/nouveau-gm20b.md).
+  series.
+* NAK, Mesa's shader compiler for NVK, is not tuned for Maxwell: fp32 compute
+  runs at roughly half the throughput of NVIDIA's driver. The patches in
+  `patches/mesa3d/` close part of that gap.
 * If NVIDIA's boot firmware itself is damaged, the board has to be recovered
   over USB recovery mode (RCM), which this system does not provide tools for.
 
 ## Documentation
 
 * [docs/booting.md](docs/booting.md): booting from a Nerves microSD card.
-* [docs/board-testing.md](docs/board-testing.md): reaching, flashing and
-  boot-testing a board from the host, with the `scripts/board/` helpers.
-* [docs/nouveau-gm20b.md](docs/nouveau-gm20b.md): GPU bring-up notes and the
-  accepted power-management configuration.
-* [docs/ai-use-cases.md](docs/ai-use-cases.md): LLM, speech and vision engines
-  measured on the CPU and on the GPU through NVK.
-* [docs/gpu-compute.md](docs/gpu-compute.md), [docs/nvk-findings.md](docs/nvk-findings.md),
-  [docs/l4t-findings.md](docs/l4t-findings.md): GPU compute investigation and
-  what L4T configures that this system has to match.

@@ -24,8 +24,7 @@ on the eMMC instead, see the README.
 ## 1. Build a firmware
 
 In a Nerves application whose `mix.exs` lists this system for the
-`:okdo_c100` target (`~/Projects/hello_c100` is such an application and is
-used for board testing):
+`:okdo_c100` target:
 
 ```sh
 export MIX_TARGET=okdo_c100
@@ -128,9 +127,10 @@ installation are described in the README.
   works without any of that.
 * **After an update the old firmware runs again.** The new slot was not
   validated before a reboot; upload again and let it validate.
-* **GPU errors in `dmesg`.** nouveau builds the GPU's golden context when the
-  first application opens a channel; see `docs/nouveau-gm20b.md` if that
-  logs a timeout or a trap.
+* **GPU errors in `dmesg`.** nouveau initializes the GPU when the first
+  application opens it. A `gr: init failed` or `TRAP` message there leaves
+  the GPU unusable until the next boot; please report it with the full
+  `dmesg`.
 
 Recovering a board whose NVIDIA boot firmware is damaged requires USB recovery
 mode and `c100-bootupd`; this system provides no tools for that.

@@ -6,7 +6,6 @@ path = [
  ".gitignore",
  "CHANGELOG.md",
  "nerves_defconfig",
- "PLAN.md",
  "REUSE.toml",
  "mix.exs",
  "mix.lock",
