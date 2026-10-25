@@ -60,7 +60,9 @@ partition. Slot B stays empty until the first update.
    U-Boot (its banner names the Tegra210 and mentions `mmc1`), the line
    `Found U-Boot script /boot.scr` followed by this system's U-Boot
    (`U-Boot 2026.07`), then the Linux kernel and the Nerves boot messages.
-   After roughly 20 seconds the IEx prompt appears on the console.
+   The kernel messages also appear on HDMI/DP. After roughly 20 seconds the
+   IEx prompt appears on HDMI/DP, where a USB keyboard can be used. To have
+   it on the serial console instead, select `ttyS0` in `erlinit.config`.
 3. If the application uses `nerves_pack` with the default configuration, the
    board requests an address over DHCP on `eth0` and advertises itself with
    mDNS as `nerves-xxxx.local`, where `xxxx` are the last four characters of
@@ -121,9 +123,9 @@ installation are described in the README.
 * **`Found U-Boot script` appears but Linux never starts.** The bootloader
   partition is readable but the slot's boot partition or root filesystem is
   not: rewrite the card.
-* **Linux starts, no IEx prompt.** Watch the serial console for `erlinit`
-  errors; the console is `ttyS0`. Check that the application was built for
-  `MIX_TARGET=okdo_c100`.
+* **Linux starts, no IEx prompt.** IEx is on HDMI/DP (`tty1`); watch the
+  screen or the serial console for `erlinit` errors. Check that the
+  application was built for `MIX_TARGET=okdo_c100`.
 * **No network.** `eth0` needs a link and a DHCP server; `nerves_pack` can be
   configured for a static address. The gadget Ethernet on the USB device port
   works without any of that.

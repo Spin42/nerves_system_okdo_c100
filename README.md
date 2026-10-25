@@ -12,7 +12,7 @@ production module (P3448-0002, 16 GB eMMC).
 | Storage              | microSD (default) or 16 GB eMMC                    |
 | Linux kernel         | 6.18 (mainline)                                    |
 | Bootloader           | U-Boot 2026.07 (mainline)                          |
-| IEx terminal         | UART `ttyS0` (115200 8N1)                          |
+| IEx terminal         | HDMI/DP with a USB keyboard; UART `ttyS0` (115200 8N1) via `erlinit.config` |
 | GPIO, I2C, SPI       | Yes - [Elixir Circuits](https://github.com/elixir-circuits) |
 | Ethernet             | Yes - Realtek RTL8111 over PCIe                    |
 | Display              | HDMI and DisplayPort                               |
