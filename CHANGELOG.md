@@ -16,4 +16,4 @@ Initial release.
   nouveau and tegra drivers, Vulkan 1.3 through NVK
 * CPU (1479 MHz) and GPU (921.6 MHz) limited to the module's validated
   maxima; DRAM at 1600 MHz
-* `nerves_system_br` 1.35.2, Buildroot 2026.08, GCC 15.3
+* `nerves_system_br` 1.35.3, Buildroot 2026.08.1, GCC 15.3
