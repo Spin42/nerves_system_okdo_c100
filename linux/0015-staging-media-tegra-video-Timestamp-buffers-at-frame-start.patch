@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lo=C3=AFc=20Vigneron?= <loic.vigneron@gmail.com>
+Date: Wed, 28 Oct 2026 16:12:28 +0100
+Subject: [PATCH] staging: media: tegra-video: Timestamp buffers at frame start
+
+Buffers were stamped when their memory write completed, after the
+whole frame had been read out and the capture thread had been
+scheduled. Stamp them when the frame start syncpoint is reached
+instead, so timestamps from two cameras can be compared to measure
+and align their frame timing.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+ drivers/staging/media/tegra-video/tegra210.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/staging/media/tegra-video/tegra210.c b/drivers/staging/media/tegra-video/tegra210.c
+index da99f19..0f09234 100644
+--- a/drivers/staging/media/tegra-video/tegra210.c
++++ b/drivers/staging/media/tegra-video/tegra210.c
+@@ -377,7 +377,9 @@ static void release_buffer(struct tegra_vi_channel *chan,
+ 
+ 	vb->sequence = chan->sequence++;
+ 	vb->field = V4L2_FIELD_NONE;
+-	vb->vb2_buf.timestamp = ktime_get_ns();
++	/* A captured buffer carries the time of its frame start. */
++	if (state != VB2_BUF_STATE_DONE)
++		vb->vb2_buf.timestamp = ktime_get_ns();
+ 	vb2_buffer_done(&vb->vb2_buf, state);
+ }
+ 
+@@ -486,6 +488,8 @@ static int tegra_channel_capture_frame(struct tegra_vi_channel *chan,
+ 		}
+ 	}
+ 
++	buf->buf.vb2_buf.timestamp = ktime_get_ns();
++
+ 	if (capture_timedout) {
+ 		dev_err_ratelimited(&chan->video.dev,
+ 				    "frame start syncpt timeout: %d\n", err);

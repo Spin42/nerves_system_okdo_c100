@@ -1,0 +1,51 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lo=C3=AFc=20Vigneron?= <loic.vigneron@gmail.com>
+Date: Wed, 28 Oct 2026 16:12:28 +0100
+Subject: [PATCH] staging: media: tegra-video: Filter formats by media bus code
+
+Report V4L2_CAP_IO_MC and honour the mbus_code filter of
+VIDIOC_ENUM_FMT, so user space that configures the subdevices itself
+(libcamera's simple pipeline among others) can find the pixel formats
+matching the sensor's bus format.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+ drivers/staging/media/tegra-video/vi.c | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/staging/media/tegra-video/vi.c b/drivers/staging/media/tegra-video/vi.c
+index 7157e14..8824951 100644
+--- a/drivers/staging/media/tegra-video/vi.c
++++ b/drivers/staging/media/tegra-video/vi.c
+@@ -399,6 +399,21 @@ static int tegra_channel_enum_format(struct file *file, void *fh,
+ 	if (!IS_ENABLED(CONFIG_VIDEO_TEGRA_TPG))
+ 		fmts_bitmap = chan->fmts_bitmap;
+ 
++	if (f->mbus_code) {
++		unsigned int n = 0;
++
++		for_each_set_bit(i, fmts_bitmap, MAX_FORMAT_NUM) {
++			if (chan->vi->soc->video_formats[i].code != f->mbus_code)
++				continue;
++			if (n++ == f->index) {
++				f->pixelformat = chan->vi->soc->video_formats[i].fourcc;
++				return 0;
++			}
++		}
++
++		return -EINVAL;
++	}
++
+ 	if (f->index >= bitmap_weight(fmts_bitmap, MAX_FORMAT_NUM))
+ 		return -EINVAL;
+ 
+@@ -1164,7 +1179,8 @@ static int tegra_channel_init(struct tegra_vi_channel *chan)
+ 	chan->video.lock = &chan->video_lock;
+ 	chan->video.device_caps = V4L2_CAP_VIDEO_CAPTURE |
+ 				  V4L2_CAP_STREAMING |
+-				  V4L2_CAP_READWRITE;
++				  V4L2_CAP_READWRITE |
++				  V4L2_CAP_IO_MC;
+ 	video_set_drvdata(&chan->video, chan);
+ 
+ 	chan->queue.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;

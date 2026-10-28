@@ -17,6 +17,7 @@ production module (P3448-0002, 16 GB eMMC).
 | Ethernet             | Yes - Realtek RTL8111 over PCIe                    |
 | Display              | HDMI and DisplayPort                               |
 | USB                  | USB 3.0 host                                       |
+| Cameras              | Two Raspberry Pi Camera Module 3 (IMX708) on the CSI connectors, raw Bayer over V4L2 |
 
 ## Using
 
@@ -162,6 +163,29 @@ The GPU clock scales with load between 76.8 and 921.6 MHz (devfreq,
 `/sys/class/devfreq/57000000.gpu/`) and the CPU up to 1479 MHz, the module's
 validated maxima. The DRAM runs at 1600 MHz, the rate NVIDIA's boot firmware
 trains.
+
+## Cameras
+
+Both camera connectors are described for the Raspberry Pi Camera Module 3
+(Sony IMX708): CAM0 on CSI port A and CAM1 on CSI port E, two lanes each.
+Mainline Linux has no IMX708 driver, so the Raspberry Pi kernel's driver is
+carried in `linux/`, along with patches to the Tegra210 video input driver
+(`tegra-video`, in staging):
+
+* device nodes for the sensors and CSI channels (`/dev/v4l-subdev*`), so
+  exposure, gain and blanking can be set from user space;
+* the CSI channels pass the sensor's format through;
+* `VIDIOC_ENUM_FMT` filters by media bus code (`V4L2_CAP_IO_MC`);
+* buffers are timestamped at frame start, so the frame timing of the two
+  cameras can be compared and aligned by adjusting one sensor's vertical
+  blanking.
+
+The Tegra X1's ISP has no open driver, so frames arrive as raw 10-bit Bayer
+(`RG10`, one sample per 16 bits), one video node per connector, named
+`54080000.vi-output-0` (CAM0) and `54080000.vi-output-4` (CAM1) in
+`/sys/class/video4linux/*/name`. Each connector's enable line is a fixed
+regulator with a startup delay, which the sensor needs before it answers on
+I2C. The CMA pool is 256 MiB for the capture buffers.
 
 ## Known limitations
 

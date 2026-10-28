@@ -1,0 +1,56 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lo=C3=AFc=20Vigneron?= <loic.vigneron@gmail.com>
+Date: Wed, 28 Oct 2026 16:12:28 +0100
+Subject: [PATCH] staging: media: tegra-video: Pass the sensor format through
+ the CSI channel
+
+The CSI channel's get_fmt and set_fmt only work with the test pattern
+generator and return -ENOIOCTLCMD otherwise, so a pipeline cannot be
+configured pad by pad from user space. Without the generator the
+channel carries the sensor's format unchanged: accept any format on
+either pad, keep TRY formats in the file handle's state and the
+ACTIVE one in the channel.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+ drivers/staging/media/tegra-video/csi.c | 20 ++++++++++++++++----
+ 1 file changed, 16 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/staging/media/tegra-video/csi.c b/drivers/staging/media/tegra-video/csi.c
+index 6ef6b88..87389d9 100644
+--- a/drivers/staging/media/tegra-video/csi.c
++++ b/drivers/staging/media/tegra-video/csi.c
+@@ -83,8 +83,11 @@ static int csi_get_format(struct v4l2_subdev *subdev,
+ {
+ 	struct tegra_csi_channel *csi_chan = to_csi_chan(subdev);
+ 
+-	if (!IS_ENABLED(CONFIG_VIDEO_TEGRA_TPG))
+-		return -ENOIOCTLCMD;
++	if (!IS_ENABLED(CONFIG_VIDEO_TEGRA_TPG) &&
++	    fmt->which == V4L2_SUBDEV_FORMAT_TRY) {
++		fmt->format = *v4l2_subdev_state_get_format(sd_state, fmt->pad);
++		return 0;
++	}
+ 
+ 	fmt->format = csi_chan->format;
+ 
+@@ -188,8 +191,17 @@ static int csi_set_format(struct v4l2_subdev *subdev,
+ 	const struct v4l2_frmsize_discrete *sizes;
+ 	unsigned int i;
+ 
+-	if (!IS_ENABLED(CONFIG_VIDEO_TEGRA_TPG))
+-		return -ENOIOCTLCMD;
++	/* Without the test pattern generator the channel passes the sensor's format through. */
++	if (!IS_ENABLED(CONFIG_VIDEO_TEGRA_TPG)) {
++		format->field = V4L2_FIELD_NONE;
++		if (fmt->which == V4L2_SUBDEV_FORMAT_ACTIVE) {
++			csi_chan->format = *format;
++		} else {
++			for (i = 0; i < csi_chan->numpads; i++)
++				*v4l2_subdev_state_get_format(sd_state, i) = *format;
++		}
++		return 0;
++	}
+ 
+ 	sizes = v4l2_find_nearest_size(tegra_csi_tpg_sizes,
+ 				       ARRAY_SIZE(tegra_csi_tpg_sizes),

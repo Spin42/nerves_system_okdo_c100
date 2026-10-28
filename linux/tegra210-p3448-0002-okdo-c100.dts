@@ -45,8 +45,192 @@
 		};
 	};
 
+	/*
+	 * The two camera connectors (CAM0 on CSI port A, CAM1 on CSI port E,
+	 * two lanes each) share the VI I2C bus through a GPIO-switched mux.
+	 * They are described for Raspberry Pi Camera Module 3 (IMX708), which
+	 * carries its own 24 MHz oscillator and regulators.
+	 */
+	cam_clk: clock-camera {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <24000000>;
+	};
+
+	/*
+	 * Each connector's enable line powers the camera module's regulators;
+	 * the sensor needs them settled before it answers on I2C.
+	 */
+	cam0_reg: regulator-cam0 {
+		compatible = "regulator-fixed";
+		regulator-name = "cam0";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+		gpio = <&gpio TEGRA_GPIO(S, 7) GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		startup-delay-us = <70000>;
+		off-on-delay-us = <30000>;
+	};
+
+	cam1_reg: regulator-cam1 {
+		compatible = "regulator-fixed";
+		regulator-name = "cam1";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+		gpio = <&gpio TEGRA_GPIO(T, 0) GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		startup-delay-us = <70000>;
+		off-on-delay-us = <30000>;
+	};
+
+	i2c-mux-camera {
+		compatible = "i2c-mux-gpio";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		i2c-parent = <&vi_i2c>;
+		mux-gpios = <&gpio TEGRA_GPIO(I, 0) GPIO_ACTIVE_HIGH>;
+
+		i2c@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			camera@1a {
+				compatible = "sony,imx708";
+				reg = <0x1a>;
+				clocks = <&cam_clk>;
+				clock-names = "inclk";
+				vana1-supply = <&cam0_reg>;
+
+				port {
+					cam0_out: endpoint {
+						remote-endpoint = <&csi_a_in>;
+						data-lanes = <1 2>;
+						clock-noncontinuous;
+						link-frequencies = /bits/ 64 <450000000>;
+					};
+				};
+			};
+		};
+
+		i2c@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			camera@1a {
+				compatible = "sony,imx708";
+				reg = <0x1a>;
+				clocks = <&cam_clk>;
+				clock-names = "inclk";
+				vana1-supply = <&cam1_reg>;
+
+				port {
+					cam1_out: endpoint {
+						remote-endpoint = <&csi_e_in>;
+						data-lanes = <1 2>;
+						clock-noncontinuous;
+						link-frequencies = /bits/ 64 <450000000>;
+					};
+				};
+			};
+		};
+	};
+
 	host1x@50000000 {
-		i2c@546c0000 {
+		vi@54080000 {
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				port@0 {
+					reg = <0>;
+
+					vi_a_in: endpoint {
+						remote-endpoint = <&csi_a_out>;
+					};
+				};
+
+				port@4 {
+					reg = <4>;
+
+					vi_e_in: endpoint {
+						remote-endpoint = <&csi_e_out>;
+					};
+				};
+			};
+
+			csi@838 {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				/*
+				 * The test pattern generator's clock comes from PLL_D,
+				 * which also clocks the display controller driving DP:
+				 * setting its rate would change the display's pixel
+				 * clock. Only the lane clocks are set.
+				 */
+				assigned-clocks = <&tegra_car TEGRA210_CLK_CILAB>,
+						  <&tegra_car TEGRA210_CLK_CILCD>,
+						  <&tegra_car TEGRA210_CLK_CILE>;
+				assigned-clock-parents = <&tegra_car TEGRA210_CLK_PLL_P>,
+							 <&tegra_car TEGRA210_CLK_PLL_P>,
+							 <&tegra_car TEGRA210_CLK_PLL_P>;
+				assigned-clock-rates = <102000000>,
+						       <102000000>,
+						       <102000000>;
+
+				channel@0 {
+					reg = <0>;
+					nvidia,mipi-calibrate = <&mipi 0x01>; /* CSIA pad */
+					#address-cells = <1>;
+					#size-cells = <0>;
+
+					port@0 {
+						reg = <0>;
+
+						csi_a_in: endpoint {
+							data-lanes = <1 2>;
+							remote-endpoint = <&cam0_out>;
+						};
+					};
+
+					port@1 {
+						reg = <1>;
+
+						csi_a_out: endpoint {
+							remote-endpoint = <&vi_a_in>;
+						};
+					};
+				};
+
+				channel@4 {
+					reg = <4>;
+					nvidia,mipi-calibrate = <&mipi 0x10>; /* CSIE pad */
+					#address-cells = <1>;
+					#size-cells = <0>;
+
+					port@0 {
+						reg = <0>;
+
+						csi_e_in: endpoint {
+							data-lanes = <1 2>;
+							remote-endpoint = <&cam1_out>;
+						};
+					};
+
+					port@1 {
+						reg = <1>;
+
+						csi_e_out: endpoint {
+							remote-endpoint = <&vi_e_in>;
+						};
+					};
+				};
+			};
+		};
+
+		vi_i2c: i2c@546c0000 {
 			power-sensor@40 {
 				compatible = "ti,ina3221";
 				reg = <0x40>;
