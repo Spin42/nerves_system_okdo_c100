@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.2.0
 
 * `tegra-video` allows cache hints, so capture buffers can be mapped cached
   for the CPU
