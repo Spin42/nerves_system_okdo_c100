@@ -74,8 +74,14 @@ jobs:
           key: nerves-dl-${{ hashFiles('nerves_defconfig', 'mix.lock') }}
           restore-keys: nerves-dl-
 
-      - name: Fetch Mix dependencies
-        run: mix deps.get
+      # Nerves resolves artifacts only once its own deps are compiled, so the
+      # second deps.get is the one that fetches the toolchain.
+      - name: Fetch Mix dependencies and the Nerves toolchain
+        run: |
+          mix deps.get
+          mix deps.compile
+          mix deps.get
+          test -d "$HOME/.nerves/artifacts/nerves_toolchain_aarch64_nerves_linux_gnu-linux_x86_64-$(cat deps/nerves_toolchain_aarch64_nerves_linux_gnu/VERSION)"
 
       - name: Build the Nerves system
         timeout-minutes: 240
