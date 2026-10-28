@@ -178,7 +178,9 @@ carried in `linux/`, along with patches to the Tegra210 video input driver
 * `VIDIOC_ENUM_FMT` filters by media bus code (`V4L2_CAP_IO_MC`);
 * buffers are timestamped at frame start, so the frame timing of the two
   cameras can be compared and aligned by adjusting one sensor's vertical
-  blanking.
+  blanking;
+* buffers can be requested cached (`V4L2_MEMORY_FLAG_NON_COHERENT`), so
+  reading a frame on the CPU is not slowed by an uncached mapping.
 
 The Tegra X1's ISP has no open driver, so frames arrive as raw 10-bit Bayer
 (`RG10`, one sample per 16 bits), one video node per connector, named

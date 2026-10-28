@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* `tegra-video` allows cache hints, so capture buffers can be mapped cached
+  for the CPU
+
 * Two Raspberry Pi Camera Module 3 (IMX708) on the CSI connectors, captured
   as raw Bayer through V4L2: the Raspberry Pi kernel's IMX708 driver, and
   patches to `tegra-video` for subdevice nodes, format pass-through on the
