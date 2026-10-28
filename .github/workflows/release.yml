@@ -74,14 +74,25 @@ jobs:
           key: nerves-dl-${{ hashFiles('nerves_defconfig', 'mix.lock') }}
           restore-keys: nerves-dl-
 
-      # Nerves resolves artifacts only once its own deps are compiled, so the
-      # second deps.get is the one that fetches the toolchain.
-      - name: Fetch Mix dependencies and the Nerves toolchain
+      - name: Fetch Mix dependencies
+        run: mix deps.get
+
+      # On a fresh runner Nerves resolves its artifacts only after it has
+      # built the system, then fails because the toolchain is missing; any
+      # Mix task that loads the Nerves environment starts that build. The
+      # toolchain release tarball is the artifact itself, CHECKSUM included.
+      - name: Fetch the Nerves toolchain
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          mix deps.get
-          mix deps.compile
-          mix deps.get
-          test -d "$HOME/.nerves/artifacts/nerves_toolchain_aarch64_nerves_linux_gnu-linux_x86_64-$(cat deps/nerves_toolchain_aarch64_nerves_linux_gnu/VERSION)"
+          name=nerves_toolchain_aarch64_nerves_linux_gnu
+          version=$(cat "deps/$name/VERSION")
+          dest="$HOME/.nerves/artifacts/$name-linux_x86_64-$version"
+          gh release download "v$version" --repo nerves-project/toolchains \
+            --pattern "$name-linux_x86_64-$version-*.tar.xz" --dir "$RUNNER_TEMP/toolchain"
+          mkdir -p "$dest"
+          tar -xJf "$RUNNER_TEMP"/toolchain/*.tar.xz -C "$dest" --strip-components=1
+          test -f "$dest/CHECKSUM"
 
       - name: Build the Nerves system
         timeout-minutes: 240
