@@ -1,7 +1,7 @@
 defmodule NervesSystemOkdoC100.MixProject do
   use Mix.Project
 
-  @github_organization "mlainez"
+  @github_organization "Spin42"
   @app :nerves_system_okdo_c100
   @source_url "https://github.com/#{@github_organization}/#{@app}"
   @version Path.join(__DIR__, "VERSION")

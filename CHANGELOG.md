@@ -7,6 +7,8 @@
   patches to `tegra-video` for subdevice nodes, format pass-through on the
   CSI channels, media bus code filtering and frame start timestamps
 * CMA pool raised from 32 to 256 MiB for the capture buffers
+* Prebuilt systems are released from `Spin42/nerves_system_okdo_c100`
+  by a GitHub Actions workflow on each `v*` tag
 
 ## v0.1.0
 
