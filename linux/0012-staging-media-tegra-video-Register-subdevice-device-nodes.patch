@@ -1,0 +1,47 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lo=C3=AFc=20Vigneron?= <loic.vigneron@gmail.com>
+Date: Wed, 28 Oct 2026 16:12:28 +0100
+Subject: [PATCH] staging: media: tegra-video: Register subdevice device nodes
+
+The driver never registers device nodes for the subdevices in its
+graph, so user space cannot reach the sensor's controls (exposure,
+gain, blanking) or configure the CSI channel. Request a node for the
+CSI channels and register the subdevice nodes once a channel's graph
+is complete.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+ drivers/staging/media/tegra-video/csi.c | 1 +
+ drivers/staging/media/tegra-video/vi.c  | 7 +++++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/drivers/staging/media/tegra-video/csi.c b/drivers/staging/media/tegra-video/csi.c
+index 604185c..6ef6b88 100644
+--- a/drivers/staging/media/tegra-video/csi.c
++++ b/drivers/staging/media/tegra-video/csi.c
+@@ -613,6 +613,7 @@ static int tegra_csi_channel_init(struct tegra_csi_channel *chan)
+ 	/* initialize V4L2 subdevice and media entity */
+ 	subdev = &chan->subdev;
+ 	v4l2_subdev_init(subdev, &tegra_csi_ops);
++	subdev->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
+ 	subdev->dev = csi->dev;
+ 	if (IS_ENABLED(CONFIG_VIDEO_TEGRA_TPG))
+ 		snprintf(subdev->name, sizeof(subdev->name), "%s-%d", "tpg",
+diff --git a/drivers/staging/media/tegra-video/vi.c b/drivers/staging/media/tegra-video/vi.c
+index f5d7ba4..7157e14 100644
+--- a/drivers/staging/media/tegra-video/vi.c
++++ b/drivers/staging/media/tegra-video/vi.c
+@@ -1648,6 +1648,13 @@ static int tegra_vi_graph_notify_complete(struct v4l2_async_notifier *notifier)
+ 	subdev = tegra_channel_get_remote_source_subdev(chan);
+ 	v4l2_set_subdev_hostdata(subdev, chan);
+ 
++	ret = v4l2_device_register_subdev_nodes(chan->video.v4l2_dev);
++	if (ret < 0) {
++		dev_err(vi->dev,
++			"failed to register subdev nodes: %d\n", ret);
++		goto unregister_video;
++	}
++
+ 	return 0;
+ 
+ unregister_video:

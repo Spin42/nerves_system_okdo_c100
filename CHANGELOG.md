@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.2.0
+
+* `tegra-video` allows cache hints, so capture buffers can be mapped cached
+  for the CPU
+
+* Two Raspberry Pi Camera Module 3 (IMX708) on the CSI connectors, captured
+  as raw Bayer through V4L2: the Raspberry Pi kernel's IMX708 driver, and
+  patches to `tegra-video` for subdevice nodes, format pass-through on the
+  CSI channels, media bus code filtering and frame start timestamps
+* CMA pool raised from 32 to 256 MiB for the capture buffers
+* Prebuilt systems are released from `Spin42/nerves_system_okdo_c100`
+  by a GitHub Actions workflow on each `v*` tag
+
 ## v0.1.0
 
 Initial release.
