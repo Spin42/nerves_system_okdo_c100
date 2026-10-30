@@ -1,0 +1,94 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lo=C3=AFc=20Vigneron?= <loic.vigneron@gmail.com>
+Date: Fri, 30 Oct 2026 12:00:00 +0100
+Subject: [PATCH] drm/nouveau: Tear down clients before the fence context
+
+nouveau_drm_device_fini() cleans up clients whose files are still open
+after nouveau_accel_fini() has destroyed the fence context and set
+drm->fence to NULL. nouveau_abi16_fini() then idles each remaining
+channel through nouveau_fence_new(), and nouveau_fence_emit() reads
+priv->uevent through the NULL drm->fence:
+
+  Unable to handle kernel NULL pointer dereference at virtual address 0000000000000028
+  pc : nouveau_fence_emit+0x40/0x280 [nouveau]
+  lr : nouveau_fence_new+0x44/0x100 [nouveau]
+  Call trace:
+   nouveau_fence_emit+0x40/0x280 [nouveau] (P)
+   nouveau_fence_new+0x44/0x100 [nouveau]
+   nouveau_channel_idle+0x58/0xf0 [nouveau]
+   nouveau_abi16_chan_fini.isra.0+0x34/0x1a0 [nouveau]
+   nouveau_abi16_fini+0x8c/0xc0 [nouveau]
+   nouveau_drm_device_fini+0xe0/0x180 [nouveau]
+   nouveau_drm_device_remove+0x40/0xb0 [nouveau]
+   nouveau_platform_remove+0x14/0x20 [nouveau]
+
+This is hit on a Tegra210 (GM20B) when the driver is unbound while a
+Vulkan process still has channels open.
+
+Clean up the remaining clients first, while the fence context, TTM and
+the rest of the device are still in the state nouveau_drm_postclose()
+expects.
+
+Assisted-by: Claude:claude-opus-5-5
+---
+ drivers/gpu/drm/nouveau/nouveau_drm.c | 35 +++++++++++++++------------
+ 1 file changed, 19 insertions(+), 16 deletions(-)
+
+diff --git a/drivers/gpu/drm/nouveau/nouveau_drm.c b/drivers/gpu/drm/nouveau/nouveau_drm.c
+index d05da2db9..f4c59b02e 100644
+--- a/drivers/gpu/drm/nouveau/nouveau_drm.c
++++ b/drivers/gpu/drm/nouveau/nouveau_drm.c
+@@ -587,27 +587,14 @@ nouveau_drm_device_fini(struct nouveau_drm *drm)
+ 		pm_runtime_dont_use_autosuspend(dev->dev);
+ 	}
+ 
+-	nouveau_led_fini(dev);
+-	nouveau_dmem_fini(drm);
+-	nouveau_svm_fini(drm);
+-	nouveau_hwmon_fini(dev);
+-	nouveau_debugfs_fini(drm);
+-
+-	if (dev->mode_config.num_crtc)
+-		nouveau_display_fini(dev, false, false);
+-	nouveau_display_destroy(dev);
+-
+-	nouveau_accel_fini(drm);
+-	nouveau_bios_takedown(dev);
+-
+-	nouveau_ttm_fini(drm);
+-	nouveau_vga_fini(drm);
+-
+ 	/*
+ 	 * There may be existing clients from as-yet unclosed files. For now,
+ 	 * clean them up here rather than deferring until the file is closed,
+ 	 * but this likely not correct if we want to support hot-unplugging
+ 	 * properly.
++	 *
++	 * Their channels are idled through the fence context, so this must
++	 * run before nouveau_accel_fini() destroys it.
+ 	 */
+ 	mutex_lock(&drm->clients_lock);
+ 	list_for_each_entry_safe(cli, temp_cli, &drm->clients, head) {
+@@ -621,6 +608,22 @@ nouveau_drm_device_fini(struct nouveau_drm *drm)
+ 	}
+ 	mutex_unlock(&drm->clients_lock);
+ 
++	nouveau_led_fini(dev);
++	nouveau_dmem_fini(drm);
++	nouveau_svm_fini(drm);
++	nouveau_hwmon_fini(dev);
++	nouveau_debugfs_fini(drm);
++
++	if (dev->mode_config.num_crtc)
++		nouveau_display_fini(dev, false, false);
++	nouveau_display_destroy(dev);
++
++	nouveau_accel_fini(drm);
++	nouveau_bios_takedown(dev);
++
++	nouveau_ttm_fini(drm);
++	nouveau_vga_fini(drm);
++
+ 	nouveau_cli_fini(&drm->client);
+ 	destroy_workqueue(drm->sched_wq);
+ 	mutex_destroy(&drm->clients_lock);
