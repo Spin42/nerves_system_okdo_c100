@@ -1,7 +1,9 @@
 # Changelog
 
-## Unreleased
+## v0.3.0
 
+* `nouveau` tears down the clients whose files are still open before its
+  fence context, so unbinding it with GPU channels open no longer oopses
 * The Camera Module 3 lens actuators (DW9817) are described and driven by
   `dw9807-vcm`, with the Raspberry Pi kernel's DW9817 support, so user space
   can set the focus through `V4L2_CID_FOCUS_ABSOLUTE` on the lens subdevice
