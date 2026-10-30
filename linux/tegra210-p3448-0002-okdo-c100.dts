@@ -49,7 +49,8 @@
 	 * The two camera connectors (CAM0 on CSI port A, CAM1 on CSI port E,
 	 * two lanes each) share the VI I2C bus through a GPIO-switched mux.
 	 * They are described for Raspberry Pi Camera Module 3 (IMX708), which
-	 * carries its own 24 MHz oscillator and regulators.
+	 * carries its own 24 MHz oscillator and regulators, and a DW9817 lens
+	 * actuator powered from the same enable line as the sensor.
 	 */
 	cam_clk: clock-camera {
 		compatible = "fixed-clock";
@@ -95,12 +96,19 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
+			cam0_lens: lens@c {
+				compatible = "dongwoon,dw9817-vcm";
+				reg = <0x0c>;
+				VDD-supply = <&cam0_reg>;
+			};
+
 			camera@1a {
 				compatible = "sony,imx708";
 				reg = <0x1a>;
 				clocks = <&cam_clk>;
 				clock-names = "inclk";
 				vana1-supply = <&cam0_reg>;
+				lens-focus = <&cam0_lens>;
 
 				port {
 					cam0_out: endpoint {
@@ -118,12 +126,19 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
+			cam1_lens: lens@c {
+				compatible = "dongwoon,dw9817-vcm";
+				reg = <0x0c>;
+				VDD-supply = <&cam1_reg>;
+			};
+
 			camera@1a {
 				compatible = "sony,imx708";
 				reg = <0x1a>;
 				clocks = <&cam_clk>;
 				clock-names = "inclk";
 				vana1-supply = <&cam1_reg>;
+				lens-focus = <&cam1_lens>;
 
 				port {
 					cam1_out: endpoint {

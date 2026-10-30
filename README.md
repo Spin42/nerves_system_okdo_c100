@@ -189,6 +189,19 @@ The Tegra X1's ISP has no open driver, so frames arrive as raw 10-bit Bayer
 regulator with a startup delay, which the sensor needs before it answers on
 I2C. The CMA pool is 256 MiB for the capture buffers.
 
+Each module's lens actuator, a Dongwoon DW9817 at I2C address 0x0c, is driven
+by mainline's `dw9807-vcm` driver with the Raspberry Pi kernel's DW9817
+support (`linux/`). It is the sensor's `lens-focus`, so the camera's video
+node only appears once the `dw9807_vcm` module has bound. The lens has its own
+subdevice node, named `dw9807 <bus>-000c` next to the sensor's
+`imx708 <bus>-001a`, with `V4L2_CID_FOCUS_ABSOLUTE` from 0 to 1023 (512 is
+zero current, the default is 480). The actuator shares the sensor's supply:
+every time the supply comes up, while the sensor streams or while the lens
+node is open, the driver ramps the lens to the last value set; when it goes
+down, the lens returns to rest. Raspberry Pi's libcamera tuning for the wide
+module (`imx708_wide.json`, `rpi.af` map) puts infinity at 420 and 35
+dioptres at 920.
+
 ## Known limitations
 
 * The DRAM clock does not scale with load; it stays at 1600 MHz.

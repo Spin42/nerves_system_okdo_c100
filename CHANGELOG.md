@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+* The Camera Module 3 lens actuators (DW9817) are described and driven by
+  `dw9807-vcm`, with the Raspberry Pi kernel's DW9817 support, so user space
+  can set the focus through `V4L2_CID_FOCUS_ABSOLUTE` on the lens subdevice
+
 ## v0.2.0
 
 * `tegra-video` allows cache hints, so capture buffers can be mapped cached
